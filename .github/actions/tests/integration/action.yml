@@ -1,0 +1,9 @@
+name: integration
+description: Integration tests for SDK code
+runs:
+  using: composite
+  steps:
+    - name: Run integration tests
+      run: |
+        poetry run pytest --with-integration
+      shell: bash

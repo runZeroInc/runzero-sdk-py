@@ -1,0 +1,9 @@
+name: deptry
+description: Dependency checks of SDK code with deptry
+runs:
+  using: composite
+  steps:
+    - name: Run deptry analysis
+      run: |
+        poetry run deptry .
+      shell: bash

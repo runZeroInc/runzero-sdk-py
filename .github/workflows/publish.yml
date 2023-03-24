@@ -1,0 +1,52 @@
+name: Publish SDK
+on:
+  release:
+    types: [published]
+jobs:
+  tests:
+    # run integration tests against production before releasing new version of sdk
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install --with dev
+      - name: Run tests - Unit
+        uses: ./.github/actions/tests/unit
+      - name: Run tests - Integration
+        uses: ./.github/actions/tests/integration
+        env:
+          url: "https://console.runzero.com"
+          account_token: ${{ secrets.ACCOUNT_TOKEN }}
+          org_token: ${{ secrets.ORG_TOKEN }}
+          org_id: ${{ secrets.ORG_ID }}
+          client_id: ${{ secrets.CLIENT_ID }}
+          client_secret: ${{ secrets.CLIENT_SECRET }}
+          validate_cert: "true"
+  publish-release:
+    needs:
+      - tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: pipx install poetry
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: poetry install --no-interaction --no-root --no-dev
+    - name: Publish SDK
+      shell: bash
+      run: |
+        poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+        poetry publish --build --no-interaction

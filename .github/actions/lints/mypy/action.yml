@@ -1,0 +1,9 @@
+name: mypy
+description: Python type checking with mypy
+runs:
+  using: composite
+  steps:
+    - name: Run mypy type checking
+      run: |
+        poetry run mypy ./runzero
+      shell: bash

@@ -1,0 +1,174 @@
+[tool.poetry]
+name = "runzero-sdk"
+version = "0.1.0"
+description = "The runZero platform sdk"
+license = "BSD-2-Clause"
+authors = ["runZero <support@runzero.com>"]
+readme = "README.md"
+homepage = "https://runzero.com/"
+repository = "https://github.com/runZeroInc/runzero-sdk-py"
+keywords = ["runzero", "api", "sdk"]
+packages = [{include = "runzero"}]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Pydantic",
+  "Framework :: Pytest",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Systems Administration",
+  "Typing :: Typed",
+]
+
+[tool.poetry.group.codegen]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pydantic = "^1.10.5"
+requests = "^2.28.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+mypy = "^1.0.1"
+isort = "^5.12.0"
+pylint = "^2.16.2"
+pytest = "^7.2.1"
+types-requests = "^2.28.11.15"
+toml = "^0.10.2"
+pytest-lazy-fixture = "^0.6.3"
+pytest-cov = "^4.0.0"
+deptry = "^0.8.0"
+pytest-integration = "^0.2.3"
+mypy-extensions = "^1.0.0"
+
+[tool.poetry.group.devlocal.dependencies]
+tox = "^4.4.7"
+
+[tool.poetry.group.codegen.dependencies]
+datamodel-code-generator = { version = "^0.17.1", extras = ["http"]}
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    isolated_build = true
+    env_list =
+        py38
+        py39
+        py310
+        py311
+
+    [testenv]
+    # This runs tests using all in-scope envs on your local source tree files.
+    # This is faster but can hide serious issues downstream.
+    allowlist_externals = poetry
+    commands_pre =
+      poetry install --no-root --sync
+    commands =
+      poetry run pytest --import-mode importlib --cov
+
+    [testenv:ci]
+    # This runs tests using all in-scope envs on a built and installed version of the package.
+    # This is slower but more thorough.
+    allowlist_externals = poetry
+    commands_pre =
+      poetry install
+    commands =
+      poetry run pytest --import-mode importlib --cov --without-integration
+
+    [testenv:ci-integration]
+    # This runs unit & integration tests using all in-scope envs on a built and installed version of the package.
+    # This is slower but more thorough.
+    allowlist_externals = poetry
+    commands_pre =
+      poetry install
+    commands =
+      poetry run pytest --import-mode importlib --cov --with-integration --integration-cover
+
+"""
+
+[tool.deptry]
+extend_exclude = [
+  # necessary until deptry can understand
+  # that if TYPE_CHECKING means dev dep
+  "runzero/client/_http/io.py"
+]
+
+[tool.coverage.paths]
+source = [".", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+omit = [
+  # Don't measure coverage of tests
+  'tests/*'
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise NotImplementedError",
+  "raise AssertionError",
+  "def __repr__",
+  "if __name__ == .__main__.:",
+]
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+preview = true
+
+[tool.datamodel-codegen]
+field-constraints = true
+snake-case-field = true
+strip-default-none = false
+target-python-version = "3.8"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = 3.8
+exclude = "tests"
+plugins = [
+  "pydantic.mypy"
+]
+
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
+[tool.pylint]
+ignore-patterns = ["_data_models_gen.py"]
+
+[tool.pylint.code_style]
+max-line-length = 120
+
+[tool.pylint.'MESSAGES CONTROL']
+extension-pkg-whitelist = "pydantic"
+disable = [
+  "fixme",
+  "too-few-public-methods",
+  "too-many-arguments", # TODO: consider re-enabling and refactoring error locations
+  "too-many-branches", # TODO: consider re-enabling and refactoring error locations
+  "too-many-instance-attributes", # TODO: consider re-enabling and refactoring error locations
+  "too-many-locals", # TODO: consider re-enabling and refactoring error locations
+  "unnecessary-pass",
+]

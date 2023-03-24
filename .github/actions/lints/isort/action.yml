@@ -1,0 +1,9 @@
+name: isort
+description: Import ordering enforcement with iSort
+runs:
+  using: composite
+  steps:
+    - name: Run isort import ordering
+      run: |
+        poetry run isort --check-only ./runzero ./tests ./examples
+      shell: bash

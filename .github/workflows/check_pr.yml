@@ -1,0 +1,63 @@
+name: Check PR Pipeline
+
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - 'runzero/**'
+      - 'tests/**'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install --with dev
+      - name: Run tests - Unit
+        uses: ./.github/actions/tests/unit
+      - name: Run tests - Integration
+        uses: ./.github/actions/tests/integration
+        env:
+          url: "https://console.runzero.com"
+          account_token: ${{ secrets.ACCOUNT_TOKEN }}
+          org_token: ${{ secrets.ORG_TOKEN }}
+          org_id: ${{ secrets.ORG_ID }}
+          client_id: ${{ secrets.CLIENT_ID }}
+          client_secret: ${{ secrets.CLIENT_SECRET }}
+          validate_cert: "true"
+  lints:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install --with dev
+      - name: Check code formatting
+        uses: ./.github/actions/lints/black
+      - name: Check import sorting
+        uses: ./.github/actions/lints/isort
+      - name: Check linting
+        uses: ./.github/actions/lints/pylint
+      - name: Type checking
+        uses: ./.github/actions/lints/mypy
+      - name: Check dependencies
+        uses: ./.github/actions/lints/deptry

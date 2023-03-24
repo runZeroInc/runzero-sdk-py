@@ -1,0 +1,9 @@
+name: black
+description: Code formatting enforcement with Black
+runs:
+  using: composite
+  steps:
+    - name: Check black formatting
+      run: |
+        poetry run black --check ./runzero ./tests ./examples
+      shell: bash
