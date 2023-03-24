@@ -1,0 +1,9 @@
+name: unit
+description: Unit tests for SDK code
+runs:
+  using: composite
+  steps:
+    - name: Run unit tests
+      run: |
+        poetry run pytest --without-integration
+      shell: bash

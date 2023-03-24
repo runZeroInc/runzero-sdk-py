@@ -1,0 +1,9 @@
+name: pylint
+description: Linting of SDK code with pylint
+runs:
+  using: composite
+  steps:
+    - name: Run pylint linter
+      run: |
+        poetry run pylint ./runzero
+      shell: bash
