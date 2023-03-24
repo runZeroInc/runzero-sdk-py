@@ -27,6 +27,9 @@ classifiers = [
 python = "^3.8"
 pydantic = "^1.10.5"
 requests = "^2.28.2"
+# no standard mechanism to pin transitive deps
+# https://github.com/python-poetry/poetry/issues/4991
+certifi = { version = ">=2022.12", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
