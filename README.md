@@ -21,7 +21,7 @@ discoverable, consistent, and easy to use. We want you to concentrate on working
 
 ## Installation
 
-This project is [published to PyPI](https://pypi.org) and can be installed using your local Python package manager.
+This project is [published to PyPI](https://pypi.org/project/runzero-sdk/) and can be installed using your local Python package manager.
 
 ```commandline
 pip install runzero-sdk
