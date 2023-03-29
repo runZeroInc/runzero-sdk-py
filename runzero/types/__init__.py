@@ -5,9 +5,10 @@ Public runZero API types contained inside this package are made available here. 
 objects in the private module, which is generated from OpenAPI specs, are usable in this
 project today.
 """
+from ipaddress import IPv4Address, IPv6Address
+
 from runzero.types._data_models_gen import (
     BaseAssetCustomSource,
-    CustomAttribute,
     ImportAsset,
     ImportTask,
     NetworkInterface,
@@ -15,18 +16,21 @@ from runzero.types._data_models_gen import (
     NewAssetImport,
     Organization,
     OrgOptions,
+    Problem,
     Site,
     SiteOptions,
-    Tag,
     Task,
 )
-from runzero.types._wrapped import AssetCustomSource
+from runzero.types._wrapped import AssetCustomSource, CustomAttribute, Hostname, Tag
 from runzero.types.errors import ValidationError
 
 __all__ = [
     "AssetCustomSource",
     "BaseAssetCustomSource",
     "CustomAttribute",
+    "Hostname",
+    "IPv4Address",
+    "IPv6Address",
     "ImportAsset",
     "ImportTask",
     "NetworkInterface",
@@ -34,6 +38,7 @@ __all__ = [
     "NewAssetImport",
     "Organization",
     "OrgOptions",
+    "Problem",
     "Site",
     "SiteOptions",
     "Tag",

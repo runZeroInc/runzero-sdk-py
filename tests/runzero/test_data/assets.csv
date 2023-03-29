@@ -1,4 +1,0 @@
-id,domain,first_seen_ts,last_seen_ts,os,os_version,manufacturer,model,device_type,some_other_attribute,yet_another_attribute,one_more_for_good_measure
-foo123,domain.com,2023-03-06T18:14:50.52Z,2023-03-06T18:14:50.52Z,Ubuntu Linux 22.04,22.04,Apple Inc.,Macbook Air,Desktop,foo,bar,baz
-bar1234,domain2.com,2023-03-07T18:14:50.52Z,2023-03-07T18:14:50.52Z,Ubuntu Linux 18,18 LTS,Dell,XP5,Desktop,foo,bar,baz
-baz123,domain3.com,2023-03-08T18:14:50.52Z,2023-03-08T18:14:50.52Z,Mint Linux,Minty,Gateway,Cowbox,Laptop,foo,bar,baz

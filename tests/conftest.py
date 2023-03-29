@@ -10,10 +10,9 @@ from uuid import UUID
 import pytest
 import toml
 
-from runzero.admin.asset_data_sources import CustomSourcesAdmin, NewAssetCustomSource
-from runzero.admin.orgs import OrgOptions, OrgsAdmin
+from runzero.api import CustomSourcesAdmin, OrgsAdmin, Sites
 from runzero.client import Client, ClientError
-from runzero.sites import SiteOptions, Sites
+from runzero.types import OrgOptions, SiteOptions
 
 
 @pytest.fixture
@@ -141,8 +140,10 @@ class IntegrationConfigs:
 
 
 def get_path_to_config() -> Path:
-    cwd = Path.cwd()
-    while cwd.stem != "runzero-sdk-py":
-        cwd = cwd.parent
-    config_path = cwd.joinpath("test_configs.toml").resolve()
-    return config_path
+    return (
+        Path(__file__)
+        .parent.parent.joinpath(
+            "test_configs.toml",
+        )
+        .resolve()
+    )

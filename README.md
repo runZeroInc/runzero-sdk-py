@@ -11,7 +11,7 @@ This project is currently in beta and subject to change.
 This is a Python API client for [runZero](https://www.runzero.com/) - a product that provides asset discovery and
 network visibility to help you build and maintain a comprehensive inventory of your cyber assets. runZero customers can use this project to interact with their environment using runZero and Python.
 
-Note: the APIs used with this client are only availble to customers of the [Professional and Enterprise editions](https://www.runzero.com/product/pricing/) of runZero.
+Note: the APIs used with this client are only available to customers of the [Professional and Enterprise editions](https://www.runzero.com/product/pricing/) of runZero.
 
 This project seeks to do only what is necessary to make interactions with runZero in your own Python code feel more
 like any other local, Pythonic API. It uses code generated from the runZero
@@ -21,7 +21,7 @@ discoverable, consistent, and easy to use. We want you to concentrate on working
 
 ## Installation
 
-This project is [published to PyPI](https://pypi.org) and can be installed using your local Python package manager.
+This project is [published to PyPI](https://pypi.org/project/runzero-sdk/) and can be installed using your local Python package manager.
 
 ```commandline
 pip install runzero-sdk
@@ -38,13 +38,26 @@ A typical code flow would look like the following:
 
 ```python
 import runzero
+import runzero.api as rz
 
 client = runzero.Client()
 client.oauth_login(MY_CLIENT_ID, MY_CLIENT_SECRET)
 
-orgs = runzero.OrgsAdmin(client=client).get_all()
+orgs = rz.OrgsAdmin(client=client).get_all()
 print(f"retrieved {len(orgs)} from our runZero account")
 ```
+
+## Modules
+
+The runzero-sdk package contains the following modules to group functionality.
+
+### runzero.api
+
+The `api` module contains all the http handlers for interacting with runZero api resources such as Sites, Orgs, Tasks, Custom Sources, etc.
+
+### runzero.types
+
+The `types` module contains all the pydantic classes required for interacting with the runZero API resources such as Import Assets, Sites, Tasks, etc.
 
 ## Custom Import Asset field mappings
 

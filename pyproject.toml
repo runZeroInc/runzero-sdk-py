@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runzero-sdk"
-version = "0.1.0"
+version = "0.1.1"
 description = "The runZero platform sdk"
 license = "BSD-2-Clause"
 authors = ["runZero <support@runzero.com>"]
@@ -29,7 +29,7 @@ pydantic = "^1.10.5"
 requests = "^2.28.2"
 # no standard mechanism to pin transitive deps
 # https://github.com/python-poetry/poetry/issues/4991
-certifi = { version = ">=2022.12", optional = true }
+certifi = ">=2022.12"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
@@ -95,6 +95,9 @@ extend_exclude = [
   # necessary until deptry can understand
   # that if TYPE_CHECKING means dev dep
   "runzero/client/_http/io.py"
+]
+ignore_obsolete = [
+    "certifi"
 ]
 
 [tool.coverage.paths]
@@ -172,6 +175,5 @@ disable = [
   "too-many-arguments", # TODO: consider re-enabling and refactoring error locations
   "too-many-branches", # TODO: consider re-enabling and refactoring error locations
   "too-many-instance-attributes", # TODO: consider re-enabling and refactoring error locations
-  "too-many-locals", # TODO: consider re-enabling and refactoring error locations
   "unnecessary-pass",
 ]

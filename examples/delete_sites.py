@@ -1,6 +1,7 @@
 import uuid
 
 import runzero
+from runzero.api import Sites
 
 # API keys are required for using the runZero sdk. See https://www.runzero.com/docs/leveraging-the-api/
 MY_CLIENT_ID = ""  # OAuth client id. See https://console.runzero.com/account/api/clients
@@ -22,8 +23,8 @@ def main():
     c.oauth_login(MY_CLIENT_ID, MY_CLIENT_SECRET)
     print("login successful")
 
-    # create the site manager using the client to read and write sites
-    site_manager = runzero.Sites(client=c)
+    # create the site api manager using the client to read and write sites
+    site_manager = Sites(client=c)
 
     # retrieve all sites in your org
     sites = site_manager.get_all(MY_ORG_ID)
@@ -32,7 +33,7 @@ def main():
     # iterate over each of your sites in your org
     for site in sites:
         if site.name.startswith("Custom"):
-            # use the manager to delete the sites if the site name started with the "Custom" prefix
+            # use the api manager to delete the sites if the site name started with the "Custom" prefix
             site_manager.delete(MY_ORG_ID, site.id)
             print(f"deleted site: {site.name}")
 

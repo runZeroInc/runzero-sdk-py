@@ -1,7 +1,7 @@
 import uuid
 
 import runzero
-from runzero.client import AuthError, ClientError
+from runzero.api import OrgsAdmin, Sites
 
 # API keys are required for using the runZero sdk. See https://www.runzero.com/docs/leveraging-the-api/
 MY_ACCOUNT_API_KEY = ""  # Account scoped API key. See https://console.runzero.com/account
@@ -26,26 +26,26 @@ def main():
     c = runzero.Client(account_key=MY_ACCOUNT_API_KEY)
 
     # retrieve all Orgs in your account
-    orgs = runzero.OrgsAdmin(client=c).get_all()
+    orgs = OrgsAdmin(client=c).get_all()
     print(f"got {len(orgs)} from your account")
 
     # Because the account key was used in the client above, the client will have access to account level items. However,
     # the SDK and API will limit what can be accessed if the client only has an org key.
     org_only_client = runzero.Client(org_key=MY_ORG_API_KEY)
     try:
-        runzero.OrgsAdmin(client=org_only_client).get_all()
-    except AuthError:
+        OrgsAdmin(client=org_only_client).get_all()
+    except runzero.AuthError:
         print("we got an error because we attempted to retrieve account level data but only had an Org API Key")
 
     # Despite the error above, the client can still be used to retrieve Org level data from the Org that the key is
     #  associated with.
-    sites = runzero.Sites(client=org_only_client).get_all(MY_ORG_ID)
+    sites = Sites(client=org_only_client).get_all(MY_ORG_ID)
     print(f"got {len(sites)} from our org")
 
     # Below will fail due to using an Org key to request data from an Org that the Org key is not associated with.
     try:
-        runzero.Sites(client=org_only_client).get_all(OTHER_ORG_ID)
-    except ClientError:
+        Sites(client=org_only_client).get_all(OTHER_ORG_ID)
+    except runzero.ClientError:
         print("Could not retrieve orgs due to client not having a valid Org key for the requested Org")
 
 

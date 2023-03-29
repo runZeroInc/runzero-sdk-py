@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from runzero import ImportAsset
+from runzero.types import ImportAsset
 
 
 def test_asset_to_json_direct():

@@ -7,6 +7,8 @@ concurrency:
 on:
   pull_request:
     paths:
+      - 'pyproject.toml'
+      - 'poetry.lock'
       - 'runzero/**'
       - 'tests/**'
 
@@ -39,6 +41,8 @@ jobs:
           client_id: ${{ secrets.CLIENT_ID }}
           client_secret: ${{ secrets.CLIENT_SECRET }}
           validate_cert: "true"
+      - name: Run tests - install check
+        uses: ./.github/actions/tests/install
   lints:
     runs-on: ubuntu-latest
     steps:

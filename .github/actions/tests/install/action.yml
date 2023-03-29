@@ -1,0 +1,9 @@
+name: install
+description: Installs the SDK, performs simple checks
+runs:
+  using: composite
+  steps:
+    - name: Run install checks
+      run: |
+        ./script/checks/check_install.sh
+      shell: bash

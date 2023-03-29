@@ -1,8 +1,7 @@
 import pytest
 
-from runzero.admin import OrgsAdmin
+from runzero.api import OrgsAdmin, Sites
 from runzero.client import AuthError, Client
-from runzero.sites import Sites
 
 
 @pytest.mark.integration_test
