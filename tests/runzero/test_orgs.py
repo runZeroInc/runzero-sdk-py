@@ -1,6 +1,6 @@
 import pytest
 
-from runzero.admin import OrgsAdmin
+from runzero.api import OrgsAdmin
 from runzero.client import AuthError, ClientError
 from runzero.types import OrgOptions
 

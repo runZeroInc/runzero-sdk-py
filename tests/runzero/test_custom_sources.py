@@ -1,13 +1,11 @@
-import base64
-import io
 import pathlib
 
 import pytest
 from pydantic import ValidationError
 
 from runzero import Error
-from runzero.admin import CustomSourcesAdmin
-from runzero.asset_data_sources import CustomSources
+from runzero.api import CustomSources
+from runzero.api.admin import CustomSourcesAdmin
 from runzero.client import AuthError, ClientError
 from runzero.types import BaseAssetCustomSource, NewAssetCustomSource
 
@@ -23,6 +21,7 @@ def test_custom_sources_admin_admin_no_org_access(org_client):
         CustomSourcesAdmin(client=c).get_all()
 
 
+@pytest.mark.integration_test
 def test_custom_sources_name_no_whitespace_allowed(org_client):
     """
     This test demonstrates that a custom asset source name cannot contain a space

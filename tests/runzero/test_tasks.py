@@ -1,6 +1,6 @@
 import pytest
 
-from runzero import Tasks
+from runzero.api import Tasks
 
 
 @pytest.mark.integration_test

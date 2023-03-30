@@ -1,4 +1,5 @@
 import runzero
+from runzero.api import OrgsAdmin
 
 # API keys are required for using the runZero sdk. See https://www.runzero.com/docs/leveraging-the-api/
 MY_CLIENT_ID = ""  # OAuth client id. See https://console.runzero.com/account/api/clients
@@ -23,7 +24,7 @@ def main():
     print("successfully logged in to your self-hosted instance")
 
     # retrieve all Orgs in your self-hosted instance
-    orgs = runzero.OrgsAdmin(client=c).get_all()
+    orgs = OrgsAdmin(client=c).get_all()
     print(f"got {len(orgs)} from your self hosted instance")
 
 

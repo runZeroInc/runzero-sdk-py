@@ -1,6 +1,6 @@
 import pytest
 
-from runzero.admin import OrgsAdmin
+from runzero.api.admin import OrgsAdmin
 from runzero.client import Client
 from runzero.client.errors import ConnError
 

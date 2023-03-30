@@ -1,7 +1,7 @@
 #/bin/bash
 
 .PHONY: ci
-ci: fmt lint deptry mypy tox-ci
+ci: fmt lint deptry mypy install-check tox-ci
 
 # Runs linter with CI config
 .PHONY: lint
@@ -70,6 +70,10 @@ codegen-models:
 .PHONY: sync-deps
 sync-deps:
 	poetry install --sync --with dev,codegen,devlocal
+
+.PHONY: install-check
+install-check:
+	./script/checks/check_install.sh
 
 .PHONY: init-test-configs
 init-test-configs:

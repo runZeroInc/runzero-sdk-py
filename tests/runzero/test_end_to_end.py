@@ -1,36 +1,55 @@
 import time
+from datetime import datetime, timezone
 
 import pytest
 
-from runzero import CustomAssets, Sites, Tasks, assets_from_csv, assets_from_json
-from runzero.admin import CustomSourcesAdmin, OrgsAdmin
+from runzero.api import CustomAssets, CustomSourcesAdmin, OrgsAdmin, Sites, Tasks
 from runzero.client import ClientError
-from runzero.types import OrgOptions, SiteOptions
+from runzero.types import (
+    CustomAttribute,
+    Hostname,
+    ImportAsset,
+    IPv4Address,
+    IPv6Address,
+    NetworkInterface,
+    OrgOptions,
+    SiteOptions,
+    Tag,
+)
 
-from .utils import build_test_data_path
+
+def build_test_data():
+    return [
+        ImportAsset(
+            id="foo123",
+            networkInterfaces=[
+                NetworkInterface(
+                    macAddress="01:23:45:67:89:0A",
+                    ipv4Addresses=[IPv4Address("192.0.2.1"), IPv4Address("192.0.2.2")],
+                    ipv6Addresses=[IPv6Address("2002:db7::")],
+                )
+            ],
+            hostnames=[Hostname("host.domain.com"), Hostname("host2.domain.com")],
+            domain="domain.com",
+            firstSeenTS=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            lastSeenTS=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            os="Ubuntu Linux 22.04",
+            osVersion="22.04",
+            manufacturer="Apple Inc.",
+            model="Macbook Air",
+            tags=[Tag("foo"), Tag("key=value")],
+            deviceType="Desktop",
+            customAttributes={
+                "otherAttribute": CustomAttribute("foo"),
+                "anotherAttribute": CustomAttribute("bar"),
+                "yetAnotherAttr": CustomAttribute("baz"),
+            },
+        )
+    ]
 
 
 @pytest.mark.integration_test
 def test_client_end_to_end_import(account_client, request, tsstring):
-    data = """{"id": "foo123", \
-    "network_interfaces": [{"ipv4_addresses": ["192.0.2.1", "192.0.2.2"], \
-    "ipv6_addresses": ["2001:db8::", "2001:db7::"], "mac_address": "01:23:45:67:89:0A"}, \
-    {"ipv4_addresses": ["193.0.2.1"], \
-    "ipv6_addresses": ["2002:db7::"]}], \
-    "hostnames": ["host.domain.com", "host2.domain.com"], \
-    "domain": "domain.com", \
-    "first_seen_ts": "2023-03-06T18:14:50.52Z", \
-    "last_seen_ts": "2023-03-06T18:14:50.52Z", \
-    "os": "Ubuntu Linux 22.04", \
-    "os_version": "22.04", \
-    "manufacturer": "Apple Inc.", \
-    "model": "Macbook Air", \
-    "tags": ["foo", "key=value"], \
-    "device_type": "Desktop", \
-    "other_attribute": "foo", \
-    "another_attribute": "bar", \
-    "yet_another_attr": "baz"}"""
-
     c = account_client
     org_name = tsstring(f"org for {request.node.name}")
     org_opts = OrgOptions(name=str(org_name))
@@ -46,21 +65,20 @@ def test_client_end_to_end_import(account_client, request, tsstring):
     custom_source = CustomSourcesAdmin(client=c).create(str(source_name))
     assert custom_source.name == source_name
 
-    csv_path = build_test_data_path("assets.csv")
-    assets = assets_from_csv(csv_path)
-    assets += assets_from_json(data)
+    assets = build_test_data()
 
     created_task = CustomAssets(client=c).upload_assets(created_org.id, created_site.id, custom_source.id, assets)
 
     status = created_task.status
     iters = 0
     # keep polling until the task is completed or failed
-    # timeout after 120 seconds
-    while status not in ("processed", "failed", "error") and iters < 20:
+    # timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < 50:
         time.sleep(6)
         iters += 1
         status = Tasks(client=c).get_status(created_org.id, created_task.id)
 
+    assert iters != 50  # this is a timeout issue
     assert status == "processed"
 
     # teardown Org

@@ -1,6 +1,6 @@
 import pytest
 
-from runzero.imports import CustomAssets
+from runzero.api.imports import CustomAssets
 from runzero.types import ImportAsset, ImportTask, Tag
 
 
@@ -36,8 +36,7 @@ def test_client_custom_asset_import(client, integration_config, temp_custom_sour
         task_info=ImportTask(
             name="task name",
             description="task description",
-            # Todo: this is uncomfortable
-            tags=[Tag(__root__="one"), Tag(__root__="two")],
+            tags=[Tag("one"), Tag("two")],
         ),
     )
 

@@ -14,6 +14,9 @@ from typing import Optional
 from pydantic import Field
 
 from ._data_models_gen import AssetCustomSource as RESTAssetCustomSource
+from ._data_models_gen import CustomAttribute as RESTCustomAttribute
+from ._data_models_gen import Hostname as RESTHostname
+from ._data_models_gen import Tag as RESTTag
 
 
 class AssetCustomSource(RESTAssetCustomSource):
@@ -32,3 +35,33 @@ class AssetCustomSource(RESTAssetCustomSource):
     """
     bytes of png formatted image with maximum size 32x32 pixels
     """
+
+
+class CustomAttribute(RESTCustomAttribute):
+    """
+    CustomAttribute is a string key / value pair from an external custom asset data source.
+    """
+
+    def __init__(self, attr: str):
+        super().__init__(__root__=attr)
+
+
+class Hostname(RESTHostname):
+    """
+    Hostname the dns name the asset is assigned or reachable at.
+
+    This can be a fully-qualified hostname with the domain name, or
+    a short hostname.
+    """
+
+    def __init__(self, hostname: str):
+        super().__init__(__root__=hostname)
+
+
+class Tag(RESTTag):
+    """
+    Tag is an arbitrary string classifier applied to the asset.
+    """
+
+    def __init__(self, tag: str):
+        super().__init__(__root__=tag)
