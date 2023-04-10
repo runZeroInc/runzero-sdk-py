@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove ability to specify last seen timestamp on asset imports. Though the server retained the timestamp as a
   custom property, it is not a merge-able property. This is likely to cause confusion. API users are advised
   to use any invented custom property to hold this value.
+- Added new 'RateLimitError' exception to inform the user when they reach their daily usage limit.
 - Rename all occurrences in API docs, models, types, routes of 'sources' or 'custom sources' with 'custom integrations'
 
 ## [0.1.1] - 2023-03-30
