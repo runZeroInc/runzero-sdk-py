@@ -2,6 +2,9 @@
 client provides the runZero platform Client which must be provided to all objects which interact
 with the runZero API.
 """
+
+from __future__ import annotations
+
 from enum import Enum
 from typing import Any, Optional
 from urllib.parse import urlparse
@@ -12,6 +15,8 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import ConnectTimeout as RequestsConnectTimeout
 from requests.exceptions import ContentDecodingError
 from requests.exceptions import HTTPError as RequestsHTTPError
+
+from runzero.types import RateLimitInformation
 
 from ._http.auth import OAuthToken, RegisteredAPIClient
 from ._http.io import Request, Response
@@ -45,7 +50,7 @@ class Client:
         e.g. 'https://runzero.local:8443'
         If not provided, the default hosted infrastructure URL
         'https://console.runzero.com' is used.
-    :type validate_certificate: bool
+    :type server_url: str
 
     :param validate_certificate: Optional bool to change whether Client checks
         the validity of the API server's certificate before proceeding. We recommend
@@ -98,6 +103,7 @@ class Client:
             self._validate_cert = True
         else:
             self._validate_cert = validate_certificate
+        self._rate_limit_information: Optional[RateLimitInformation] = None
 
     @property
     def oauth_token_is_expired(self) -> bool:
@@ -223,6 +229,14 @@ class Client:
             return
 
     @property
+    def last_rate_limit_information(self) -> Optional[RateLimitInformation]:
+        """
+        The last rate limit information retrieved from the server.
+        :return: Optional[RateLimitInformation]
+        """
+        return self._rate_limit_information
+
+    @property
     def timeout(self) -> int:
         """
         The set request timeout value in seconds
@@ -281,6 +295,7 @@ class Client:
             files=files,
             multipart=multipart,
         ).execute()
+        self._rate_limit_information = resp.rate_limit_information
         # If the result doesn't have JSON decoded, it's not a valid result.
         # TODO: Decide if absolutely anything else else should be a raised error here
         return resp

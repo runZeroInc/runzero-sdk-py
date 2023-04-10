@@ -62,7 +62,10 @@ tox-ci-integration:
 
 # Creates data models via codegen tool
 .PHONY: codegen-models
-codegen-models:
+codegen-models: _codegen-models fmt
+
+.PHONY: _codegen-models
+_codegen-models:
 	poetry run datamodel-codegen --input ./api/proposed-runzero-api.yml --field-constraints --collapse-root-models \
 	--use-schema-description --validation --use-field-description --output ./runzero/types/_data_models_gen.py --target-python-version 3.8
 

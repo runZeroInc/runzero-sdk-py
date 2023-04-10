@@ -12,7 +12,7 @@ def test_client_orgs_requires_account_key(org_client):
 
 
 @pytest.mark.integration_test
-def test_client_orgs_get(account_client):
+def test_client_orgs_get(account_client, temp_org):
     """
     This test demonstrates getting one or more orgs
     """
@@ -20,12 +20,12 @@ def test_client_orgs_get(account_client):
     orgs = OrgsAdmin(client=c).get_all()
     assert len(orgs) > 0
 
-    org = OrgsAdmin(client=c).get(org_id=orgs[0].id)
-    assert org.id == orgs[0].id
+    org = OrgsAdmin(client=c).get(org_id=temp_org.id)
+    assert org.id == temp_org.id
 
-    org = OrgsAdmin(client=c).get(name=orgs[0].name)
-    assert org.id == orgs[0].id
-    assert org.name == orgs[0].name
+    org = OrgsAdmin(client=c).get(name=temp_org.name)
+    assert org.id == temp_org.id
+    assert org.name == temp_org.name
 
 
 @pytest.mark.integration_test

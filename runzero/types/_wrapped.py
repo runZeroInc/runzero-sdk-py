@@ -13,14 +13,14 @@ from typing import Optional
 
 from pydantic import Field
 
-from ._data_models_gen import AssetCustomSource as RESTAssetCustomSource
 from ._data_models_gen import CustomAttribute as RESTCustomAttribute
+from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
 from ._data_models_gen import Tag as RESTTag
 
 
-class AssetCustomSource(RESTAssetCustomSource):
-    """AssetCustomSource represents a custom asset data source for custom integrations use"""
+class CustomIntegration(RESTCustomIntegration):
+    """CustomIntegration represents a custom asset data source for custom integrations use"""
 
     # The REST API uses base-64 encoded strings, but inside this SDK
     # we want always use bytes and hide the transport encoding.

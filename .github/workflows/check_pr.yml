@@ -7,6 +7,7 @@ concurrency:
 on:
   pull_request:
     paths:
+      - '.github/**'
       - 'pyproject.toml'
       - 'poetry.lock'
       - 'runzero/**'
@@ -16,7 +17,6 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     steps:
@@ -34,12 +34,12 @@ jobs:
       - name: Run tests - Integration
         uses: ./.github/actions/tests/integration
         env:
-          url: "https://console.runzero.com"
-          account_token: ${{ secrets.ACCOUNT_TOKEN }}
-          org_token: ${{ secrets.ORG_TOKEN }}
-          org_id: ${{ secrets.ORG_ID }}
-          client_id: ${{ secrets.CLIENT_ID }}
-          client_secret: ${{ secrets.CLIENT_SECRET }}
+          url: ${{ secrets.STAGING_PYTHON_SDK_URL }}
+          account_token: ${{ secrets.STAGING_PYTHON_SDK_ACCOUNT_KEY }}
+          org_token: ${{ secrets.STAGING_PYTHON_SDK_ORG_KEY }}
+          org_id: ${{ secrets.STAGING_PYTHON_SDK_ORG_ID }}
+          client_id: ${{ secrets.STAGING_PYTHON_SDK_CLIENT_ID }}
+          client_secret: ${{ secrets.STAGING_PYTHON_SDK_SECRET }}
           validate_cert: "true"
       - name: Run tests - install check
         uses: ./.github/actions/tests/install

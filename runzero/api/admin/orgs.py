@@ -1,5 +1,5 @@
 """
-Management of asset custom data sources.
+Management of asset custom integrations.
 """
 import uuid
 from typing import List, Optional

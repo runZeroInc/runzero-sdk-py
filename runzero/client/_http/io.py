@@ -20,10 +20,12 @@ from runzero.client.errors import (
     ConnError,
     ConnTimeoutError,
     ErrInfo,
+    RateLimitError,
     ServerError,
     UnknownAPIError,
     UnsupportedRequestError,
 )
+from runzero.types import RateLimitInformation
 
 ALLOWED_VERBS = frozenset(["GET", "POST", "PUT", "DELETE", "PATCH"])
 
@@ -44,6 +46,7 @@ class Response:
         """Constructor method"""
         self.status_code = response.status_code
         self.headers = response.headers
+        self.rate_limit_information = RateLimitInformation.from_headers(response.headers)
         try:
             self.json_obj = response.json()
         except JSONDecodeError:
@@ -209,7 +212,7 @@ def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsRespons
             content_type = response.headers.get("Content-Type", "")
         if content_type.startswith("application/json") or content_type.startswith("application/problem+json"):
             body = response.json().copy()
-            # {"detail":"sourceId UUID cannot be all zeroes","error":"request failed","status":"error",
+            # {"detail":"customIntegrationId UUID cannot be all zeroes","error":"request failed","status":"error",
             # "title":"request failed"}
             try:
                 error_info = ErrInfo(
@@ -223,6 +226,11 @@ def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsRespons
         raise UnknownAPIError(str(response), response.reason) from exc
 
     if 400 <= response.status_code <= 499:
+        if response.status_code == 429:
+            rate_limit = RateLimitInformation.from_headers(response.headers)
+            remaining = rate_limit.usage_remaining
+            if isinstance(remaining, int) and remaining < 1:
+                raise RateLimitError(rate_limit_information=rate_limit)
         raise ClientError(
             unparsed_response=str(response),
             message=f"The request was rejected by the server: {error_message}",

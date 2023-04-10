@@ -12,7 +12,7 @@ from runzero.types import ImportAsset, ImportTask, Tag
         (pytest.lazy_fixture("org_client")),
     ],
 )
-def test_client_custom_asset_import(client, integration_config, temp_custom_source, temp_site):
+def test_client_custom_asset_import(client, integration_config, temp_custom_integration, temp_site):
     """
     This test demonstrates loading of custom asset data
     """
@@ -26,12 +26,12 @@ def test_client_custom_asset_import(client, integration_config, temp_custom_sour
     import_mgr = CustomAssets(c)
     target_org_id = integration_config.org_id
     target_site_id = temp_site.id
-    custom_source_id = temp_custom_source.id
+    custom_integration_id = temp_custom_integration.id
 
     task = import_mgr.upload_assets(
         org_id=target_org_id,
         site_id=target_site_id,
-        source_id=custom_source_id,
+        custom_integration_id=custom_integration_id,
         assets=import_assets,
         task_info=ImportTask(
             name="task name",

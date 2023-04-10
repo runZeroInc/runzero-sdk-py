@@ -39,7 +39,7 @@ The makefile included in this repo provides a convenient shorthand for calling c
 * `make test`: runs all tests
 * `make test-unit`: runs unit tests
 * `make test-int`: runs integration tests
-* `make codegen`: runs the pydantic data-model code generator against the API spec
+* `make codegen-models`: runs the pydantic data-model code generator against the API spec
 * `make sync-deps`: syncs your current local deps with the current poetry lockfile
 * `make init-test-config`: creates a test configuration template locally for overriding integration test configs
 

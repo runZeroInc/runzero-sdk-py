@@ -1,4 +1,4 @@
-"""this private module holds only the default python SDK custom source icon in base64 encoded format"""
+"""this private module holds only the default python SDK custom integration icon in base64 encoded format"""
 # pylint: disable=C0301
 _PY_ICON_BYTES = (
     b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00 \x00\x00\x00"
