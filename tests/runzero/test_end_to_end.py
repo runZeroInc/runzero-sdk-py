@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from runzero.api import CustomAssets, CustomSourcesAdmin, OrgsAdmin, Sites, Tasks
+from runzero.api import CustomAssets, CustomIntegrationsAdmin, OrgsAdmin, Sites, Tasks
 from runzero.client import ClientError
 from runzero.types import (
     CustomAttribute,
@@ -32,7 +32,6 @@ def build_test_data():
             hostnames=[Hostname("host.domain.com"), Hostname("host2.domain.com")],
             domain="domain.com",
             firstSeenTS=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
-            lastSeenTS=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
             os="Ubuntu Linux 22.04",
             osVersion="22.04",
             manufacturer="Apple Inc.",
@@ -62,12 +61,12 @@ def test_client_end_to_end_import(account_client, request, tsstring):
     assert created_site.name == site_name
 
     source_name = tsstring(f"source-for-{request.node.name}")
-    custom_source = CustomSourcesAdmin(client=c).create(str(source_name))
-    assert custom_source.name == source_name
+    custom_integration = CustomIntegrationsAdmin(client=c).create(str(source_name))
+    assert custom_integration.name == source_name
 
     assets = build_test_data()
 
-    created_task = CustomAssets(client=c).upload_assets(created_org.id, created_site.id, custom_source.id, assets)
+    created_task = CustomAssets(client=c).upload_assets(created_org.id, created_site.id, custom_integration.id, assets)
 
     status = created_task.status
     iters = 0
@@ -86,7 +85,7 @@ def test_client_end_to_end_import(account_client, request, tsstring):
     with pytest.raises(ClientError):
         OrgsAdmin(client=c).get(created_org.id)
 
-    # teardown custom source
-    CustomSourcesAdmin(client=c).delete(custom_source.id)
+    # teardown custom integration
+    CustomIntegrationsAdmin(client=c).delete(custom_integration.id)
     with pytest.raises(ClientError):
-        CustomSourcesAdmin(client=c).get(source_id=custom_source.id)
+        CustomIntegrationsAdmin(client=c).get(custom_integration_id=custom_integration.id)

@@ -1,19 +1,20 @@
 """
-types provides the Pydantic data model representations of the runZero Platform API schema.
+types provides the Pydantic data model representations of the runZero Platform
+API schema, as well as other data types which wrap looser runZero API data.
 
-Public runZero API types contained inside this package are made available here. Not all
-objects in the private module, which is generated from OpenAPI specs, are usable in this
-project today.
+Public, SDK-supported runZero API types contained inside this package are made
+available here. Not all objects in the private module, which is generated from
+OpenAPI specs, are usable in this project today.
 """
 from ipaddress import IPv4Address, IPv6Address
 
 from runzero.types._data_models_gen import (
-    BaseAssetCustomSource,
+    BaseCustomIntegration,
     ImportAsset,
     ImportTask,
     NetworkInterface,
-    NewAssetCustomSource,
     NewAssetImport,
+    NewCustomIntegration,
     Organization,
     OrgOptions,
     Problem,
@@ -21,12 +22,13 @@ from runzero.types._data_models_gen import (
     SiteOptions,
     Task,
 )
-from runzero.types._wrapped import AssetCustomSource, CustomAttribute, Hostname, Tag
+from runzero.types._rate_limit_information import RateLimitInformation
+from runzero.types._wrapped import CustomAttribute, CustomIntegration, Hostname, Tag
 from runzero.types.errors import ValidationError
 
 __all__ = [
-    "AssetCustomSource",
-    "BaseAssetCustomSource",
+    "CustomIntegration",
+    "BaseCustomIntegration",
     "CustomAttribute",
     "Hostname",
     "IPv4Address",
@@ -34,11 +36,12 @@ __all__ = [
     "ImportAsset",
     "ImportTask",
     "NetworkInterface",
-    "NewAssetCustomSource",
+    "NewCustomIntegration",
     "NewAssetImport",
     "Organization",
     "OrgOptions",
     "Problem",
+    "RateLimitInformation",
     "Site",
     "SiteOptions",
     "Tag",

@@ -53,7 +53,7 @@ The runzero-sdk package contains the following modules to group functionality.
 
 ### runzero.api
 
-The `api` module contains all the http handlers for interacting with runZero api resources such as Sites, Orgs, Tasks, Custom Sources, etc.
+The `api` module contains all the http handlers for interacting with runZero api resources such as Sites, Orgs, Tasks, Custom Integrations, etc.
 
 ### runzero.types
 
@@ -61,14 +61,15 @@ The `types` module contains all the pydantic classes required for interacting wi
 
 ## Custom Import Asset field mappings
 
-The following fields are available to be set for custom source asset imports. Any field which matches the below field
+The following fields are available to be set for custom integration asset imports. Any field which matches the below field
 names, either directly or via remapping, will be inserted into the corresponding `ImportAsset` field and validated to
 ensure it meets the outlined constraints.
 
 Any field which does not match the fields below will be placed under the `custom_attributes` field. Please see the
 `ImportAsset` schema definition for more details: #/components/schemas/ImportAsset
 
-* `id` - this `str` field is ***required*** to be set for all custom source assets and is the unique identifier for the asset. If your asset does not have a unique id then we recommend you create one using `uuid.uuid4()`.
+* `id` - this `str` field is ***required*** to be set for all custom integration assets and is the unique identifier for the asset. If your asset does not have a unique id then we recommend you create one using `uuid.uuid4()`.
+* `runZeroID` - a `uuid` field representing the unique identifier of an existing runZero asset to merge into.
 * `network_interfaces` - this field is an array of objects representing the network interfaces of the asset. Please see the API Schema for details. #/components/schemas/ImportAsset/properties/networkInterfaces.
 * `hostnames` - a `List[str]` field of all the hostnames associated with the asset. Each hostname has a maximum length of 260 characters and the `list` has a maximum of 100 hostnames.
 * `domain` - a `str` field representing the domain associated with the asset. Maximum length of 260 characters.

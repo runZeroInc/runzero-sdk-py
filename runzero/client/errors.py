@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Optional
 
 from runzero.errors import APIError, Error
+from runzero.types import RateLimitInformation
 from runzero.types.errors import RFC7807Error
 
 
@@ -100,6 +101,47 @@ class AuthError(APIError):
     """
 
     pass
+
+
+class RateLimitError(APIError):
+    """
+    RateLimitError is a named Exception class errors resulting from API rate limiting.
+
+    See https://www.runzero.com/docs/leveraging-the-api/#api-client-credentials for details.
+
+    Consider an exponential backoff retry, or a more calculated approach by examining the returned
+    numbers.
+
+    :param message: A top-level error description. The default value None provides a reasonable
+        message.
+
+    :param unparsed_response: optional string which holds the unparsed response body.
+    :type unparsed_response: str, optional
+
+    :param rate_limit_information: a RateLimitInformation object which holds the rate limit data
+    :type rate_limit_information: RateLimitInformation
+
+    """
+
+    def __init__(
+        self,
+        rate_limit_information: RateLimitInformation,
+        message: Optional[str] = None,
+        unparsed_response: Optional[str] = None,
+    ):
+        """Constructor method"""
+        if not message:
+            message = (
+                "Too many API requests for licensed rate limit. See runZero documentation for details on API "
+                "rate limiting."
+            )
+        super().__init__(message)
+        self.message = message
+        self.unparsed_response: Optional[str] = unparsed_response
+        self.rate_limit_information: RateLimitInformation = rate_limit_information
+
+    def __str__(self) -> str:
+        return f"{self.message} Rate limit information: {self.rate_limit_information}"
 
 
 class UnknownAPIError(APIError):

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2023-04-10
+
+- Increase supported custom integration icon size from 32x32 to 256x256
+- Loosen restrictions on MAC address input validation, permitting all types that the runZero platform can accept.
+- Remove ability to specify last seen timestamp on asset imports. Though the server retained the timestamp as a
+  custom property, it is not a merge-able property. This is likely to cause confusion. API users are advised
+  to use any invented custom property to hold this value.
+- Added new 'RateLimitError' exception to inform the user when they reach their daily usage limit.
+- Rename all occurrences in API docs, models, types, routes of 'sources' or 'custom sources' with 'custom integrations'
 
 ## [0.1.1] - 2023-03-30
 
@@ -21,7 +30,7 @@ Initial beta release
 ### Major features
 
 - Authentication and connection
-- Crud operations on sites, tasks, organizations, custom asset data sources
+- Crud operations on sites, tasks, organizations, custom asset data integrations
 - Custom asset data transformation
 - Uploadable custom assets
 

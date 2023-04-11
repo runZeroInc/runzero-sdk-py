@@ -10,7 +10,7 @@ from uuid import UUID
 import pytest
 import toml
 
-from runzero.api import CustomSourcesAdmin, OrgsAdmin, Sites
+from runzero.api import CustomIntegrationsAdmin, OrgsAdmin, Sites
 from runzero.client import Client, ClientError
 from runzero.types import OrgOptions, SiteOptions
 
@@ -74,14 +74,14 @@ def temp_org(account_client, request):
 
 
 @pytest.fixture
-def temp_custom_source(account_client, request):
+def temp_custom_integration(account_client, request):
     c = account_client
-    custom_source_mgr = CustomSourcesAdmin(c)
-    custom_source_name = TSString(f"custom source for {request.node.name}")
-    custom_source = custom_source_mgr.create(name=str(custom_source_name), icon=None)
-    yield custom_source
+    custom_integration_mgr = CustomIntegrationsAdmin(c)
+    custom_integration_name = TSString(f"custom integration for {request.node.name}")
+    custom_integration = custom_integration_mgr.create(name=str(custom_integration_name), icon=None)
+    yield custom_integration
     try:
-        custom_source_mgr.delete(custom_source.id)
+        custom_integration_mgr.delete(custom_integration.id)
     except ClientError:
         pass
 
@@ -128,7 +128,7 @@ class IntegrationConfigs:
             self.client_secret: str = t.get("client_secret")
             self.validate_cert: bool = t.get("validate_cert")
         else:
-            self.url: str = os.environ.get("console_url")
+            self.url: str = os.environ.get("url")
             self.account_token: str = os.environ.get("account_token")
             self.org_token: str = os.environ.get("org_token")
             oid = os.environ.get("org_id")

@@ -2,7 +2,7 @@ import time
 import uuid
 
 import runzero
-from runzero.api import CustomAssets, CustomSourcesAdmin, Sites, Tasks
+from runzero.api import CustomAssets, CustomIntegrationsAdmin, Sites, Tasks
 from runzero.types import ImportAsset
 
 # API keys are required for using the runZero sdk. See https://www.runzero.com/docs/leveraging-the-api/
@@ -21,7 +21,7 @@ def build_example_assets():
 
 def main():
     """
-    The code below gives an example of how to create a custom source and upload assets to a site using the new custom
+    The code below gives an example of how to create a custom integration and upload assets to a site using the new custom
     source.
     """
     # create the runzero client
@@ -43,10 +43,10 @@ def main():
         return
     print(f"got information for site {site.name}")
 
-    # create the custom source api manager and create a new custom source
-    custom_source_mgr = CustomSourcesAdmin(c)
-    my_asset_source = custom_source_mgr.create(name="my-custom-source2")
-    print(f"created custom source: {my_asset_source.id}")
+    # create the custom integration api manager and create a new custom integration
+    custom_integration_mgr = CustomIntegrationsAdmin(c)
+    my_asset_source = custom_integration_mgr.create(name="my-custom-source2")
+    print(f"created custom integration: {my_asset_source.id}")
 
     # creates some example assets
     assets = build_example_assets()
@@ -63,7 +63,7 @@ def main():
     # keep polling until the task is completed or failed or 30 seconds have elapsed
     iters = 0
     while status not in ("processed", "failed", "error") and iters < 6:
-        print("polling on status for custom source upload task....")
+        print("polling on status for custom integration upload task....")
         time.sleep(5)
         iters += 1
         status = task_mgr.get_status(MY_ORG_ID, import_task.id)
