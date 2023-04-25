@@ -1,5 +1,11 @@
 #/bin/bash
 
+# Can override these from env
+SPHINXOPTS    ?=
+SPHINXBUILD   ?= sphinx-build
+SOURCEDIR     = source
+BUILDDIR      = build
+
 .PHONY: ci
 ci: fmt lint deptry mypy install-check tox-ci
 
@@ -18,6 +24,14 @@ lint-all:
 deptry:
 	poetry run deptry .
 
+.PHONY: docs
+docs:
+	poetry install --sync --with docs && \
+	poetry run sphinx-build -M clean docs/source docs/build -j auto $(SPHINXOPTS) $(O) && \
+	2>&1 echo "Checking for dead links" && \
+	poetry run sphinx-build -M linkcheck docs/source docs/build -j auto $(SPHINXOPTS) $(O) && \
+	2>&1 echo "Building - will repeat any warnings from above" && \
+	poetry run sphinx-build -M html docs/source docs/build -j auto $(SPHINXOPTS) $(O)
 
 # Formats code with black and isort
 .PHONY: fmt
@@ -67,16 +81,20 @@ codegen-models: _codegen-models fmt
 .PHONY: _codegen-models
 _codegen-models:
 	poetry run datamodel-codegen --input ./api/proposed-runzero-api.yml --field-constraints --collapse-root-models \
-	--use-schema-description --validation --use-field-description --output ./runzero/types/_data_models_gen.py --target-python-version 3.8
+	--use-schema-description --validation --use-field-description --allow-population-by-field-name --output ./runzero/types/_data_models_gen.py --target-python-version 3.8
 
 # Syncs your local deps with the current lockfile
 .PHONY: sync-deps
 sync-deps:
-	poetry install --sync --with dev,codegen,devlocal
+	poetry install --sync --with dev,codegen,devlocal,docs
 
 .PHONY: install-check
 install-check:
 	./script/checks/check_install.sh
+
+.PHONY: hooks
+hooks:
+	git config --local core.hooksPath "$(shell git rev-parse --show-toplevel)/.githooks"
 
 .PHONY: init-test-configs
 init-test-configs:

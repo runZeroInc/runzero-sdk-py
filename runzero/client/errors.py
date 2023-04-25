@@ -51,11 +51,20 @@ class ClientError(APIError):
         error_info: Optional[ErrInfo] = None,
     ):
         """Constructor method"""
+        if message:
+            message = message.strip()
         if not message:
             message = "The request was rejected by the server."
         super().__init__(message)
         self.error_info: Optional[ErrInfo] = error_info
         self.unparsed_response: Optional[str] = unparsed_response
+
+    def __str__(self) -> str:
+        """Provide a friendly, printable error string. Otherwise, only 'message' is printed."""
+        out = f"{super().__str__()}".strip()
+        if self.error_info:
+            out = f"{out}: {self.error_info}"
+        return out
 
 
 class ServerError(APIError):
@@ -83,11 +92,20 @@ class ServerError(APIError):
         error_info: Optional[ErrInfo] = None,
     ):
         """Constructor method"""
+        if message:
+            message = message.strip()
         if not message:
             message = "The server encounter an error or is unable to process the request."
         super().__init__(message)
         self.error_info: Optional[ErrInfo] = error_info
         self.unparsed_response: Optional[str] = unparsed_response
+
+    def __str__(self) -> str:
+        """Provide a friendly, printable error string. Otherwise, only 'message' is printed."""
+        out = f"{super().__str__()}"
+        if self.error_info:
+            out = f"{out}: {self.error_info}"
+        return out
 
 
 class AuthError(APIError):

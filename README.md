@@ -1,5 +1,5 @@
 # runZero Python SDK
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runzero-sdk)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runzero-sdk)](https://pypi.org/project/runzero-sdk/)
 [![PyPI](https://img.shields.io/pypi/v/runzero-sdk)](https://pypi.org/project/runzero-sdk/)
 [![License](https://img.shields.io/badge/License-BSD_2--Clause-lightgrey.svg)](https://opensource.org/license/bsd-2-clause/)
 
@@ -23,7 +23,7 @@ discoverable, consistent, and easy to use. We want you to concentrate on working
 
 This project is [published to PyPI](https://pypi.org/project/runzero-sdk/) and can be installed using your local Python package manager.
 
-```commandline
+```console
 pip install runzero-sdk
 ```
 

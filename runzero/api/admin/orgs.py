@@ -1,6 +1,7 @@
 """
-Management of asset custom integrations.
+Management of runZero organizations.
 """
+
 import uuid
 from typing import List, Optional
 
@@ -40,8 +41,8 @@ class OrgsAdmin:
         """
         Retrieves the runZero Organization with the provided name or id, if it exists in your account.
 
-        :param org_id: Optional id of the organization you want returned
-        :param name: Optional name of the organization you want returned
+        :param org_id: Optional id of the organization to retrieve
+        :param name: Optional name of the organization to retrieve
         :return: Organization if found, or None
         :raises AuthError, ClientError, ServerError
         """
@@ -60,7 +61,7 @@ class OrgsAdmin:
         """
         Creates a new organization in your account.
 
-        :param org_options: Description of organizaiton to create
+        :param org_options: Description of organization to create
         :return Organization created or None
         :raises AuthError, ClientError, ServerError
         """
@@ -76,7 +77,7 @@ class OrgsAdmin:
         """
         Updates an organization associated with your account.
 
-        :param org_id: The ID of the Organization to patch
+        :param org_id: The ID of the organization to patch
         :param org_options: Organization's updated values
         :return Organization updated or None
         :raises AuthError, ClientError, ServerError
@@ -89,7 +90,7 @@ class OrgsAdmin:
         Deletes an organization with provided ID from your account.
 
         :param org_id: The ID of the organization to operate against
-        :return Organization deleted or None
+        :return None
         :raises AuthError, ClientError, ServerError
         """
         self._client.execute("DELETE", f"{self._ENDPOINT}/{org_id}")

@@ -47,6 +47,15 @@ class CustomAssets:
         """
         Upload your custom assets to the runZero platform.
 
+        See the ImportAsset object for a description of the data that can be imported.
+
+        Assets are merged according to the merge logic in the release of the platform. This
+        involves fields other than the custom_properties dictionary.
+
+        If the runZero asset ID is known externally, it may be specified on any single
+        ImportAsset object to override all merge rules and force that object's data onto
+        the runZero asset with that ID.
+
         :param org_id: Organization ID to import these assets into
         :param site_id: ID of the Site to import these asstes into
         :param custom_integration_id: custom integration id for the provided Import Assets
@@ -101,12 +110,9 @@ def _import_assets_into_gzip_jsonl(import_assets: Iterable[ImportAsset]) -> byte
 def _create_custom_asset_request(
     site_id: uuid.UUID, custom_integration_id: uuid.UUID, assets: Iterable[ImportAsset], import_task: ImportTask
 ) -> NewAssetImport:
-    # TODO: We are disabling validation on all fields with .construct
-    # until openapi 'bytes' type and pydantic can agree on a file-like.
-    # See FastAPI implementation of UploadFile for ref
     return NewAssetImport(
-        siteId=site_id,
-        customIntegrationId=custom_integration_id,
-        importTask=import_task,
-        assetData=_import_assets_into_gzip_jsonl(assets),
+        site_id=site_id,
+        custom_integration_id=custom_integration_id,
+        import_task=import_task,
+        asset_data=_import_assets_into_gzip_jsonl(assets),
     )

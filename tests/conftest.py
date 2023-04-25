@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import time
+import uuid
 from pathlib import Path
 from typing import Union
 from uuid import UUID
@@ -10,9 +11,24 @@ from uuid import UUID
 import pytest
 import toml
 
-from runzero.api import CustomIntegrationsAdmin, OrgsAdmin, Sites
+from runzero.api import (
+    CustomIntegrationsAdmin,
+    Explorers,
+    HostedZones,
+    OrgsAdmin,
+    Scans,
+    Sites,
+    Tasks,
+    TemplatesAdmin,
+)
 from runzero.client import Client, ClientError
-from runzero.types import OrgOptions, SiteOptions
+from runzero.types import (
+    OrgOptions,
+    ScanOptions,
+    ScanTemplateOptions,
+    SiteOptions,
+    Task,
+)
 
 
 @pytest.fixture
@@ -87,6 +103,96 @@ def temp_custom_integration(account_client, request):
 
 
 @pytest.fixture
+def temp_task(org_client, integration_config, request, temp_site, explorers):
+    """This fixture may return an empty list if the integration test server has no explorers (agents) registered.
+
+    Tests which require this task should pytest.skipif temp_task None
+    """
+    if not explorers:
+        return None
+
+    c = org_client
+    task_name = TSString(f"scan task for {request.node.name}")
+    create_opts = ScanOptions(name=str(task_name), targets="some targets", probes="arp, echo, syn")
+    return Scans(client=c).create(org_id=integration_config.org_id, site_id=temp_site.id, scan_options=create_opts)
+
+
+@pytest.fixture
+def temp_monthly_task(org_client, integration_config, request, temp_site, explorers):
+    """This fixture may return an empty list if the integration test server has no explorers (agents) registered.
+
+    Tests which require this task should pytest.skipif temp_monthly_task is None
+    """
+    if not explorers:
+        return None
+
+    c = org_client
+    task_name = TSString(f"monthly scan task for {request.node.name}")
+    create_opts = ScanOptions(
+        name=str(task_name), targets="some targets", probes="arp, echo, syn", scan_frequency="monthly"
+    )
+    return Scans(client=c).create(org_id=integration_config.org_id, site_id=temp_site.id, scan_options=create_opts)
+
+
+@pytest.fixture
+def temp_account_scan_template(account_client, integration_config, request, temp_site, temp_org):
+    c = account_client
+    template_name = TSString(f"scan task template for {request.node.name}")
+    create_opts = ScanTemplateOptions(
+        name=str(template_name),
+        params={
+            "credentials": "",
+            "excludes": "",
+            "host-ping": "false",
+            "max-attempts": "3",
+            "max-group-size": "4096",
+            "max-host-rate": "1000",
+            "max-sockets": "2048",
+            "max-ttl": "255",
+            "nameservers": "",
+            "passes": "0",
+            "probes": "arp",
+            "rate": "3000",
+            "scan-tags": "",
+            "screenshots": "false",
+            "subnet-ping": "false",
+            "subnet-ping-net-size": "256",
+            "subnet-ping-sample-rate": "3",
+            "tcp-excludes": "",
+        },
+        organization_id=temp_org.id,
+        acl={str(temp_org.id): "user"},
+        global_=False,
+        description="Python SDK Test Template",
+    )
+    created = TemplatesAdmin(client=c).create(scan_template_options=create_opts)
+    yield created
+    TemplatesAdmin(client=c).delete(created.id)
+
+
+@pytest.fixture
+def hosted_zones(org_client, integration_config):
+    c = org_client
+    conf = integration_config
+    return HostedZones(client=c).get_all(conf.org_id)
+
+
+@pytest.fixture
+def explorers(org_client, integration_config):
+    """This fixture may return an empty list if the integration test server has no explorers (agents) registered.
+
+    Tests which requires explorers should skipif == []
+    """
+    c = org_client
+    explorers = []
+    try:
+        explorers = Explorers(client=c).get_all(integration_config.org_id)
+    except ClientError:
+        pass
+    return explorers
+
+
+@pytest.fixture
 def tsstring():
     return TSString
 
@@ -137,6 +243,28 @@ class IntegrationConfigs:
             self.client_id: str = os.environ.get("client_id")
             self.client_secret: str = os.environ.get("client_secret")
             self.validate_cert: bool = os.environ.get("validate_cert", "true").lower() == "true"
+        self._validate_config()
+
+    def _validate_config(self):
+        try:
+            if all(
+                prop
+                for prop in [
+                    self.url,
+                    self.account_token,
+                    self.org_token,
+                    self.org_id,
+                    self.client_id,
+                    self.client_secret,
+                ]
+            ):
+                return
+        except AttributeError:
+            pass
+        raise RuntimeError(
+            "Incomplete integration config while trying to run an integration tests. Check that all tests using"
+            " IntegrationConfigs have @pytest.mark.integration_test above them"
+        )
 
 
 def get_path_to_config() -> Path:
@@ -147,3 +275,8 @@ def get_path_to_config() -> Path:
         )
         .resolve()
     )
+
+
+@pytest.fixture
+def uuid_nil() -> uuid.UUID:
+    return uuid.UUID("00000000-0000-0000-0000-000000000000")

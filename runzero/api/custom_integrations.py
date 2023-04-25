@@ -49,7 +49,7 @@ class CustomIntegrations:
 
         :param org_id: The ID of the organization to operate against
         :param name: Optional, name of the organization you want the UUID for
-        :param custom_integration_id: Optional, the id of the source you want returned
+        :param custom_integration_id: Optional, the id of the source to retrieve
         :raises AuthError, ClientError, ServerError
             ValueError if neither custom_integration_id nor name are provided.
         :return: The matching CustomIntegration or None

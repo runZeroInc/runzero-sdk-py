@@ -7,12 +7,12 @@
    2. I recommend you install this with [pyenv](https://github.com/pyenv/pyenv) for convenience of following these setup instructions, but you may install however you wish
    3. Here are the dev env setup steps using `pyenv`
       1. `brew install pyenv`
-      2. `pyenv install 3.8` 
+      2. `pyenv install 3.8`
          * this installs the latest version of `3.8`
       3. `pyenv global 3.8`
          * this sets the system alias of `python` to version `3.8` for your system
          * this is not required, but it is convenient for installing poetry on your system
-      4. `pyenv local 3.8` 
+      4. `pyenv local 3.8`
          * this creates a `.python-version` which poetry will depend upon for version and path resolution when creating your virtual environment
 2. Install [poetry](https://python-poetry.org/docs/) which will be our toolchain for managing all things python
    1. `poetry` will install to a global directory on your system. I recommend you set it using the `POETRY_HOME` env var - but that is not a requirement
@@ -42,6 +42,7 @@ The makefile included in this repo provides a convenient shorthand for calling c
 * `make codegen-models`: runs the pydantic data-model code generator against the API spec
 * `make sync-deps`: syncs your current local deps with the current poetry lockfile
 * `make init-test-config`: creates a test configuration template locally for overriding integration test configs
+* `make hooks`: installs optional local git hooks to keep remote build surprises at bay
 
 ## Running tests
 This SDK uses pytest to manage running its unit and integration tests.
@@ -57,16 +58,16 @@ Poetry is an incredibly powerful toolchain and I recommend you [read its docs](h
 ### Adding a dependency
 1. Unlike `pip`, `poetry` has the ability to manage multiple dependency groups so that a published library only includes the dependencies that it needs to run
 2. To add a dependency, it's as simple as `poetry add {lib}`
-   1. Poetry also offers a number of versioning restrictions like such: 
+   1. Poetry also offers a number of versioning restrictions like such:
    ```# Allow >=2.0.5, <3.0.0 versions
    poetry add {lib}@^2.0.5
-   
+
    # Allow >=2.0.5, <2.1.0 versions
    poetry add {lib}@~2.0.5
-   
+
    # Allow >=2.0.5 versions, without upper bound
    poetry add "{lib}>=2.0.5"
-   
+
    # Allow only 2.0.5 version
    poetry add {lib}==2.0.5
    ```
@@ -84,13 +85,29 @@ Poetry is an incredibly powerful toolchain and I recommend you [read its docs](h
 ### Running linters and code formatting
 1. `poetry` can manage running your formatters and linters for you as well by leveraging the settings in the `pyproject.toml` file
 2. It's as simple as running the `poetry run {cmd}`
-   * To format with `black`:`poetry run black ./runzero ./tests` 
+   * To format with `black`:`poetry run black ./runzero ./tests`
    * To format with `isort`: `poetry run isort ./runzero ./tests`
    * To type check with `mypy`: `poetry run mypy ./runzero`
    * To lint with `pylint`: `poetry run pylint ./runzero`
+3. Consider auto-linting with the local git hook. Install with `make hooks`
 
 ### Codegen the pydantic data models for our api
 1. First we need to install the codegen dependency
    * `poetry install --with codegen`
 2. Next, we can run the command to generate the pydantic models from the openapi spec
    * `poetry run datamodel-codegen --input ./api/runzero-api.yml --field-constraints --output ./models/asset.py --target-python-version 3.8`
+
+### Preparing a release
+
+To prepare a release by:
+
+1. Ensuring semver conventions by taking a 'major', 'minor' or 'patch' argument, or accepting a forced but standard,
+   version string
+2. Bumping the project version
+3. Creating a standard release commit
+4. Creating the annotated release tag with a required commiter signature
+5. Pushing to remote
+
+Use `./scripts/prepare_release.sh`. Use -h flag for help / details. It will not execute in a dirty repo, and will back out
+all changes on failure.
+

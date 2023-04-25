@@ -57,8 +57,8 @@ class CustomIntegrationsAdmin:
         """
         Retrieves runZero custom integrations with either the matching ID or Name.
 
-        :param name: Optional, name of the organization you want the UUID for
-        :param custom_integration_id: Optional, the id of the source you want returned
+        :param name: Optional, name of the custom integration to retrieve
+        :param custom_integration_id: Optional, the id of the custom integration to retrieve
         :raises AuthError, ClientError, ServerError
             ValueError if neither custom_integration_id nor name are provided.
         :return: The matching CustomIntegration or None

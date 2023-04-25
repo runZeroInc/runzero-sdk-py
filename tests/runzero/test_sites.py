@@ -2,7 +2,7 @@ import pytest
 
 from runzero.api import Sites
 from runzero.client import ClientError
-from runzero.types import SiteOptions
+from runzero.types import ScanOptions, SiteOptions
 
 
 @pytest.mark.integration_test
@@ -66,7 +66,7 @@ def test_client_site_create_and_delete(client, integration_config, request, tsst
 )
 def test_client_site_update(client, integration_config, request, temp_site, tsstring):
     """
-    This test demonstrates deleting a site
+    This test demonstrates updating a site
     """
     c = client
     site_mgr = Sites(client=c)

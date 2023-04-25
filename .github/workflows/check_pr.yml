@@ -14,6 +14,19 @@ on:
       - 'tests/**'
 
 jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: poetry install --with dev,docs
+      - name: Build project documentation
+        uses: ./.github/actions/docsbuild
   tests:
     runs-on: ubuntu-latest
     strategy:
@@ -32,6 +45,7 @@ jobs:
       - name: Run tests - Unit
         uses: ./.github/actions/tests/unit
       - name: Run tests - Integration
+        if: github.actor != 'dependabot[bot]'
         uses: ./.github/actions/tests/integration
         env:
           url: ${{ secrets.STAGING_PYTHON_SDK_URL }}

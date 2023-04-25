@@ -9,13 +9,16 @@ Each class should have a non-docstring comment in it describing why the REST typ
 was insufficient.
 """
 
-from typing import Optional
+from typing import Any, Iterable, Optional
 
 from pydantic import Field
 
 from ._data_models_gen import CustomAttribute as RESTCustomAttribute
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
+from ._data_models_gen import ScanOptions as RESTScanOptions
+from ._data_models_gen import ScanTemplate as RESTScanTemplate
+from ._data_models_gen import ScanTemplateOptions as RESTScanTemplateOptions
 from ._data_models_gen import Tag as RESTTag
 
 
@@ -65,3 +68,33 @@ class Tag(RESTTag):
 
     def __init__(self, tag: str):
         super().__init__(__root__=tag)
+
+
+class ScanOptions(RESTScanOptions):
+    """Options which can be set to create or modify a scan."""
+
+    # enable kebab-case json response
+    def json(self, *args: Iterable[Any], **kwargs: Any) -> str:
+        """Ensure kebab-case is kept when converting to JSON"""
+        kwargs.setdefault("by_alias", True)
+        return super().json(*args, **kwargs)
+
+
+class ScanTemplate(RESTScanTemplate):
+    """A scan template object"""
+
+    # enable kebab-case json response
+    def json(self, *args: Iterable[Any], **kwargs: Any) -> str:
+        """Ensure kebab-case is kept when converting to JSON"""
+        kwargs.setdefault("by_alias", True)
+        return super().json(*args, **kwargs)
+
+
+class ScanTemplateOptions(RESTScanTemplateOptions):
+    """Options which can be set to create or modify a scan template."""
+
+    # enable kebab-case json response
+    def json(self, *args: Iterable[Any], **kwargs: Any) -> str:
+        """Ensure kebab-case is kept when converting to JSON"""
+        kwargs.setdefault("by_alias", True)
+        return super().json(*args, **kwargs)

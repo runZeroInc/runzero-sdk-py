@@ -6,6 +6,7 @@ license = "BSD-2-Clause"
 authors = ["runZero <support@runzero.com>"]
 readme = "README.md"
 homepage = "https://runzero.com/"
+documentation = "https://runzeroinc.github.io/runzero-sdk-py"
 repository = "https://github.com/runZeroInc/runzero-sdk-py"
 keywords = ["runzero", "api", "sdk"]
 packages = [{include = "runzero"}]
@@ -22,6 +23,9 @@ classifiers = [
 ]
 
 [tool.poetry.group.codegen]
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -49,7 +53,7 @@ mypy-extensions = "^1.0.0"
 tox = "^4.4.7"
 
 [tool.poetry.group.codegen.dependencies]
-datamodel-code-generator = { version = "^0.17.1", extras = ["http"]}
+datamodel-code-generator = { version = ">=0.17.1,<0.19.0", extras = ["http"]}
 
 [tool.tox]
 legacy_tox_ini = """
@@ -89,6 +93,18 @@ legacy_tox_ini = """
       poetry run pytest --import-mode importlib --cov --with-integration --integration-cover
 
 """
+
+
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^6.1.3"
+myst_parser = "^1.0.0"
+pandoc = "^2.3"
+sphinx-last-updated-by-git = "^0.3.4"
+sphinx-codeautolink = ">=0.14.1,<0.16.0"
+sphinx-autoapi = "^2.1.0"
+furo = "^2023.3.27"
 
 [tool.deptry]
 extend_exclude = [
@@ -162,7 +178,7 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.pylint]
-ignore-patterns = ["_data_models_gen.py"]
+ignore-patterns = ["_data_models_gen.py", "docs"]
 
 [tool.pylint.code_style]
 max-line-length = 120

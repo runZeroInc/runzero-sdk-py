@@ -19,7 +19,7 @@ pip install dist/runzero_sdk-*.tar.gz
 # get out of project root to ensure we're importing from installed copy
 [ -d "$PROJ_ROOT/build" ] || mkdir "$PROJ_ROOT/build" 2>&1
 pushd "$PROJ_ROOT/build" || { >&2 echo "cannot enter build dir" && exit 1; }
-INST_VER=$( python -c 'import runzero as runzero; c=runzero.Client(); print(runzero.VERSION)' )
+INST_VER=$( python -c 'import runzero as runzero; c=runzero.Client(); print(runzero.__version__)' )
 popd
 [ -z "$INST_VER" ] && { >&2 echo "Could not execute installed package and get version" && exit 1; }
 if [ "$INST_VER" != "$PROJ_VER" ]; then
