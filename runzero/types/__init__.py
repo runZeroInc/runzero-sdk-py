@@ -8,8 +8,11 @@ OpenAPI specs, are usable in this project today.
 """
 from ipaddress import IPv4Address, IPv6Address
 
+from runzero.types._data_models_gen import Agent as Explorer
+from runzero.types._data_models_gen import AgentSiteID as ExplorerSiteID
 from runzero.types._data_models_gen import (
     BaseCustomIntegration,
+    HostedZone,
     ImportAsset,
     ImportTask,
     NetworkInterface,
@@ -21,15 +24,27 @@ from runzero.types._data_models_gen import (
     Site,
     SiteOptions,
     Task,
+    TaskOptions,
 )
 from runzero.types._rate_limit_information import RateLimitInformation
-from runzero.types._wrapped import CustomAttribute, CustomIntegration, Hostname, Tag
+from runzero.types._wrapped import (
+    CustomAttribute,
+    CustomIntegration,
+    Hostname,
+    ScanOptions,
+    ScanTemplate,
+    ScanTemplateOptions,
+    Tag,
+)
 from runzero.types.errors import ValidationError
 
 __all__ = [
     "CustomIntegration",
     "BaseCustomIntegration",
     "CustomAttribute",
+    "Explorer",
+    "ExplorerSiteID",
+    "HostedZone",
     "Hostname",
     "IPv4Address",
     "IPv6Address",
@@ -42,9 +57,13 @@ __all__ = [
     "OrgOptions",
     "Problem",
     "RateLimitInformation",
+    "ScanOptions",
+    "ScanTemplate",
+    "ScanTemplateOptions",
     "Site",
     "SiteOptions",
     "Tag",
     "Task",
+    "TaskOptions",
     "ValidationError",
 ]

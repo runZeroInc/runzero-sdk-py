@@ -5,8 +5,11 @@ broad effects across a customer estate and, as such, are kept separately from ot
 
 from .custom_integrations import CustomIntegrationsAdmin
 from .orgs import OrgsAdmin
+from .tasks import TasksAdmin, TemplatesAdmin
 
 __all__ = [
     "CustomIntegrationsAdmin",
     "OrgsAdmin",
+    "TemplatesAdmin",
+    "TasksAdmin",
 ]

@@ -1,5 +1,5 @@
 """
-Management of an Organization's sites
+Management of an organization's sites.
 """
 
 import uuid
@@ -31,11 +31,11 @@ class Sites:
 
     def get_all(self, org_id: uuid.UUID) -> List[Site]:
         """
-        Retrieves all runZero Sites available within the given Organization
+        Retrieves all runZero Sites available within the given organization
 
         :param org_id: The ID of the organization to operate against
 
-        :return: a list of all Sites available within the given Organization
+        :return: a list of all Sites available within the given organization
         :raises AuthError, ClientError, ServerError
 
         """
@@ -51,9 +51,9 @@ class Sites:
         Retrieves the runZero Site with the provided name or id, if it exists in your account
 
         :param org_id: The ID of the organization to operate against
+        :param name: Optional name of the site to retrieve. If not provided, must provide site_id.
+        :param site_id: Optional id of the site to retrieve. If not provided, must provide name.
 
-        :param name: Optional name of the site you want returned
-        :param site_id: the id of the site you want returned
         :return: site requested or None
         :raises AuthError, ClientError, ServerError,
             ValueError if neither site_id nor name are provided.
@@ -65,12 +65,12 @@ class Sites:
             res = self._client.execute("GET", f"{self._ENDPOINT}/{str(site_id)}", params=params)
             if not res:
                 return None
-            obj = res.json_obj
-            data_obj = obj.get("data", "")
+            site_obj = res.json_obj
+            data_obj = site_obj.get("data", "")
             if data_obj:
-                obj = data_obj
+                site_obj = data_obj
 
-            return Site.parse_obj(obj)
+            return Site.parse_obj(site_obj)
         # name
         for site in self.get_all(org_id):
             if site.name == name:
@@ -82,8 +82,8 @@ class Sites:
         Creates a new site in the given org.
 
         :param org_id: The ID of the organization to operate against
-
         :param site_options: Description of site to create
+
         :return Site created or None
         :raises AuthError, ClientError, ServerError
         """
@@ -99,9 +99,9 @@ class Sites:
         Updates a site associated with your organization.
 
         :param org_id: The ID of the organization to operate against
-
         :param site_id: The ID of the site to update.
         :param site_options: Site's updated values
+
         :return Site updated or None
         :raises AuthError, ClientError, ServerError
         """
@@ -117,8 +117,8 @@ class Sites:
         Deletes a site from your account.
 
         :param org_id: The ID of the organization to operate against
-
         :param site_id: Custom asset site id to delete
+
         :return None
         :raises AuthError, ClientError, ServerError
         """

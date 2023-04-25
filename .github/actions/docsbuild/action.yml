@@ -1,0 +1,9 @@
+name: docsbuild
+description: Builds the project documentation
+runs:
+  using: composite
+  steps:
+    - name: Run sphinx build
+      run: |
+        make docs
+      shell: bash

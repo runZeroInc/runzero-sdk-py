@@ -1,8 +1,37 @@
-name: Publish SDK
+name: Publish SDK and Docs
 on:
   release:
     types: [published]
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment of Sphinx Docs to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "publish"
+  cancel-in-progress: false
+
 jobs:
+  # Docs must pass before SDK publish to PyPI. The publish docs task
+  # depends on the PyPI publish task, so check docs build OK before
+  # trying publishing to PyPI, then OK to publish docs themselves.
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: poetry install --with dev,docs
+      - name: Build project documentation
+        uses: ./.github/actions/docsbuild
   tests:
     # run integration tests against production before releasing new version of sdk
     runs-on: ubuntu-latest
@@ -34,6 +63,7 @@ jobs:
           validate_cert: "true"
   publish-release:
     needs:
+      - docs
       - tests
     runs-on: ubuntu-latest
     steps:
@@ -50,3 +80,28 @@ jobs:
       run: |
         poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
         poetry publish --build --no-interaction
+  publish-docs:
+    needs:
+      - publish-release
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - name: Build project documentation
+        uses: ./.github/actions/docsbuild
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'docs/build/html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

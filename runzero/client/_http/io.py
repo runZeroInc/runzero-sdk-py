@@ -147,32 +147,6 @@ class Request:
             raise CommunicationError from exc
 
 
-def _generate_prepared_request(
-    method: str,
-    url: str,
-    headers: Dict[str, Any],
-    auth: BearerToken,
-    data: Any,
-    params: Dict[str, Any],
-    handlers: List[HandlerType],
-) -> PreparedRequest:
-    request = RequestsRequest(
-        method=method,
-        url=url,
-        headers=headers,
-        auth=auth,
-        data=data,
-        params=params,
-    )
-
-    handlers.append(_error_handler)
-
-    for handler in handlers:
-        request.register_hook("response", handler)
-
-    return request.prepare()
-
-
 def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsResponse:
     # pylint: disable=unused-argument
     if not 400 <= response.status_code <= 599:
@@ -216,12 +190,13 @@ def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsRespons
             # "title":"request failed"}
             try:
                 error_info = ErrInfo(
-                    detail=body.pop("detail"),
-                    status=response.status_code,
                     title=body.pop("title"),
+                    status=response.status_code,
+                    detail=body.pop("detail", None),
                 )
             except KeyError:
                 pass
+
     except (KeyError, JSONDecodeError) as exc:
         raise UnknownAPIError(str(response), response.reason) from exc
 
@@ -232,7 +207,7 @@ def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsRespons
             if isinstance(remaining, int) and remaining < 1:
                 raise RateLimitError(rate_limit_information=rate_limit)
         raise ClientError(
-            unparsed_response=str(response),
+            unparsed_response=response.json(),
             message=f"The request was rejected by the server: {error_message}",
             error_info=error_info,
         )
