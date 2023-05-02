@@ -28,8 +28,8 @@ class OrgsAdmin:
         """
         Retrieves all runZero Organizations available to your account
 
-        :return: A list of all Organizations available to your account
-        :raises AuthError, ClientError, ServerError
+        :returns: A list of all Organizations available to your account
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute("GET", self._ENDPOINT)
         result: List[Organization] = []
@@ -43,13 +43,14 @@ class OrgsAdmin:
 
         :param org_id: Optional id of the organization to retrieve
         :param name: Optional name of the organization to retrieve
-        :return: Organization if found, or None
-        :raises AuthError, ClientError, ServerError
+
+        :returns: Organization if found, or None
+        :raises: AuthError, ClientError, ServerError
         """
         if name is None and org_id is None:
             raise ValueError("must provide org_id or organization name")
         if org_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(org_id)}")
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{org_id}")
             return Organization.parse_obj(res.json_obj)
         # name
         for org in self.get_all():
@@ -62,8 +63,8 @@ class OrgsAdmin:
         Creates a new organization in your account.
 
         :param org_options: Description of organization to create
-        :return Organization created or None
-        :raises AuthError, ClientError, ServerError
+        :returns: Organization created or None
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute("PUT", self._ENDPOINT, data=org_options)
         obj = res.json_obj
@@ -79,10 +80,10 @@ class OrgsAdmin:
 
         :param org_id: The ID of the organization to patch
         :param org_options: Organization's updated values
-        :return Organization updated or None
-        :raises AuthError, ClientError, ServerError
+        :returns: Organization updated or None
+        :raises: AuthError, ClientError, ServerError
         """
-        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{str(org_id)}", data=org_options)
+        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{org_id}", data=org_options)
         return Organization.parse_obj(res.json_obj)
 
     def delete(self, org_id: uuid.UUID) -> None:
@@ -90,7 +91,7 @@ class OrgsAdmin:
         Deletes an organization with provided ID from your account.
 
         :param org_id: The ID of the organization to operate against
-        :return None
-        :raises AuthError, ClientError, ServerError
+        :returns: None
+        :raises: AuthError, ClientError, ServerError
         """
         self._client.execute("DELETE", f"{self._ENDPOINT}/{org_id}")

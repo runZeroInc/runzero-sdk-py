@@ -30,11 +30,12 @@ class CustomIntegrations:
         Lists all custom integrations available to your account.
 
         :param org_id: The ID of the organization to operate against
-        :return: List of custom integrations
-        :raises AuthError, ClientError, ServerError
+
+        :returns: List of custom integrations
+        :raises: AuthError, ClientError, ServerError
         """
 
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         res = self._client.execute("GET", self._ENDPOINT, params=params)
         result: List[CustomIntegration] = []
         for src in res.json_obj:
@@ -50,15 +51,16 @@ class CustomIntegrations:
         :param org_id: The ID of the organization to operate against
         :param name: Optional, name of the organization you want the UUID for
         :param custom_integration_id: Optional, the id of the source to retrieve
-        :raises AuthError, ClientError, ServerError
+
+        :raises: AuthError, ClientError, ServerError
             ValueError if neither custom_integration_id nor name are provided.
-        :return: The matching CustomIntegration or None
+        :returns: The matching CustomIntegration or None
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         if name is None and custom_integration_id is None:
             raise ValueError("must provide custom_integration_id or source name")
         if custom_integration_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(custom_integration_id)}", params=params)
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{custom_integration_id}", params=params)
             return _resp_to_source(res.json_obj)
         # name
         for src in self.get_all(org_id):

@@ -69,10 +69,7 @@ def temp_site(org_client, integration_config, request):
     create_opts = SiteOptions(name=str(site_name))
     created = site_mgr.create(integration_config.org_id, site_options=create_opts)
     yield created
-    try:
-        site_mgr.delete(site_id=created.id, org_id=integration_config.org_id)
-    except ClientError:
-        pass
+    site_mgr.delete(site_id=created.id, org_id=integration_config.org_id)
 
 
 @pytest.fixture
@@ -83,10 +80,7 @@ def temp_org(account_client, request):
     create_opts = OrgOptions(name=str(org_name))
     created = org_mgr.create(org_options=create_opts)
     yield created
-    try:
-        org_mgr.delete(org_id=created.id)
-    except ClientError:
-        pass
+    org_mgr.delete(org_id=created.id)
 
 
 @pytest.fixture
@@ -96,42 +90,51 @@ def temp_custom_integration(account_client, request):
     custom_integration_name = TSString(f"custom integration for {request.node.name}")
     custom_integration = custom_integration_mgr.create(name=str(custom_integration_name), icon=None)
     yield custom_integration
-    try:
-        custom_integration_mgr.delete(custom_integration.id)
-    except ClientError:
-        pass
+    custom_integration_mgr.delete(custom_integration.id)
 
 
 @pytest.fixture
-def temp_task(org_client, integration_config, request, temp_site, explorers):
+def temp_task(org_client, integration_config, request, temp_site):
     """This fixture may return an empty list if the integration test server has no explorers (agents) registered.
 
     Tests which require this task should pytest.skipif temp_task None
     """
-    if not explorers:
-        return None
-
     c = org_client
     task_name = TSString(f"scan task for {request.node.name}")
-    create_opts = ScanOptions(name=str(task_name), targets="some targets", probes="arp, echo, syn")
-    return Scans(client=c).create(org_id=integration_config.org_id, site_id=temp_site.id, scan_options=create_opts)
+    create_opts = ScanOptions(
+        name=str(task_name), targets="some targets", probes="arp, echo, syn", scan_start="2219296293"
+    )
+    try:
+        task = Scans(client=c).create(org_id=integration_config.org_id, site_id=temp_site.id, scan_options=create_opts)
+        yield task
+        Tasks(c).stop(org_id=integration_config.org_id, task_id=task.id)
+    except ClientError as exc:
+        if exc.error_info.detail == "no available agents":
+            yield None
 
 
 @pytest.fixture
-def temp_monthly_task(org_client, integration_config, request, temp_site, explorers):
+def temp_monthly_task(org_client, integration_config, request, temp_site):
     """This fixture may return an empty list if the integration test server has no explorers (agents) registered.
 
     Tests which require this task should pytest.skipif temp_monthly_task is None
     """
-    if not explorers:
-        return None
-
     c = org_client
     task_name = TSString(f"monthly scan task for {request.node.name}")
     create_opts = ScanOptions(
-        name=str(task_name), targets="some targets", probes="arp, echo, syn", scan_frequency="monthly"
+        name=str(task_name),
+        targets="some targets",
+        probes="arp, echo, syn",
+        scan_frequency="monthly",
+        scan_start="2219296293",
     )
-    return Scans(client=c).create(org_id=integration_config.org_id, site_id=temp_site.id, scan_options=create_opts)
+    try:
+        task = Scans(client=c).create(org_id=integration_config.org_id, site_id=temp_site.id, scan_options=create_opts)
+        yield task
+        Tasks(c).stop(org_id=integration_config.org_id, task_id=task.id)
+    except ClientError as exc:
+        if exc.error_info.detail == "no available agents":
+            yield None
 
 
 @pytest.fixture
@@ -174,7 +177,8 @@ def temp_account_scan_template(account_client, integration_config, request, temp
 def hosted_zones(org_client, integration_config):
     c = org_client
     conf = integration_config
-    return HostedZones(client=c).get_all(conf.org_id)
+    hosted_zones = HostedZones(client=c).get_all(conf.org_id)
+    return [hz for hz in hosted_zones if hz.enabled]
 
 
 @pytest.fixture
@@ -185,11 +189,8 @@ def explorers(org_client, integration_config):
     """
     c = org_client
     explorers = []
-    try:
-        explorers = Explorers(client=c).get_all(integration_config.org_id)
-    except ClientError:
-        pass
-    return explorers
+    explorers = Explorers(client=c).get_all(integration_config.org_id)
+    return [e for e in explorers if e.connected and not e.inactive]
 
 
 @pytest.fixture

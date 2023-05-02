@@ -25,8 +25,7 @@ class OAuthToken(BaseModel):
         """
         Determines if the oauth token is expired or will expire within a minute
 
-        :return: Returns a bool of whether the token is expired or about to
-        :rtype bool
+        :returns: Returns a bool of whether the token is expired or about to
         """
         delta = self.created_at - datetime.now()
         return not delta.total_seconds() <= (self.expires_in + 60)
@@ -43,8 +42,8 @@ class BearerToken(AuthBase):
         Attaches the bearer token to the request headers
 
         :param r: the calling requests object - which is a requests.PreparedRequest
-        :return the calling object
-        :rtype requests.PreparedRequest
+
+        :returns: the calling object
         """
         r.headers["Authorization"] = f"Bearer {self._token}"
         return r
@@ -62,8 +61,7 @@ class RegisteredAPIClient(AuthBase):
         Attach appropriate headers to the request for api client registration
 
         :param r: the calling requests object - which is a requests.PreparedRequest
-        :return the calling object
-        :rtype requests.PreparedRequest
+        :returns: the calling object
         """
         r.headers["Content-Type"] = "application/x-www-form-urlencoded"
         return r
@@ -72,8 +70,7 @@ class RegisteredAPIClient(AuthBase):
         """
         Uses the provided OAuth credentials to construct the url for requesting the OAuth bearer token.
 
-        :return dict containing the required components to be urlencoded for OAuth authentication
-        :rtype dict
+        :returns: dict containing the required components to be urlencoded for OAuth authentication
         """
 
         return {"grant_type": "client_credentials", "client_id": self._client_id, "client_secret": self._client_secret}

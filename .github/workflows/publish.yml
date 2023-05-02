@@ -65,7 +65,12 @@ jobs:
     needs:
       - docs
       - tests
+    environment:
+      name: publish-package
     runs-on: ubuntu-latest
+    permissions:
+      # for OpenID Connect trusted publisher feature
+      id-token:write
     steps:
     - uses: actions/checkout@v3
     - run: pipx install poetry
@@ -75,11 +80,13 @@ jobs:
         python-version: "3.8"
     - name: Install dependencies
       run: poetry install --no-interaction --no-root --no-dev
-    - name: Publish SDK
+    - name: Build package distributions
       shell: bash
       run: |
-        poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-        poetry publish --build --no-interaction
+        rm -rf dist;
+        poetry build --no-cache --no-interaction
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
   publish-docs:
     needs:
       - publish-release

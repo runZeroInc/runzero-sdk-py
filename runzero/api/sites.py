@@ -35,11 +35,11 @@ class Sites:
 
         :param org_id: The ID of the organization to operate against
 
-        :return: a list of all Sites available within the given organization
-        :raises AuthError, ClientError, ServerError
+        :returns: a list of all Sites available within the given organization
+        :raises: AuthError, ClientError, ServerError
 
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         res = self._client.execute("GET", self._ENDPOINT, params=params)
         result: List[Site] = []
         for site in res.json_obj:
@@ -54,15 +54,15 @@ class Sites:
         :param name: Optional name of the site to retrieve. If not provided, must provide site_id.
         :param site_id: Optional id of the site to retrieve. If not provided, must provide name.
 
-        :return: site requested or None
-        :raises AuthError, ClientError, ServerError,
+        :returns: site requested or None
+        :raises: AuthError, ClientError, ServerError,
             ValueError if neither site_id nor name are provided.
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         if name is None and site_id is None:
             raise ValueError("must provide site_id or site name")
         if site_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(site_id)}", params=params)
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{site_id}", params=params)
             if not res:
                 return None
             site_obj = res.json_obj
@@ -84,10 +84,10 @@ class Sites:
         :param org_id: The ID of the organization to operate against
         :param site_options: Description of site to create
 
-        :return Site created or None
-        :raises AuthError, ClientError, ServerError
+        :returns: Site created or None
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         res = self._client.execute("PUT", self._ENDPOINT, params=params, data=site_options)
         site_data = res.json_obj.get("data", "")
         if site_data:
@@ -102,11 +102,11 @@ class Sites:
         :param site_id: The ID of the site to update.
         :param site_options: Site's updated values
 
-        :return Site updated or None
-        :raises AuthError, ClientError, ServerError
+        :returns: Site updated or None
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
-        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{str(site_id)}", params=params, data=site_options)
+        params = {"_oid": org_id}
+        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{site_id}", params=params, data=site_options)
         site_data = res.json_obj.get("data", "")
         if site_data:
             return self.get(org_id=org_id, name=site_options.name)
@@ -119,8 +119,8 @@ class Sites:
         :param org_id: The ID of the organization to operate against
         :param site_id: Custom asset site id to delete
 
-        :return None
-        :raises AuthError, ClientError, ServerError
+        :returns: None
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         self._client.execute("DELETE", f"{self._ENDPOINT}/{site_id}", params=params)

@@ -42,10 +42,10 @@ class Scans:
         :param scan_options: ScanOptions describing the scan to perform on the given site.
         :param site_id: The ID of the site which will have inventory modified by results of the scan.
 
-        :return: Task
-        :raises AuthError, ClientError, ServerError
+        :returns: Task
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute(
-            "PUT", f"{self._ENDPOINT}/{str(site_id)}/scan", params={"_oid": str(org_id)}, data=scan_options
+            "PUT", f"{self._ENDPOINT}/{site_id}/scan", params={"_oid": org_id}, data=scan_options
         )
         return Task.parse_obj(res.json_obj)

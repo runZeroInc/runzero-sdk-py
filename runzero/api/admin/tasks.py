@@ -32,7 +32,8 @@ class TasksAdmin:
             Query string format is the same as in-UI search. See https://www.runzero.com/docs/search-query-tasks/
         :param status: An optional status value to filter tasks by. This is a
             case-insensitive string match, stripped of surrounding whitespace.
-        :return: A list of all tasks, or tasks which match the provided query string
+
+        :returns: A list of all tasks, or tasks which match the provided query string
         """
         params = {}
         if query is not None:
@@ -64,10 +65,11 @@ class TemplatesAdmin:
         """
         Retrieves up to 1000 runZero task scan templates available to all organizations in the account.
 
-        :param query: An optional query to filter returned tasks.
+        :param query: An optional query to filter returned templates.
             Query string format is the same as in-UI search. See https://www.runzero.com/docs/search-query-tasks/
-        :return: A list of all task scan templates
-        :raises AuthError, ClientError, ServerError
+
+        :returns: A list of all task scan templates
+        :raises: AuthError, ClientError, ServerError
         """
         params = {}
         if query is not None:
@@ -85,13 +87,15 @@ class TemplatesAdmin:
 
         :param name: Optional, name of the scan template to retrieve
         :param scan_template_id: Optional, the id of the scan template to retrieve
-        :raises AuthError, ClientError, ServerError
+
+        :returns: ScanTemplate created or None
+        :raises: AuthError, ClientError, ServerError
             ValueError if neither scan_template_id nor name are provided.
         """
         if name is None and scan_template_id is None:
             raise ValueError("must provide scan_template_id or scan template name")
         if scan_template_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(scan_template_id)}")
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{scan_template_id}")
             return ScanTemplate.parse_obj(res.json_obj)
 
         for scan_template in self.get_all():
@@ -104,8 +108,9 @@ class TemplatesAdmin:
         Creates a new scan template in your account.
 
         :param scan_template_options: Description of scan template to create
-        :return ScanTemplate created or None
-        :raises AuthError, ClientError, ServerError
+
+        :returns: ScanTemplate created or None
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute("POST", f"{self._ENDPOINT}", data=scan_template_options)
         return ScanTemplate.parse_obj(res.json_obj)
@@ -122,8 +127,9 @@ class TemplatesAdmin:
 
         :param scan_template_id: The id of the scan template to update
         :param new_scan_template_values: Values to update the target scan template with
-        :return ScanTemplate updated with new values or None
-        :raises AuthError, ClientError, ServerError
+
+        :returns: ScanTemplate updated with new values or None
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute("PUT", f"{self._ENDPOINT}", data=new_scan_template_values)
         return ScanTemplate.parse_obj(res.json_obj)
@@ -132,8 +138,9 @@ class TemplatesAdmin:
         """
         Deletes a scan template with provided ID from your account.
 
-        :param scan_template_id: The ID of the scan template to operate against
-        :return None
-        :raises AuthError, ClientError, ServerError
+        :param scan_template_id: The ID of the scan template to delete
+
+        :returns: None
+        :raises: AuthError, ClientError, ServerError
         """
-        self._client.execute("DELETE", f"{self._ENDPOINT}/{str(scan_template_id)}")
+        self._client.execute("DELETE", f"{self._ENDPOINT}/{scan_template_id}")

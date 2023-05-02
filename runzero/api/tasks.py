@@ -2,7 +2,7 @@
 Management of runZero tasks.
 """
 import uuid
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 from runzero.client import Client
 from runzero.types import Task, TaskOptions
@@ -30,9 +30,9 @@ class Tasks:
             case-insensitive string match, stripped of surrounding whitespace.
         :param query: An optional query to filter returned tasks.
             Query string format is the same as in-UI search. See https://www.runzero.com/docs/search-query-tasks/
-        :return: A list of all tasks
+        :returns: A list of all tasks
         """
-        params = {"_oid": str(org_id)}
+        params: Dict[str, Union[str, uuid.UUID]] = {"_oid": org_id}
         if query is not None:
             params["search"] = query.strip()
         if status is not None:
@@ -48,18 +48,18 @@ class Tasks:
         """
         Retrieves the runZero Task with the provided name or id, if it exists in your organization.
 
-        :param org_id: ID of the organization the requested Task is in
+        :param org_id: ID of the organization the requested task is in
         :param name: Optional name of the task to retrieve. If not provided, must provide task_id.
         :param task_id: Optional id of the task to retrieve. If not provided, must provide name.
 
-        :raises AuthError, ClientError, ServerError
+        :raises: AuthError, ClientError, ServerError
             ValueError if neither task_id nor name are provided.
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         if name is None and task_id is None:
             raise ValueError("must provide either task_id or task name")
         if task_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(task_id)}", params=params)
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{task_id}", params=params)
             return Task.parse_obj(res.json_obj)
         # name
         for task in self.get_all(org_id):
@@ -73,13 +73,12 @@ class Tasks:
 
         The org_id should be provided if using an Account level api key.
 
+        :param org_id: ID of the organization the requested task is in
         :param task_id: ID of the task you want the status for
-        :param org_id: ID of the organization the requested Task is in. This is
-            necessary if you use an Auth token.
-        :return: a string result indicating task status, or None
+        :returns: a string result indicating task status, or None
         """
-        params = {"_oid": str(org_id)}
-        res = self._client.execute("GET", f"{self._ENDPOINT}/{str(task_id)}", params=params)
+        params = {"_oid": org_id}
+        res = self._client.execute("GET", f"{self._ENDPOINT}/{task_id}", params=params)
         task = Task.parse_obj(res.json_obj)
         if task is None:
             return None
@@ -89,11 +88,42 @@ class Tasks:
         """
         Updates task parameters with provided task options values.
 
-        :param task_id: task to modify
+        :param org_id: ID of the organization the requested task is in
+        :param task_id: ID of task to modify
         :param task_options: task values to update
-        :return Task which has been updated
-        :raises AuthError, ClientError, ServerError
+
+        :returns: Task which has been updated
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
-        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{str(task_id)}", data=task_options, params=params)
+        params = {"_oid": org_id}
+        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{task_id}", data=task_options, params=params)
+        return Task.parse_obj(res.json_obj)
+
+    def stop(self, org_id: uuid.UUID, task_id: uuid.UUID) -> Task:
+        """
+        Signals an explorer to stop a currently running task, or signals server to remove
+        a future or recurring task.
+
+        :param org_id: ID of the organization the requested task is in
+        :param task_id: ID of task to stop, or scheduled task to remove from schedule.
+
+        :returns: Task which has been signalled to stop
+        :raises: AuthError, ClientError, ServerError
+        """
+        params = {"_oid": org_id}
+        res = self._client.execute("POST", f"{self._ENDPOINT}/{task_id}/stop", params=params)
+        return Task.parse_obj(res.json_obj)
+
+    def hide(self, org_id: uuid.UUID, task_id: uuid.UUID) -> Task:
+        """
+        Signal that a completed task should be hidden.
+
+        :param org_id: ID of the organization the requested task is in
+        :param task_id: task to modify
+
+        :returns: Completed task which has been hidden
+        :raises: AuthError, ClientError, ServerError
+        """
+        params = {"_oid": org_id}
+        res = self._client.execute("POST", f"{self._ENDPOINT}/{task_id}/hide", params=params)
         return Task.parse_obj(res.json_obj)
