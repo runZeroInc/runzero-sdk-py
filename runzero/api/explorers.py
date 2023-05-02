@@ -39,11 +39,11 @@ class Explorers:
 
         :param org_id: The ID of the organization to operate against
 
-        :return: a list of all Explorers available within the given Organization
-        :raises AuthError, ClientError, ServerError
+        :returns: a list of all Explorers available within the given Organization
+        :raises: AuthError, ClientError, ServerError
 
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         res = self._client.execute("GET", self._ENDPOINT, params=params)
         result: List[Explorer] = []
         for explorer in res.json_obj:
@@ -61,15 +61,15 @@ class Explorers:
             If not provided, must provide explorer_id.
         :param explorer_id: Optional id of the explorer to retrieve. If not provided, must provide name.
 
-        :return: explorer requested or None
-        :raises AuthError, ClientError, ServerError,
+        :returns: explorer requested or None
+        :raises: AuthError, ClientError, ServerError,
             ValueError if neither explorer_id nor name are provided.
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         if name is None and explorer_id is None:
             raise ValueError("must provide explorer_id or explorer name")
         if explorer_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(explorer_id)}", params=params)
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{explorer_id}", params=params)
             if not res:
                 return None
             return Explorer.parse_obj(res.json_obj)
@@ -87,11 +87,11 @@ class Explorers:
         :param org_id: The ID of the organization to operate against
         :param explorer_id: The ID of the explorer to update
 
-        :return None
-        :raises AuthError, ClientError, ServerError
+        :returns: None
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
-        self._client.execute("POST", f"{self._ENDPOINT}/{str(explorer_id)}/update", params=params)
+        params = {"_oid": org_id}
+        self._client.execute("POST", f"{self._ENDPOINT}/{explorer_id}/update", params=params)
 
     def delete(self, org_id: uuid.UUID, explorer_id: uuid.UUID) -> None:
         """
@@ -100,10 +100,10 @@ class Explorers:
         :param org_id: The ID of the organization to operate against
         :param explorer_id: ID of explorer to delete
 
-        :return None
-        :raises AuthError, ClientError, ServerError
+        :returns: None
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         self._client.execute("DELETE", f"{self._ENDPOINT}/{explorer_id}", params=params)
 
     def move_to_site(self, org_id: uuid.UUID, explorer_id: uuid.UUID, site_id: uuid.UUID) -> Explorer:
@@ -117,10 +117,10 @@ class Explorers:
         :param explorer_id: ID of explorer to assign to a new site
         :param site_id: ID of the site the explorer will be assigned to
 
-        :return The Explorer with the provided ID, assigned to new site site_id
-        :raises AuthError, ClientError, ServerError
+        :returns: The Explorer with the provided ID, assigned to new site site_id
+        :raises: AuthError, ClientError, ServerError
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         res = self._client.execute(
             "PATCH",
             f"{self._ENDPOINT}/{explorer_id}",

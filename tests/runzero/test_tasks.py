@@ -81,6 +81,68 @@ def test_tasks_patch(client, integration_config, temp_task):
         (pytest.lazy_fixture("org_client")),
     ],
 )
+def test_tasks_stop_one_run_task(client, integration_config, temp_task):
+    if temp_task is None:
+        pytest.skip("cannot run test with no explorers connected, task creation fails")
+
+    c = client
+    task = temp_task
+    assert task.status == "new"
+    hidden = Tasks(client=c).stop(
+        integration_config.org_id,
+        task_id=task.id,
+    )
+    assert hidden.id == task.id
+    assert hidden.hidden
+    assert hidden.status == "removed"
+    # you can stop a hidden task
+    stopped = Tasks(client=c).stop(
+        integration_config.org_id,
+        task_id=task.id,
+    )
+    assert stopped.id == hidden.id
+    assert stopped.status == "removed"
+
+
+@pytest.mark.integration_test
+@pytest.mark.parametrize(
+    "client",
+    [
+        (pytest.lazy_fixture("account_client")),
+        (pytest.lazy_fixture("org_client")),
+    ],
+)
+def test_tasks_stop_recurring(client, integration_config, temp_monthly_task):
+    if temp_monthly_task is None:
+        pytest.skip("cannot run test with no explorers connected, task creation fails")
+
+    c = client
+    task = temp_monthly_task
+    assert task.status == "active"
+    hidden = Tasks(client=c).stop(
+        integration_config.org_id,
+        task_id=task.id,
+    )
+    assert hidden.id == task.id
+    assert hidden.hidden
+    assert hidden.status == "removed"
+    # you can stop a hidden monthly task
+    stopped = Tasks(client=c).stop(
+        integration_config.org_id,
+        task_id=task.id,
+    )
+    assert stopped.id == hidden.id
+    assert stopped.status == "removed"
+
+
+@pytest.mark.integration_test
+@pytest.mark.parametrize(
+    "client",
+    [
+        (pytest.lazy_fixture("account_client")),
+        (pytest.lazy_fixture("org_client")),
+    ],
+)
 def test_tasks_patch_with_hosted_zone(client, integration_config, temp_monthly_task, hosted_zones):
     # a repeating scan task, or task in the future, is required for a PATCH to accept a modification
     # of the hosted_zone_id

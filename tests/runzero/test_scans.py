@@ -35,7 +35,14 @@ def test_client_scan_create(client, integration_config, tsstring, request, temp_
 
     # can provide site id
     scan_opts = ScanOptions(targets="nonexistenthost8904713251251231.local", probes="arp", scan_name=scan_name)
-    created_task = scan_mgr.create(integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts)
+    try:
+        created_task = Scans(client=c).create(
+            org_id=integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts
+        )
+    except ClientError as exc:
+        if exc.error_info.detail == "no available agents":
+            pytest.skip("cannot run test with no explorers connected, task creation fails")
+        raise
     assert created_task.site_id == temp_site.id
     assert created_task.name == scan_name
 
@@ -70,7 +77,12 @@ def test_client_scan_create_from_existing(client, integration_config, tsstring, 
     assert exc_info.value.error_info.detail == "unknown probe: nothing"
 
     scan_opts = ScanOptions(targets="nonexistenthost8904713251251231.local", probes="arp", scan_name=scan_name)
-    created_task = scan_mgr.create(integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts)
+    try:
+        created_task = scan_mgr.create(integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts)
+    except ClientError as exc:
+        if exc.error_info.detail == "no available agents":
+            pytest.skip("cannot run test with no explorers connected, task creation fails")
+        raise
     assert created_task.name == scan_name
 
 
@@ -115,6 +127,13 @@ def test_client_scan_create_with_hosted_zone_id(
     scan_opts = ScanOptions(
         targets="nonexistenthost8904713251251231.local", probes="arp", scan_name=scan_name, hosted_zone_name="auto"
     )
-    created_task = scan_mgr.create(integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts)
+
+    try:
+        created_task = scan_mgr.create(integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts)
+    except ClientError as exc:
+        if exc.error_info.detail == "no available agents":
+            pytest.skip("cannot run test with no explorers connected, task creation fails")
+        raise
+
     assert created_task.name == scan_name
     assert created_task.hosted_zone_id != uuid_nil

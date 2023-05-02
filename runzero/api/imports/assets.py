@@ -63,8 +63,8 @@ class CustomAssets:
         :param task_info: Descriptive information associated with the import
             task to be created. If omitted, a task name is generated for you
 
-        :return Task: The runZero task associated with processing the asset upload
-        :raises ServerError, ClientError, AuthError
+        :returns: Task: The runZero task associated with processing the asset upload
+        :raises: ServerError, ClientError, AuthError
         """
         # create default task_info not supplied
         if task_info is None:

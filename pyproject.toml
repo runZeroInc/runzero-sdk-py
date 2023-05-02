@@ -95,9 +95,6 @@ legacy_tox_ini = """
 """
 
 
-
-
-
 [tool.poetry.group.docs.dependencies]
 sphinx = "^6.1.3"
 myst_parser = "^1.0.0"
@@ -194,3 +191,6 @@ disable = [
   "too-many-instance-attributes", # TODO: consider re-enabling and refactoring error locations
   "unnecessary-pass",
 ]
+
+[tool.pytest.ini_options]
+addopts = "tests runzero --doctest-modules"

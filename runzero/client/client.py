@@ -113,7 +113,7 @@ class Client:
         possible. This value doesn't need to be checked and manually
         refreshed in most cases.
 
-        :return bool: indicating whether the oauth token is expired.
+        :returns: bool: indicating whether the oauth token is expired.
              If OAuth is not in-use with the client, value is always false.
         """
         if self.__token:
@@ -126,7 +126,7 @@ class Client:
          Returns true if the OAuth is in use.
              This happens when register_api_client was called successfully
 
-        :return bool: indicating whether the oauth token is expired.
+        :returns: bool: indicating whether the oauth token is expired.
              If there is no oauth used with the client, value is always false.
         """
         return self._use_token
@@ -142,7 +142,8 @@ class Client:
 
         :param client_id: The client ID for the runZero registered API client
         :param client_secret: The client secret for the runZero registered API client
-        :raise AuthError: Exception for invalid OAuth configurations
+
+        :raises: AuthError: Exception for invalid OAuth configurations
         """
         self.__client_id = client_id
         self.__client_secret = client_secret
@@ -153,7 +154,7 @@ class Client:
     def url(self) -> str:
         """The url of the server
 
-        :return: str: The URL of the runZero server
+        :returns: str: The URL of the runZero server
         """
         return self.server_url
 
@@ -162,7 +163,7 @@ class Client:
         """
         Attempts to use the client secret and client id to generate an OAuth token.
 
-        :raise AuthError
+        :raises: AuthError
         """
         if not self._use_token or (self.__client_id is None or self.__client_secret is None):
             raise AuthError("invalid auth configuration")
@@ -191,9 +192,10 @@ class Client:
         Will also refresh the OAuth token if it's about to expire.
 
         :param scope: Authentication scope for the requested credential to resolve
-        :return: Bearer token for the required API scope
+        :returns: Bearer token for the required API scope
         :rtype string
-        :raise AuthError
+
+        :raises: AuthError
         """
         self._validate_scope_permissions(scope)
 
@@ -232,7 +234,8 @@ class Client:
     def last_rate_limit_information(self) -> Optional[RateLimitInformation]:
         """
         The last rate limit information retrieved from the server.
-        :return: Optional[RateLimitInformation]
+
+        :returns: Rate limit information when provided.
         """
         return self._rate_limit_information
 
@@ -240,7 +243,8 @@ class Client:
     def timeout(self) -> int:
         """
         The set request timeout value in seconds
-        :return: int
+
+        :returns: timeout in seconds
         """
         return self._timeout
 
@@ -248,7 +252,8 @@ class Client:
     def validate_cert(self) -> bool:
         """
         Boolean indicating whether the https cert must valid before proceeding.
-        :return: bool
+
+        :returns: true if certficate information is validated, false if not
         """
         return self._validate_cert
 
@@ -269,8 +274,9 @@ class Client:
         :param data: The data to send in form body (POST, PATCH, PUT)
         :param files: For multipart form data or file uploads. Format varies.
         :param multipart: True if using a multipart form data (combination file[s] and form data)
-        :return: The result of the execution as class:.`Response`
-        :raises ValidationError, ConnTimeoutError, ConnError, CommunicationError
+
+        :returns: The result of the execution as class:.`Response`
+        :raises: ValidationError, ConnTimeoutError, ConnError, CommunicationError
         """
         token: str = ""
         try:
@@ -296,6 +302,4 @@ class Client:
             multipart=multipart,
         ).execute()
         self._rate_limit_information = resp.rate_limit_information
-        # If the result doesn't have JSON decoded, it's not a valid result.
-        # TODO: Decide if absolutely anything else else should be a raised error here
         return resp

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2023-05-02
+
+- Improved project documentation and tests.
+- Moved to PyPI's new and more secure [Trusted Publisher](https://blog.pypi.org/posts/2023-04-20-introducing-trusted-publishers/) workflow for package maintainers.
+- Removed spurious run_zero_id from NewAssetImport requests - a change made alongside updated OpenAPI spec.
+- Added ability to hide and halt or unschedule scans/tasks.
+
 
 ## [0.3.0] - 2023-04-25
 
@@ -15,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added source_id field to Task objects.
 - Updated example code to demonstrate forcing data to be merged onto a known runZero asset ID, allowing
   for arbitrary asset matching, programmatically defined.
+
 
 ## [0.2.0] - 2023-04-10
 

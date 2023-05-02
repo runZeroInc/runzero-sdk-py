@@ -39,11 +39,11 @@ class HostedZones:
 
         :param org_id: The ID of the organization to operate against
 
-        :return: list of HostedZones
-        :raises AuthError, ClientError, ServerError
+        :returns: list of HostedZones
+        :raises: AuthError, ClientError, ServerError
 
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         res = self._client.execute("GET", self._ENDPOINT, params=params)
         result: List[HostedZone] = []
         for hosted_zone in res.json_obj:
@@ -57,19 +57,19 @@ class HostedZones:
         Retrieves the runZero hosted zone with the provided name or id, if it is active and exists in the Organization.
 
         :param org_id: The ID of the organization to operate against
-
         :param name: Optional name of the hosted zone to retrieve. This is a case-insensitive match.
             If not provided, must provide hosted_zone_id.
         :param hosted_zone_id: Optional id of the hosted zone to retrieve. If not provided, must provide name.
-        :return: HostedZone requested or None
-        :raises AuthError, ClientError, ServerError,
+
+        :returns: HostedZone requested or None
+        :raises: AuthError, ClientError, ServerError,
             ValueError if neither hosted_zone_id nor name are provided.
         """
-        params = {"_oid": str(org_id)}
+        params = {"_oid": org_id}
         if name is None and hosted_zone_id is None:
             raise ValueError("must provide hosted_zone_id or hosted zone name")
         if hosted_zone_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(hosted_zone_id)}", params=params)
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{hosted_zone_id}", params=params)
             if not res:
                 return None
             return HostedZone.parse_obj(res.json_obj)

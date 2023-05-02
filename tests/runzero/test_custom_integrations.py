@@ -61,7 +61,8 @@ def test_custom_integrations_admin_create_and_delete(account_client, integration
     assert created.icon is None
     src = integrations.get(custom_integration_id=created.id)
     assert src == created
-    integrations.delete(custom_integration_id=created.id)
+    deleted = integrations.delete(custom_integration_id=created.id)
+    assert deleted.id == created.id
 
     with pytest.raises(ClientError):
         integrations.get(custom_integration_id=src.id)

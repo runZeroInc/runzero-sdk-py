@@ -33,6 +33,7 @@ extensions = [
     "autoapi.extension",
     "myst_parser",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc.typehints",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx_last_updated_by_git",
@@ -61,6 +62,9 @@ autoapi_file_patterns = [
 autoapi_add_toctree_entry = False
 autoapi_python_class_content = "both"
 autoapi_member_order = "alphabetical"
+autodoc_typehints = "both"
+autodoc_typehints_format = "short"
+autodoc_typehints_description_target = "documented_params"
 autoapi_python_use_implicit_namespaces = False
 autoapi_prepare_jinja_env = None
 autoapi_keep_files = False
@@ -84,7 +88,7 @@ exclude_patterns = ['_build', '_templates']
 # --- include version information from git tags ---
 try:
     from subprocess import check_output
-    release = check_output(['git', 'describe', '--tags', '--always'])
+    release = check_output(['git', 'describe', '--match', 'v*', '--abbrev=0'])
     release = release.decode().strip()
     today = check_output(['git', 'show', '-s', '--format=%ad', '--date=short'])
     today = today.decode().strip()
@@ -93,7 +97,7 @@ except Exception:
     today = '<unknown date>'
 
 # --- HTML output ---
-html_title = project + ' v' + release
+html_title = project + ' ' + release
 html_theme = "furo"
 html_theme_options = {
     "light_css_variables": {

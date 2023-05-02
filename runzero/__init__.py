@@ -15,6 +15,9 @@ __version__ = runzero.version.__version__
 
 __all__ = [
     "__version__",
+    "Client",
+    "ClientError",
+    "ServerError",
     "APIError",
     "Error",
     "ValidationError",

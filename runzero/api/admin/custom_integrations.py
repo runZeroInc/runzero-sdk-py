@@ -1,5 +1,5 @@
 """
-enables administrative management of runZero custom integrations, including write operations.
+Administrative management of runZero custom integrations, including write operations.
 
 These operations are privileged and require an account token directly or an OAuth key that can generate one.
 """
@@ -19,8 +19,8 @@ from ._sdk_source_icon import _PY_ICON_BYTES
 class CustomIntegrationsAdmin:
     """Full Management of custom integrations.
 
-    Full management of custom integrations are descriptive registered associations
-    between integrations of data and assets imported which are associated with those integrations.
+    Custom integrations are descriptive registered associations between integrations of data and
+    assets imported which are associated with those integrations.
 
     This is a superset of operations available in runzero.custom_integrations.CustomIntegrations
     which allows only read operations.
@@ -42,8 +42,8 @@ class CustomIntegrationsAdmin:
         """
         Lists all custom integrations available to your account.
 
-        :return: List of custom integrations
-        :raises AuthError, ClientError, ServerError
+        :returns: List of custom integrations
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute("GET", self._ENDPOINT)
         result: List[CustomIntegration] = []
@@ -59,14 +59,15 @@ class CustomIntegrationsAdmin:
 
         :param name: Optional, name of the custom integration to retrieve
         :param custom_integration_id: Optional, the id of the custom integration to retrieve
-        :raises AuthError, ClientError, ServerError
+
+        :raises: AuthError, ClientError, ServerError
             ValueError if neither custom_integration_id nor name are provided.
-        :return: The matching CustomIntegration or None
+        :returns: The matching CustomIntegration or None
         """
         if name is None and custom_integration_id is None:
             raise ValueError("must provide custom_integration_id or source name")
         if custom_integration_id is not None:
-            res = self._client.execute("GET", f"{self._ENDPOINT}/{str(custom_integration_id)}")
+            res = self._client.execute("GET", f"{self._ENDPOINT}/{custom_integration_id}")
             return _resp_to_source(res.json_obj)
         # name
         for src in self.get_all():
@@ -93,8 +94,8 @@ class CustomIntegrationsAdmin:
             Use None to have the server choose the default custom integration logo,
             a grey runZero logo
 
-        :return CustomIntegration created
-        :raises AuthError, ClientError, ServerError
+        :returns: CustomIntegration created
+        :raises: AuthError, ClientError, ServerError
         """
 
         if isinstance(icon, (Path, str)):
@@ -116,10 +117,11 @@ class CustomIntegrationsAdmin:
 
         :param custom_integration_id: custom integration with updated values
         :param source_options: custom integration request values to update
-        :return CustomIntegration updated
-        :raises AuthError, ClientError, ServerError
+
+        :returns: CustomIntegration updated
+        :raises: AuthError, ClientError, ServerError
         """
-        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{str(custom_integration_id)}", data=source_options)
+        res = self._client.execute("PATCH", f"{self._ENDPOINT}/{custom_integration_id}", data=source_options)
         return _resp_to_source(res.json_obj)
 
     def delete(self, custom_integration_id: uuid.UUID) -> CustomIntegration:
@@ -127,7 +129,9 @@ class CustomIntegrationsAdmin:
         Deletes a custom integration from your account.
 
         :param custom_integration_id: custom integration id to delete
-        :raises AuthError, ClientError, ServerError
+
+        :returns: CustomIntegration deleted
+        :raises: AuthError, ClientError, ServerError
         """
         res = self._client.execute("DELETE", f"{self._ENDPOINT}/{custom_integration_id}")
         return _resp_to_source(res.json_obj)
