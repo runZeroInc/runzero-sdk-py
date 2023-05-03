@@ -1,4 +1,4 @@
-# runZero Python SDK
+# 👋
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runzero-sdk)](https://pypi.org/project/runzero-sdk/)
 [![PyPI](https://img.shields.io/pypi/v/runzero-sdk)](https://pypi.org/project/runzero-sdk/)
 [![License](https://img.shields.io/badge/License-BSD_2--Clause-lightgrey.svg)](https://opensource.org/license/bsd-2-clause/)
