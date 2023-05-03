@@ -3,11 +3,6 @@ on:
   release:
     types: [published]
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment of Sphinx Docs to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -36,7 +31,6 @@ jobs:
     # run integration tests against production before releasing new version of sdk
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11" ]
     steps:
@@ -69,8 +63,8 @@ jobs:
       name: publish-package
     runs-on: ubuntu-latest
     permissions:
-      # for OpenID Connect trusted publisher feature
-      id-token:write
+      # for OpenID Connect trusted publisher to pypi
+      id-token: write
     steps:
     - uses: actions/checkout@v3
     - run: pipx install poetry
@@ -94,6 +88,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    permissions:
+      # Sets permissions of the GITHUB_TOKEN to allow deployment of Sphinx Docs to GitHub Pages
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - run: pipx install poetry
