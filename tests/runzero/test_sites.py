@@ -2,7 +2,7 @@ import pytest
 
 from runzero.api import Sites
 from runzero.client import ClientError
-from runzero.types import ScanOptions, SiteOptions
+from runzero.types import SiteOptions
 
 
 @pytest.mark.integration_test

@@ -1,9 +1,6 @@
 import pytest
 
-# TODO: we should be able to use the runzero.types.ValidationError for this
-from pydantic import ValidationError
-
-from runzero.types import CustomAttribute, Hostname, ImportAsset, Tag
+from runzero.types import CustomAttribute, Hostname, ImportAsset, Tag, ValidationError
 
 
 def test_wrapped_custom_attribute():

@@ -1,8 +1,8 @@
 import pytest
 
-from runzero.api import HostedZones, Scans
+from runzero.api import Scans
 from runzero.client import ClientError
-from runzero.types import ScanOptions, SiteOptions
+from runzero.types import ScanOptions
 
 
 @pytest.mark.integration_test
@@ -33,8 +33,11 @@ def test_client_scan_create(client, integration_config, tsstring, request, temp_
     assert exc_info.value.error_info.status == 400
     assert exc_info.value.error_info.detail == "unknown probe: nothing"
 
-    # can provide site id
-    scan_opts = ScanOptions(targets="nonexistenthost8904713251251231.local", probes="arp", scan_name=scan_name)
+    explorer = explorers[0]
+    # can provide site id and explorer ID
+    scan_opts = ScanOptions(
+        targets="nonexistenthost8904713251251231.local", probes="arp", scan_name=scan_name, explorer=explorer.id
+    )
     try:
         created_task = Scans(client=c).create(
             org_id=integration_config.org_id, site_id=temp_site.id, scan_options=scan_opts
@@ -45,6 +48,7 @@ def test_client_scan_create(client, integration_config, tsstring, request, temp_
         raise
     assert created_task.site_id == temp_site.id
     assert created_task.name == scan_name
+    assert created_task.agent_id == explorer.id
 
 
 @pytest.mark.integration_test
