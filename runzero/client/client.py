@@ -95,7 +95,7 @@ class Client:
             raise ValueError(f"Url {server_url} is not valid")
         if not parsed.scheme == "https":
             raise ValueError(f"Url {server_url} must be https")
-        self.server_url = server_url
+        self.server_url = parsed.geturl().rstrip("/")
         if timeout_seconds is not None and timeout_seconds <= 0:
             raise ValueError("Timeout must be greater than 0")
         self._timeout = timeout_seconds or self.__default_timeout__

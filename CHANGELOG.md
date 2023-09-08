@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2023-09-11
+
+- Improved the validation on the `ImportAsset` class to now catch and surface issues with the `custom_attributes` field which would have caused an import task to fail during processing.
+- Added new `runzero.ValidationError` and `runzero.types.AddressValueError` exceptions as part of the SDK package exports.
+- Updated dependencies to require the latest version of both `requests` and `certifi` as both contained security updates.
+
+
 ## [0.4.0] - 2023-05-02
 
 - Improved project documentation and tests.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import signal
 import time
 import uuid
 from pathlib import Path
@@ -196,6 +197,18 @@ def explorers(org_client, integration_config):
 @pytest.fixture
 def tsstring():
     return TSString
+
+
+@pytest.fixture(scope="session", autouse=True)
+def term_handler():
+    # This handler is suggested by pytest maintainers as a way to help ensure
+    # cleanup when the process is externally terminated. Because we create
+    # resources during integration tests, it's important that those resources
+    # are removed in reasonable circumstance.
+    # Obviously we cannot handle SIGKILL situations ;)
+    orig = signal.signal(signal.SIGTERM, signal.getsignal(signal.SIGINT))
+    yield
+    signal.signal(signal.SIGTERM, orig)
 
 
 class TSString:

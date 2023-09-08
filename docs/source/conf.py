@@ -16,6 +16,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.abspath("../.."))
 
+import runzero
 
 # -- Project information -----------------------------------------------------
 
@@ -36,7 +37,6 @@ extensions = [
     "sphinx.ext.autodoc.typehints",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinx_last_updated_by_git",
 ]
 
 
@@ -85,19 +85,10 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', '_templates']
 
-# --- include version information from git tags ---
-try:
-    from subprocess import check_output
-    release = check_output(['git', 'describe', '--match', 'v*', '--abbrev=0'])
-    release = release.decode().strip()
-    today = check_output(['git', 'show', '-s', '--format=%ad', '--date=short'])
-    today = today.decode().strip()
-except Exception:
-    release = '<unknown>'
-    today = '<unknown date>'
+release = runzero.__version__
 
 # --- HTML output ---
-html_title = project + ' ' + release
+html_title = project + ' v' + release
 html_theme = "furo"
 html_theme_options = {
     "light_css_variables": {
@@ -122,7 +113,6 @@ html_theme_options = {
     "sidebar_hide_name": False,
 }
 
-# html_logo = "_static/img/runZerologo.png"
 html_theme_options = {
     "light_logo": "img/runZerologo.png",
     "dark_logo": "img/runZerologoDarkmode.png",

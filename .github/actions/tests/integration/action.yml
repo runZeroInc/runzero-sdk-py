@@ -5,5 +5,5 @@ runs:
   steps:
     - name: Run integration tests
       run: |
-        poetry run pytest -m integration_test
+        poetry run pytest --cov --with-integration --integration-cover
       shell: bash

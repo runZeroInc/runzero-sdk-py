@@ -5,5 +5,5 @@ runs:
   steps:
     - name: Run unit tests
       run: |
-        poetry run pytest --without-integration
+        poetry run pytest --cov --without-integration
       shell: bash

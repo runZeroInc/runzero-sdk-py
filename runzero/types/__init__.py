@@ -6,14 +6,15 @@ Public, SDK-supported runZero API types contained inside this package are made
 available here. Not all objects in the private module, which is generated from
 OpenAPI specs, are usable in this project today.
 """
-from ipaddress import IPv4Address, IPv6Address
+from ipaddress import AddressValueError, IPv4Address, IPv6Address
+
+from pydantic import ValidationError
 
 from runzero.types._data_models_gen import Agent as Explorer
 from runzero.types._data_models_gen import AgentSiteID as ExplorerSiteID
 from runzero.types._data_models_gen import (
     BaseCustomIntegration,
     HostedZone,
-    ImportAsset,
     ImportTask,
     NetworkInterface,
     NewAssetImport,
@@ -31,17 +32,18 @@ from runzero.types._wrapped import (
     CustomAttribute,
     CustomIntegration,
     Hostname,
+    ImportAsset,
     ScanOptions,
     ScanTemplate,
     ScanTemplateOptions,
     Tag,
 )
-from runzero.types.errors import ValidationError
 
 __all__ = [
-    "CustomIntegration",
+    "AddressValueError",
     "BaseCustomIntegration",
     "CustomAttribute",
+    "CustomIntegration",
     "Explorer",
     "ExplorerSiteID",
     "HostedZone",
@@ -51,8 +53,8 @@ __all__ = [
     "ImportAsset",
     "ImportTask",
     "NetworkInterface",
-    "NewCustomIntegration",
     "NewAssetImport",
+    "NewCustomIntegration",
     "Organization",
     "OrgOptions",
     "Problem",

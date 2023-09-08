@@ -9,13 +9,15 @@ Each class should have a non-docstring comment in it describing why the REST typ
 was insufficient.
 """
 
-from typing import Any, Iterable, Optional
+from typing import Any, Dict, Iterable, Optional
 
-from pydantic import Field
+# Note: `validator` has been replaced with `field_validator` in v2+
+from pydantic import Field, ValidationError, validator
 
 from ._data_models_gen import CustomAttribute as RESTCustomAttribute
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
+from ._data_models_gen import ImportAsset as RESTImportAsset
 from ._data_models_gen import ScanOptions as RESTScanOptions
 from ._data_models_gen import ScanTemplate as RESTScanTemplate
 from ._data_models_gen import ScanTemplateOptions as RESTScanTemplateOptions
@@ -47,6 +49,39 @@ class CustomAttribute(RESTCustomAttribute):
 
     def __init__(self, attr: str):
         super().__init__(__root__=attr)
+
+
+class ImportAsset(RESTImportAsset):
+    """
+    Represents a custom asset to be created or merged after import.
+    """
+
+    __MAX_ATTRS = 1024
+    __MAX_ATTR_KEY_LEN = 256
+
+    def __int__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
+    @validator("custom_attributes")
+    def custom_attributes_length(  # pylint: disable=E0213
+        cls, attrs: Dict[str, CustomAttribute]
+    ) -> Dict[str, CustomAttribute]:
+        """
+        Validates that the length of the dict used for `custom_attributes` does not exceed a length of 256 items and
+        that each key in that dict does not itself exceed a length of 256 characters.
+        """
+        if len(attrs) > cls.__MAX_ATTRS:
+            raise ValidationError(
+                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
+                ImportAsset,
+            )
+        for k in attrs.keys():
+            if len(k) > cls.__MAX_ATTR_KEY_LEN:
+                raise ValidationError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
+                    ImportAsset,
+                )
+        return attrs
 
 
 class Hostname(RESTHostname):

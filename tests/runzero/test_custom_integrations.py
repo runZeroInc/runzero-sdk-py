@@ -1,13 +1,12 @@
 import pathlib
 
 import pytest
-from pydantic import ValidationError
 
 from runzero import Error
 from runzero.api import CustomIntegrations
 from runzero.api.admin import CustomIntegrationsAdmin
 from runzero.client import AuthError, ClientError
-from runzero.types import BaseCustomIntegration, NewCustomIntegration
+from runzero.types import BaseCustomIntegration, NewCustomIntegration, ValidationError
 
 
 @pytest.mark.integration_test

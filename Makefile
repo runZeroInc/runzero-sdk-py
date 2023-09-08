@@ -83,9 +83,10 @@ _codegen-models:
 	poetry run datamodel-codegen --input ./api/proposed-runzero-api.yml --field-constraints --collapse-root-models \
 	--use-schema-description --validation --use-field-description --allow-population-by-field-name --output ./runzero/types/_data_models_gen.py --target-python-version 3.8
 
-# Syncs your local deps with the current lockfile
+# Syncs your local deps with the current lockfile and updates poetry
 .PHONY: sync-deps
 sync-deps:
+	poetry update self && \
 	poetry install --sync --with dev,codegen,devlocal,docs
 
 .PHONY: install-check

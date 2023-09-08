@@ -1,4 +1,3 @@
-import pydantic
 import pytest
 
 from runzero.types import ImportAsset, NetworkInterface, ValidationError
@@ -67,7 +66,7 @@ def test_valid_mac_addresses(mac):
     ],
 )
 def test_invalid_mac_addresses(badmac):
-    with pytest.raises(pydantic.ValidationError):
+    with pytest.raises(ValidationError):
         ImportAsset(
             id="foo123", os="Debian", osVersion="123.456", networkInterfaces=[NetworkInterface(macAddress=str(badmac))]
         )
