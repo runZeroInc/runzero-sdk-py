@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runzero-sdk"
-version = "0.4.0"
+version = "0.5.0"
 description = "The runZero platform sdk"
 license = "BSD-2-Clause"
 authors = ["runZero <support@runzero.com>"]
@@ -92,6 +92,7 @@ legacy_tox_ini = """
     commands =
       poetry run pytest --import-mode importlib --cov --with-integration --integration-cover
 """
+
 
 
 
