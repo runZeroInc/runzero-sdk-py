@@ -31,16 +31,22 @@
 ## Using the Makefile
 The makefile included in this repo provides a convenient shorthand for calling common poetry commands.
 
+* `make ci`: runs linters, type checking, build docs, unit tests, etc - basically everything needed for CI except integration tests as a quick feedback loop
+* `make ci-int`: runs everything that's needed for CI to pass including integration tests
 * `make fmt`: runs black and isort formatters on all python code
 * `make lint`: runs the linter against the `runzero` package to check for CI criteria
 * `make lint-all`: runs the linter against all python code in the repo; beyond what is required for CI
 * `make mypy`: runs the mypy type checker against the `runzero` package to check for CI criteria
 * `make mypy-all`: runs the mypy type checker against all python code in the repo; beyond what is required for CI
-* `make test`: runs all tests
-* `make test-unit`: runs unit tests
-* `make test-int`: runs integration tests
+* `make test`: runs unit tests
+* `make test-int`: runs all (unit and integration) tests
+* `make docs`: builds the sphinx docs locally from the SDK
+* `make deptry`: runs deptry to analyze deps for issues
+* `make tox`: runs all tests under all supported python envs with tox
+* `make tox-ci`: runs unit tests under all supported python envs with tox by installing the package and executing tests against what is built
+* `make tox-ci-int`: runs unit and integration tests under all supported python envs with tox by installing the package and executing tests against what is built
 * `make codegen-models`: runs the pydantic data-model code generator against the API spec
-* `make sync-deps`: syncs your current local deps with the current poetry lockfile
+* `make sync-deps`: updates poetry and syncs your current local deps with the current poetry lockfile
 * `make init-test-config`: creates a test configuration template locally for overriding integration test configs
 * `make hooks`: installs optional local git hooks to keep remote build surprises at bay
 
@@ -105,7 +111,7 @@ To prepare a release by:
    version string
 2. Bumping the project version
 3. Creating a standard release commit
-4. Creating the annotated release tag with a required commiter signature
+4. Creating the annotated release tag with a required committer signature
 5. Pushing to remote
 
 Use `./scripts/prepare_release.sh`. Use -h flag for help / details. It will not execute in a dirty repo, and will back out

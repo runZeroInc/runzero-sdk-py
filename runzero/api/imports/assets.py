@@ -75,6 +75,8 @@ class CustomAssets:
                 task_info.name = f"Custom Asset Import {time.time_ns():.0f}"
             if task_info.description is None or task_info.description == "":
                 task_info.description = "py-sdk import"
+            if task_info.exclude_unknown is None:
+                task_info.exclude_unknown = False
 
         asset_import_req = _create_custom_asset_request(
             site_id=site_id,
@@ -92,6 +94,8 @@ class CustomAssets:
             ("customIntegrationId", (None, str(asset_import_req.custom_integration_id))),
             ("importTask.name", (None, asset_import_req.import_task.name)),
             ("importTask.description", (None, asset_import_req.import_task.description)),
+            # this requires casting to a lower-cased string to function properly
+            ("importTask.excludeUnknown", (None, str(asset_import_req.import_task.exclude_unknown).lower())),
             ("importTask.tags", (None, tags_as_str)),
         )
         res = self._client.execute("POST", self._ENDPOINT.format(oid=org_id), files=multipart_form_data, multipart=True)

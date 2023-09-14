@@ -18,4 +18,5 @@ def test_client_keeps_last_rate_limit(org_client, temp_custom_integration, integ
         m.setattr(RateLimitInformation, "from_headers", lambda *args: good_rate_usage)
         sm.get(org_id=integration_config.org_id, custom_integration_id=temp_custom_integration.id)
         rates = c.last_rate_limit_information
+        assert rates is not None
         assert rates.usage_limit == 1000

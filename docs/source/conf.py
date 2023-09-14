@@ -45,7 +45,7 @@ intersphinx_mapping = {
 }
 
 autoapi_type = "python"
-autoapi_dirs= ["../../runzero"]
+autoapi_dirs = ["../../runzero"]
 autoapi_add_toctree_entry = False
 autoapi_options = [
     "members",
@@ -59,7 +59,7 @@ autoapi_file_patterns = [
     "*.pyi",
 ]
 
-autoapi_add_toctree_entry = False
+# autoapi_add_toctree_entry = False
 autoapi_python_class_content = "both"
 autoapi_member_order = "alphabetical"
 autodoc_typehints = "both"
@@ -70,7 +70,7 @@ autoapi_prepare_jinja_env = None
 autoapi_keep_files = False
 suppress_warnings = []  # type: ignore
 
-linkcheck_ignore = [r'https:\/\/runzero\.local']
+linkcheck_ignore = [r"https:\/\/runzero\.local"]
 
 # -- Options for View-Code -------------------------------------------------
 viewcode_follow_imported_members = True
@@ -83,12 +83,12 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', '_templates']
+exclude_patterns = ["_build", "_templates"]
 
 release = runzero.__version__
 
 # --- HTML output ---
-html_title = project + ' v' + release
+html_title = project + " v" + release
 html_theme = "furo"
 html_theme_options = {
     "light_css_variables": {
@@ -111,13 +111,11 @@ html_theme_options = {
     ],
     "navigation_with_keys": True,
     "sidebar_hide_name": False,
-}
-
-html_theme_options = {
     "light_logo": "img/runZerologo.png",
     "dark_logo": "img/runZerologoDarkmode.png",
 }
-html_favicon = '_static/img/favicon.ico'
+
+html_favicon = "_static/img/favicon.ico"
 html_css_files = [
     "css/custom.css",
 ]
@@ -129,4 +127,3 @@ html_js_files = [
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-

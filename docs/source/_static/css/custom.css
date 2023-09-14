@@ -21,17 +21,17 @@
 
 /* lighter footer text color */
 .bottom-of-page .left-details {
-    color: #e6f3f5;
+    color: #0a1c29;
 }
 .bottom-of-page .left-details a {
-    color: #e6f3f5;
+    color: #0a1c29;
     text-decoration: None;
 }
 body[data-theme="dark"] .bottom-of-page .left-details {
-    color: #0a1c29;
+    color: #9ca0a5;
 }
 body[data-theme="dark"] .bottom-of-page .left-details a {
-    color: #0a1c29;
+    color: #9ca0a5;
     text-decoration: None;
 }
 

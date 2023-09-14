@@ -3,7 +3,7 @@ import uuid
 
 import runzero
 from runzero.api import CustomAssets, CustomIntegrationsAdmin, Sites, Tasks
-from runzero.types import ImportAsset
+from runzero.types import ImportAsset, ImportTask
 
 # API keys are required for using the runZero sdk. See https://www.runzero.com/docs/leveraging-the-api/
 MY_CLIENT_ID = ""  # OAuth client id. See https://console.runzero.com/account/api/clients
@@ -51,9 +51,12 @@ def main():
     # creates some example assets
     assets = build_example_assets()
 
+    # create our named import task with 'exclude unknown' set to true
+    task_options = ImportTask(name="my sdk task", exclude_unknown=True)
+
     # create the import api manager to upload custom assets
     import_mgr = CustomAssets(c)
-    import_task = import_mgr.upload_assets(MY_ORG_ID, site.id, my_asset_source.id, assets)
+    import_task = import_mgr.upload_assets(MY_ORG_ID, site.id, my_asset_source.id, assets, task_info=task_options)
     print(f"created an custom asset import task: {import_task.name}")
 
     # create a task api manager, so we can monitor our custom asset import task
@@ -72,6 +75,14 @@ def main():
     # check that our task successfully completed
     assert status == "processed"
     print("success! custom assets are uploaded and available in the asset inventory")
+
+    # gather statistics from the completed task
+    task_data = task_mgr.get(MY_ORG_ID, task_id=import_task.id)
+    new_assets = task_data.stats.get("change.newAssets")
+    changed_assets = task_data.stats.get("change.changedAssets")
+    total_assets = task_data.stats.get("change.totalAssets")
+
+    print(f"new assets: {new_assets}, changed assets: {changed_assets}, total assets: {total_assets}")
 
 
 if __name__ == "__main__":
