@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2023-09-14
+
+- The SDK now supports the `exclude_unknown` option in the `ImportTask` object which will ignore any asset that does not merge into an existing asset in your inventory.
+- Updated the `create_upload_custom_integration` example file to highlight the `exclude_unknown` functionality.
+
 ## [0.5.0] - 2023-09-11
 
 - Improved the validation on the `ImportAsset` class to now catch and surface issues with the `custom_attributes` field which would have caused an import task to fail during processing.

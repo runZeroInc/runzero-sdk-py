@@ -5,7 +5,7 @@ from runzero.types import CustomAttribute, Hostname, ImportAsset, Tag, Validatio
 
 def test_wrapped_custom_attribute():
     attr = CustomAttribute("foo")
-    asset = ImportAsset(id="foo", customAttributes={"some_attr": attr})
+    asset = ImportAsset(id="foo", custom_attributes={"some_attr": attr})
     assert len(asset.custom_attributes) == 1
 
 

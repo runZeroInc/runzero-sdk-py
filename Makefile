@@ -6,8 +6,13 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
+# runs everything CI would except for integration tests
 .PHONY: ci
 ci: fmt lint deptry mypy install-check tox-ci
+
+# runs everything CI would including integration tests
+.PHONY: ci-int
+ci-int: fmt lint deptry mypy install-check tox-ci-integration
 
 # Runs linter with CI config
 .PHONY: lint
@@ -24,6 +29,7 @@ lint-all:
 deptry:
 	poetry run deptry .
 
+# builds the sphinx docs from the SDK
 .PHONY: docs
 docs:
 	poetry install --sync --with docs && \
@@ -89,14 +95,17 @@ sync-deps:
 	poetry update self && \
 	poetry install --sync --with dev,codegen,devlocal,docs
 
+# builds and installs the SDK in a temporary virtualenv to ensure the SDK installs and runs without issue
 .PHONY: install-check
 install-check:
 	./script/checks/check_install.sh
 
+# installs optional local git hooks to keep remote build surprises at bay
 .PHONY: hooks
 hooks:
 	git config --local core.hooksPath "$(shell git rev-parse --show-toplevel)/.githooks"
 
+# creates a test configuration template locally for overriding integration test configs
 .PHONY: init-test-configs
 init-test-configs:
 	touch ./test_configs.toml && \

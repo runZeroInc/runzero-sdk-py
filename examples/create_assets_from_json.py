@@ -55,15 +55,15 @@ def build_assets_from_json(
         # Assets can be bulk-exported from runZero and examined programmatically allowing for very custom,
         # arbitrarily-defined merge/match rules to be executed. Any program you can write to match an ImportAsset object
         # to a runZero asset ID is an encoding of merge/match rules you've defined for any data set or situation.
-        runZero_id = asset_id_force_merge_lookup.get(asset_id, None)
+        run_zero_id = asset_id_force_merge_lookup.get(asset_id, None)
         assets.append(
             ImportAsset(
                 id=asset_id,
                 domain=asset_domain,
-                deviceType=asset_type,
-                networkInterfaces=[network],
-                customAttributes=custom_attrs,
-                run_zero_id=runZero_id,  # If not None, will try to force the merge
+                device_type=asset_type,
+                network_interfaces=[network],
+                custom_attributes=custom_attrs,
+                run_zero_id=run_zero_id,  # If not None, will try to force the merge
             )
         )
     return assets
@@ -85,7 +85,7 @@ def build_network_interface(mac: str, ips: List[str]) -> NetworkInterface:
         else:
             continue
 
-    return NetworkInterface(macAddress=mac, ipv4Addresses=ip4s, ipv6Addresses=ip6s)
+    return NetworkInterface(mac_address=mac, ipv4_addresses=ip4s, ipv6_addresses=ip6s)
 
 
 def main():

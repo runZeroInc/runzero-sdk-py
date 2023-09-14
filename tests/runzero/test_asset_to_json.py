@@ -6,7 +6,7 @@ from runzero.types import ImportAsset
 
 
 def test_asset_to_json_direct():
-    asset = ImportAsset(id="foo123", os="Debian", osVersion="123.456")
+    asset = ImportAsset(id="foo123", os="Debian", os_version="123.456")
 
     result = asset.json(by_alias=True)
     result_dict = json.loads(result)

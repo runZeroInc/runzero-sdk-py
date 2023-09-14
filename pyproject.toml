@@ -55,54 +55,13 @@ tox = "^4.4.7"
 [tool.poetry.group.codegen.dependencies]
 datamodel-code-generator = { version = ">=0.17.1,<0.22.0", extras = ["http"]}
 
-[tool.tox]
-legacy_tox_ini = """
-    [tox]
-    isolated_build = true
-    env_list =
-        py38
-        py39
-        py310
-        py311
-
-    [testenv]
-    # This runs tests using all in-scope envs on your local source tree files.
-    # This is faster but can hide serious issues downstream.
-    allowlist_externals = poetry
-    commands_pre =
-      poetry install --no-root --sync
-    commands =
-      poetry run pytest --import-mode importlib --cov
-
-    [testenv:ci]
-    # This runs tests using all in-scope envs on a built and installed version of the package.
-    # This is slower but more thorough.
-    allowlist_externals = poetry
-    commands_pre =
-      poetry install
-    commands =
-      poetry run pytest --import-mode importlib --cov --without-integration
-
-    [testenv:ci-integration]
-    # This runs unit & integration tests using all in-scope envs on a built and installed version of the package.
-    # This is slower but more thorough.
-    allowlist_externals = poetry
-    commands_pre =
-      poetry install
-    commands =
-      poetry run pytest --import-mode importlib --cov --with-integration --integration-cover
-"""
-
-
-
-
 [tool.poetry.group.docs.dependencies]
-sphinx = "^6.1.3"
+sphinx = ">=6.1.3,<8.0.0"
 myst_parser = "^2.0.0"
 pandoc = "^2.3"
 sphinx-codeautolink = ">=0.14.1,<0.16.0"
 sphinx-autoapi = "^2.1.0"
-furo = "2023.07.26"
+furo = "2023.9.10"
 
 [tool.deptry]
 extend_exclude = [
@@ -191,3 +150,41 @@ disable = [
   "too-many-instance-attributes", # TODO: consider re-enabling and refactoring error locations
   "unnecessary-pass",
 ]
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    isolated_build = true
+    env_list =
+        py38
+        py39
+        py310
+        py311
+
+    [testenv]
+    # This runs tests using all in-scope envs on your local source tree files.
+    # This is faster but can hide serious issues downstream.
+    allowlist_externals = poetry
+    commands_pre =
+      poetry install --no-root --sync
+    commands =
+      poetry run pytest --import-mode importlib --cov
+
+    [testenv:ci]
+    # This runs tests using all in-scope envs on a built and installed version of the package.
+    # This is slower but more thorough.
+    allowlist_externals = poetry
+    commands_pre =
+      poetry install
+    commands =
+      poetry run pytest --import-mode importlib --cov --without-integration
+
+    [testenv:ci-integration]
+    # This runs unit & integration tests using all in-scope envs on a built and installed version of the package.
+    # This is slower but more thorough.
+    allowlist_externals = poetry
+    commands_pre =
+      poetry install
+    commands =
+      poetry run pytest --import-mode importlib --cov --with-integration --integration-cover
+"""

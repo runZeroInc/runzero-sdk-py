@@ -17,18 +17,24 @@ from runzero.types import ImportAsset, NetworkInterface, ValidationError
 )
 def test_valid_mac_addresses(mac):
     ImportAsset(
-        id="foo123", os="Debian", osVersion="123.456", networkInterfaces=[NetworkInterface(macAddress=str(mac))]
+        id="foo123", os="Debian", os_version="123.456", network_interfaces=[NetworkInterface(mac_address=str(mac))]
     )
     ImportAsset(
-        id="foo123", os="Debian", osVersion="123.456", networkInterfaces=[NetworkInterface(macAddress=str(mac).upper())]
+        id="foo123",
+        os="Debian",
+        os_version="123.456",
+        network_interfaces=[NetworkInterface(mac_address=str(mac).upper())],
     )
     ImportAsset(
-        id="foo123", os="Debian", osVersion="123.456", networkInterfaces=[NetworkInterface(macAddress=str(mac).lower())]
+        id="foo123",
+        os="Debian",
+        os_version="123.456",
+        network_interfaces=[NetworkInterface(mac_address=str(mac).lower())],
     )
 
 
 @pytest.mark.parametrize(
-    "badmac",
+    "bad_mac",
     [
         pytest.param("", id="blank"),
         pytest.param("junk", id="hex free, not a mac"),
@@ -65,20 +71,23 @@ def test_valid_mac_addresses(mac):
         pytest.param("0123 4567 89ab cdEFAB", id="EUI-64 spaces, too long, no separator"),
     ],
 )
-def test_invalid_mac_addresses(badmac):
+def test_invalid_mac_addresses(bad_mac):
     with pytest.raises(ValidationError):
         ImportAsset(
-            id="foo123", os="Debian", osVersion="123.456", networkInterfaces=[NetworkInterface(macAddress=str(badmac))]
+            id="foo123",
+            os="Debian",
+            os_version="123.456",
+            network_interfaces=[NetworkInterface(mac_address=str(bad_mac))],
         )
         ImportAsset(
             id="foo123",
             os="Debian",
-            osVersion="123.456",
-            networkInterfaces=[NetworkInterface(macAddress=str(badmac).upper())],
+            os_version="123.456",
+            network_interfaces=[NetworkInterface(mac_address=str(bad_mac).upper())],
         )
         ImportAsset(
             id="foo123",
             os="Debian",
-            osVersion="123.456",
-            networkInterfaces=[NetworkInterface(macAddress=str(badmac).lower())],
+            os_version="123.456",
+            network_interfaces=[NetworkInterface(mac_address=str(bad_mac).lower())],
         )
