@@ -11,7 +11,7 @@ This project is currently in beta and subject to change.
 This is a Python API client for [runZero](https://www.runzero.com/) - a product that provides asset discovery and
 network visibility to help you build and maintain a comprehensive inventory of your cyber assets. runZero customers can use this project to interact with their environment using runZero and Python.
 
-Note: the APIs used with this client are only available to customers of the [Professional and Enterprise editions](https://www.runzero.com/product/pricing/) of runZero.
+Note: the APIs used with this client require a [Platform license](https://www.runzero.com/product/pricing/).
 
 This project seeks to do only what is necessary to make interactions with runZero in your own Python code feel more
 like any other local, Pythonic API. It uses code generated from the runZero

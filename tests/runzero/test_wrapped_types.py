@@ -1,11 +1,23 @@
 import pytest
 
-from runzero.types import CustomAttribute, Hostname, ImportAsset, Tag, ValidationError
+from runzero.types import (
+    CustomAttribute,
+    Hostname,
+    ImportAsset,
+    Tag,
+    ValidationError,
+    Vulnerability,
+)
 
 
 def test_wrapped_custom_attribute():
+    # testing backwards compat
     attr = CustomAttribute("foo")
     asset = ImportAsset(id="foo", custom_attributes={"some_attr": attr})
+    assert len(asset.custom_attributes) == 1
+
+    other_attr = "bar"
+    asset = ImportAsset(id="bar", custom_attributes={"some_attr": other_attr})
     assert len(asset.custom_attributes) == 1
 
 
@@ -41,3 +53,9 @@ def test_wrapped_hostname_invalid():
     invalid = "x" * 1000
     with pytest.raises(ValidationError):
         Hostname(invalid)
+
+
+def test_wrapped_vuln():
+    vuln = Vulnerability(id="foo")
+    asset = ImportAsset(id="foo", vulnerabilities=[vuln])
+    assert len(asset.vulnerabilities) == 1

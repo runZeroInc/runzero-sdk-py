@@ -37,6 +37,7 @@ from runzero.types._wrapped import (
     ScanTemplate,
     ScanTemplateOptions,
     Tag,
+    Vulnerability,
 )
 
 __all__ = [
@@ -68,4 +69,5 @@ __all__ = [
     "Task",
     "TaskOptions",
     "ValidationError",
+    "Vulnerability",
 ]
