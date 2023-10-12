@@ -95,6 +95,16 @@ def temp_custom_integration(account_client, request):
 
 
 @pytest.fixture
+def temp_custom_integration_with_icon(account_client, request):
+    c = account_client
+    custom_integration_mgr = CustomIntegrationsAdmin(c)
+    custom_integration_name = TSString(f"custom integration for {request.node.name}")
+    custom_integration = custom_integration_mgr.create(name=str(custom_integration_name))
+    yield custom_integration
+    custom_integration_mgr.delete(custom_integration.id)
+
+
+@pytest.fixture
 def temp_task(org_client, integration_config, request, temp_site):
     """This fixture may return an empty list if the integration test server has no explorers (agents) registered.
 

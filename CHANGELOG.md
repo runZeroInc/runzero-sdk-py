@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2023-10-12
+
+- `runzero.types.ImportAsset` now supports associating vulnerabilities with an asset by adding a `runzero.types.Vulnerability` type to be set on the `ImportAsset.vulnerabilities` field.
+- `runzero.types.ImportAsset` now supports associating software with an asset by adding a `runzero.types.Software` type to be set on the `ImportAsset.software` field.
+- `runzero.types.ImportAsset.custom_attributes` no longer requires using the `CustomAttribute` type to wrap your string values. You can now use a `Dict[str, str]` directly.
+- `runzero.types.CustomAttribute` has been deprecated and will be removed in the `v1.0` release of the SDK.
+- Updated license requirement verbiage to reflect the new [Platform license](https://www.runzero.com/product/pricing/) requirement.
+- Added official support for Python 3.12.
+
 ## [0.6.0] - 2023-09-14
 
 - The SDK now supports the `exclude_unknown` option in the `ImportTask` object which will ignore any asset that does not merge into an existing asset in your inventory.

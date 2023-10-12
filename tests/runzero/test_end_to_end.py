@@ -7,7 +7,6 @@ import pytest
 from runzero.api import CustomAssets, CustomIntegrationsAdmin, OrgsAdmin, Sites, Tasks
 from runzero.client import ClientError
 from runzero.types import (
-    CustomAttribute,
     Hostname,
     ImportAsset,
     ImportTask,
@@ -16,8 +15,12 @@ from runzero.types import (
     NetworkInterface,
     OrgOptions,
     SiteOptions,
+    Software,
     Tag,
+    Vulnerability,
 )
+
+__TIMEOUT = 100
 
 
 def build_test_data():
@@ -41,69 +44,12 @@ def build_test_data():
             tags=[Tag("foo"), Tag("key=value")],
             device_type="Desktop",
             custom_attributes={
-                "otherAttribute": CustomAttribute("foo"),
-                "anotherAttribute": CustomAttribute("bar"),
-                "yetAnotherAttr": CustomAttribute("baz"),
+                "otherAttribute": "foo",
+                "anotherAttribute": "bar",
+                "yetAnotherAttr": "baz",
             },
         )
     ]
-
-
-@pytest.mark.integration_test
-def test_client_end_to_end_import(account_client, request, tsstring):
-    c = account_client
-    org_name = tsstring(f"org for {request.node.name}")
-    org_opts = OrgOptions(name=str(org_name))
-    created_org = OrgsAdmin(client=c).create(org_opts)
-    assert created_org.name == org_name
-
-    site_name = tsstring(f"site for {request.node.name}")
-    site_opts = SiteOptions(name=str(site_name))
-    created_site = Sites(client=c).create(created_org.id, site_opts)
-    assert created_site.name == site_name
-
-    source_name = tsstring(f"source-for-{request.node.name}")
-    custom_integration = CustomIntegrationsAdmin(client=c).create(str(source_name))
-    assert custom_integration.name == source_name
-
-    assets = build_test_data()
-
-    created_task = CustomAssets(client=c).upload_assets(created_org.id, created_site.id, custom_integration.id, assets)
-
-    status = created_task.status
-    iters = 0
-    # keep polling until the task is completed or failed
-    # timeout after 300 seconds
-    while status not in ("processed", "failed", "error") and iters < 50:
-        time.sleep(6)
-        iters += 1
-        status = Tasks(client=c).get_status(created_org.id, created_task.id)
-
-    assert iters != 50  # this is a timeout issue
-    assert status == "processed"
-
-    # check the task stats to ensure correct processing
-    task_info = Tasks(client=c).get(created_org.id, task_id=created_task.id)
-    assert task_info is not None
-    new_assets = task_info.stats.get("change.newAssets")
-    assert new_assets is not None
-    assert int(new_assets) == 1
-    changed_assets = task_info.stats.get("change.changedAssets")
-    assert changed_assets is not None
-    assert int(changed_assets) == 0
-    total_assets = task_info.stats.get("change.totalAssets")
-    assert total_assets is not None
-    assert int(total_assets) == 1
-
-    # teardown Org
-    OrgsAdmin(client=c).delete(created_org.id)
-    with pytest.raises(ClientError):
-        OrgsAdmin(client=c).get(created_org.id)
-
-    # teardown custom integration
-    CustomIntegrationsAdmin(client=c).delete(custom_integration.id)
-    with pytest.raises(ClientError):
-        CustomIntegrationsAdmin(client=c).get(custom_integration_id=custom_integration.id)
 
 
 def build_assets() -> List[ImportAsset]:
@@ -127,7 +73,7 @@ def build_assets() -> List[ImportAsset]:
             tags=[Tag("foo"), Tag("key=value")],
             device_type="Desktop",
             custom_attributes={
-                "otherAttribute": CustomAttribute("foo1"),
+                "otherAttribute": "foo1",
             },
         ),
         # Has different id, mac/ipv4, first seen ts, and custom attributes
@@ -149,7 +95,7 @@ def build_assets() -> List[ImportAsset]:
             tags=[Tag("foo"), Tag("key=value")],
             device_type="Desktop",
             custom_attributes={
-                "otherAttribute": CustomAttribute("foo2"),
+                "otherAttribute": "foo2",
             },
         ),
         # Has different id, mac/ipv4, first seen ts, and custom attributes
@@ -171,10 +117,194 @@ def build_assets() -> List[ImportAsset]:
             tags=[Tag("foo"), Tag("key=value")],
             device_type="Desktop",
             custom_attributes={
-                "otherAttribute": CustomAttribute("foo3"),
+                "otherAttribute": "foo3",
             },
         ),
     ]
+
+
+def build_vulns() -> List[Vulnerability]:
+    return [
+        Vulnerability(
+            id="vuln-1",
+            category="openssl",
+            name="my name",
+            description="a terse description of the vuln",
+            solution="try turning it off and back on again",
+            service_address=IPv4Address("127.0.0.1"),
+            service_transport="tcp",
+            service_port=8080,
+            cpe23="cpe:/o:google:*",
+            cve="CVE-2022-31005",
+            cvss2_base_score=4.3,
+            cvss2_temporal_score=2.2,
+            cvss3_base_score=5.1,
+            cvss3_temporal_score=4.3,
+            severity_rank=3,
+            severity_score=6.6,
+            risk_rank=4,
+            risk_score=211.4,
+            exploitable=True,
+            published_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            first_detected_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            last_detected_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            custom_attributes={"foo": "bar"},
+        ),
+        Vulnerability(
+            id="vuln-2",
+            category="wifi",
+            name="other name",
+            description="bueler?",
+            solution="just throw it out",
+            service_address=IPv4Address("0.0.0.1"),
+            service_transport="udp",
+            service_port=10001,
+            cpe23="cpe:/o:libwebp:*",
+            cve="CVE-2021-11001",
+            cvss2_base_score=2.1,
+            cvss2_temporal_score=2.2,
+            cvss3_base_score=5.1,
+            cvss3_temporal_score=4.3,
+            severity_rank=2,
+            severity_score=3.6,
+            risk_rank=1,
+            risk_score=19.4,
+            exploitable=True,
+            published_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            first_detected_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            last_detected_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            custom_attributes={"foo": "bar"},
+        ),
+        Vulnerability(
+            id="vuln-3",
+            category="roomba",
+            name="demon in my vacuum",
+            description="dont trust vacuums",
+            solution="there is no solution - the uprising is inevitable",
+            service_address=IPv6Address("2002:db7::"),
+            service_transport="grpc",
+            service_port=443,
+            cpe23="cpe:/*",
+            cve="CVE-2045-11001",
+            cvss2_base_score=2.1,
+            cvss2_temporal_score=2.2,
+            cvss3_base_score=5.1,
+            cvss3_temporal_score=4.3,
+            severity_rank=4,
+            severity_score=3.6,
+            risk_rank=4,
+            risk_score=19.4,
+            exploitable=False,
+            published_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            first_detected_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            last_detected_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            custom_attributes={"foo": "bar"},
+        ),
+    ]
+
+
+def build_software() -> List[Software]:
+    return [
+        Software(
+            id="test-sw-1",
+            service_address=IPv6Address("2002:db7::"),
+            service_transport="grpc",
+            service_port=443,
+            cpe23="cpe:/a:/test/*",
+            installed_at=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            installed_from="apt-ubuntu-20.14-LTS",
+            installed_size=1564857439,
+            vendor="test-vendor",
+            product="test-product",
+            version="v1.2.3.004a",
+            update="service pack 2",
+            language="russian",
+            software_edition="ultimate",
+            target_software="macOS",
+            target_hardware="m2",
+            other="test",
+            custom_attributes={"foo": "bar"},
+        )
+    ]
+
+
+@pytest.mark.integration_test
+def test_client_end_to_end_import(account_client, request, tsstring):
+    """
+    This test does the following:
+
+    1. Creates a new Org
+    2. Creates a site in that Org
+    3. Creates a custom integration source
+    4. Creates an asset to upload
+    5. Uploads the asset for processing
+    6. Checks the status of the created task and expects it to successfully complete
+    7. Checks the stats of the task to ensure it created the expected new asset
+    8. Deletes the Site
+    9. Checks that the site was in fact deleted
+    10. Deletes the Org
+    11. Checks that the org was in fact deleted
+    12. Deletes the custom integration source
+    13. Checks that the custom integration source was in fact deleted
+    """
+    c = account_client
+    org_name = tsstring(f"org for {request.node.name}")
+    org_opts = OrgOptions(name=str(org_name))
+    created_org = OrgsAdmin(client=c).create(org_opts)
+    assert created_org.name == org_name
+
+    site_name = tsstring(f"site for {request.node.name}")
+    site_opts = SiteOptions(name=str(site_name))
+    created_site = Sites(client=c).create(created_org.id, site_opts)
+    assert created_site.name == site_name
+
+    source_name = tsstring(f"source-for-{request.node.name}")
+    custom_integration = CustomIntegrationsAdmin(client=c).create(str(source_name))
+    assert custom_integration.name == source_name
+
+    assets = build_test_data()
+
+    created_task = CustomAssets(client=c).upload_assets(created_org.id, created_site.id, custom_integration.id, assets)
+
+    status = created_task.status
+    iters = 0
+    # keep polling until the task is completed or failed
+    # timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(created_org.id, created_task.id)
+
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check the task stats to ensure correct processing
+    task_info = Tasks(client=c).get(created_org.id, task_id=created_task.id)
+    assert task_info is not None
+    new_assets = task_info.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = task_info.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = task_info.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1
+
+    # teardown site
+    Sites(client=c).delete(created_org.id, created_site.id)
+    with pytest.raises(ClientError):
+        Sites(client=c).get(created_org.id, site_id=created_site.id)
+
+    # teardown Org
+    OrgsAdmin(client=c).delete(created_org.id)
+    with pytest.raises(ClientError):
+        OrgsAdmin(client=c).get(created_org.id)
+
+    # teardown custom integration
+    CustomIntegrationsAdmin(client=c).delete(custom_integration.id)
+    with pytest.raises(ClientError):
+        CustomIntegrationsAdmin(client=c).get(custom_integration_id=custom_integration.id)
 
 
 @pytest.mark.integration_test
@@ -212,11 +342,11 @@ def test_asset_import_exclude_unknown(account_client, temp_org, temp_custom_inte
     iters = 0
     # keep polling until the task is completed or failed
     # timeout after 300 seconds
-    while status not in ("processed", "failed", "error") and iters < 50:
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
         time.sleep(6)
         iters += 1
         status = Tasks(client=c).get_status(temp_org.id, first_created_task.id)
-    assert iters != 50  # this is a timeout issue
+    assert iters != __TIMEOUT  # this is a timeout issue
     assert status == "processed"
 
     # check out the stats of the first task
@@ -258,11 +388,11 @@ def test_asset_import_exclude_unknown(account_client, temp_org, temp_custom_inte
     iters = 0
     # keep polling until the task is completed or failed
     # timeout after 300 seconds
-    while status not in ("processed", "failed", "error") and iters < 50:
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
         time.sleep(6)
         iters += 1
         status = Tasks(client=c).get_status(temp_org.id, second_created_task.id)
-    assert iters != 50  # this is a timeout issue
+    assert iters != __TIMEOUT  # this is a timeout issue
     assert status == "processed"
 
     # check out the stats of the second task
@@ -304,11 +434,11 @@ def test_asset_import_exclude_unknown(account_client, temp_org, temp_custom_inte
     iters = 0
     # keep polling until the task is completed or failed
     # timeout after 300 seconds
-    while status not in ("processed", "failed", "error") and iters < 50:
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
         time.sleep(6)
         iters += 1
         status = Tasks(client=c).get_status(temp_org.id, third_created_task.id)
-    assert iters != 50  # this is a timeout issue
+    assert iters != __TIMEOUT  # this is a timeout issue
     assert status == "processed"
 
     # check out the stats of the third task
@@ -332,3 +462,165 @@ def test_asset_import_exclude_unknown(account_client, temp_org, temp_custom_inte
     total_assets = third_created_task.stats.get("change.totalAssets")
     assert total_assets is not None
     assert int(total_assets) == 3
+
+
+@pytest.mark.integration_test
+def test_client_custom_attr_len(account_client, temp_org, temp_custom_integration):
+    """
+    This test ensures we can upload an asset with up to 1024 custom attributes and have it process successfully.
+    """
+    c = account_client
+    # create our test asset
+    asset = build_test_data()
+    # then add up to 1024 custom attributes to it
+    asset[0].custom_attributes = {f"foo-{n}": f"{n}" for n in range(1024)}
+    assert len(asset[0].custom_attributes) == 1024
+
+    # create our temp site
+    site = Sites(client=c).create(temp_org.id, site_options=SiteOptions(name="temp-site-for-exclude-unknown-test"))
+
+    # upload our asset
+    created_task = CustomAssets(client=c).upload_assets(
+        temp_org.id,
+        site.id,
+        temp_custom_integration.id,
+        asset,
+        task_info=ImportTask(name="first", exclude_unknown=False),
+    )
+
+    status = created_task.status
+    iters = 0
+    # keep polling until the task is completed or failed
+    # timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(temp_org.id, created_task.id)
+
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check the task stats to ensure correct processing
+    task_info = Tasks(client=c).get(temp_org.id, task_id=created_task.id)
+    assert task_info is not None
+    new_assets = task_info.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = task_info.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = task_info.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1
+
+
+@pytest.mark.integration_test
+def test_asset_import_include_vulns(account_client, temp_org, temp_custom_integration_with_icon):
+    """
+    This test utilizes a temp org/site/integration to ensure idempotency
+
+    1. uploads a single asset with 3 vulnerabilities
+    2. asserts that 1 asset was created by checking the task stats after completion successfully completes
+    """
+    c = account_client
+    # create the 3 assets we will use through this test
+    assets = build_test_data()
+    # add our vuln data
+    assets[0].vulnerabilities = build_vulns()
+
+    # create our temp site
+    site = Sites(client=c).create(temp_org.id, site_options=SiteOptions(name="temp-site-for-includes-vulns-test"))
+
+    # upload our first asset
+    vuln_task = CustomAssets(client=c).upload_assets(
+        temp_org.id,
+        site.id,
+        temp_custom_integration_with_icon.id,
+        assets,
+        task_info=ImportTask(name="with-vulns", exclude_unknown=False),
+    )
+
+    # check that the task successfully completed
+    status = vuln_task.status
+    iters = 0
+    # keep polling until the task is completed or failed
+    # timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(temp_org.id, vuln_task.id)
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check out the stats of the first task
+    # should be:
+    # - 1 new asset
+    # - 0 changed assets
+    # - 1 asset total
+    vuln_task = Tasks(client=c).get(temp_org.id, task_id=vuln_task.id)
+    assert vuln_task is not None
+    new_assets = vuln_task.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = vuln_task.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = vuln_task.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1
+
+
+@pytest.mark.integration_test
+def test_asset_import_include_software(account_client, temp_org, temp_custom_integration_with_icon):
+    """
+    This test utilizes a temp org/site/integration to ensure idempotency
+
+    1. uploads a single asset with 3 vulnerabilities
+    2. asserts that 1 asset was created by checking the task stats after completion successfully completes
+    """
+    c = account_client
+    # create the 3 assets we will use through this test
+    assets = build_test_data()
+    # add our vuln data
+    assets[0].software = build_software()
+
+    # create our temp site
+    site = Sites(client=c).create(temp_org.id, site_options=SiteOptions(name="temp-site-for-includes-software-test"))
+
+    # upload our first asset
+    sw_task = CustomAssets(client=c).upload_assets(
+        temp_org.id,
+        site.id,
+        temp_custom_integration_with_icon.id,
+        assets,
+        task_info=ImportTask(name="with-software", exclude_unknown=False),
+    )
+
+    # check that the task successfully completed
+    status = sw_task.status
+    iters = 0
+    # keep polling until the task is completed or failed
+    # timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(temp_org.id, sw_task.id)
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check out the stats of the first task
+    # should be:
+    # - 1 new asset
+    # - 0 changed assets
+    # - 1 asset total
+    sw_task = Tasks(client=c).get(temp_org.id, task_id=sw_task.id)
+    assert sw_task is not None
+    new_assets = sw_task.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = sw_task.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = sw_task.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1

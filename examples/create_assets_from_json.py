@@ -3,13 +3,7 @@ from ipaddress import ip_address
 from typing import Any, Dict, List
 from uuid import UUID
 
-from runzero.types import (
-    CustomAttribute,
-    ImportAsset,
-    IPv4Address,
-    IPv6Address,
-    NetworkInterface,
-)
+from runzero.types import ImportAsset, IPv4Address, IPv6Address, NetworkInterface
 
 
 def build_assets_from_json(
@@ -37,16 +31,16 @@ def build_assets_from_json(
         network = build_network_interface(mac, ip)
 
         # handle the custom attributes
-        custom_attrs: Dict[str, CustomAttribute] = {"otherAttribute": CustomAttribute(other_attr)}
+        custom_attrs: Dict[str, str] = {"otherAttribute": other_attr}
         # in this case drive might not always be present and needs to be checked
         drive = item.get("drive_type")
         if drive is not None:
-            custom_attrs["driveType"] = CustomAttribute(item.pop("drive_type"))
+            custom_attrs["driveType"] = item.pop("drive_type")
 
         # handle any additional values and insert into custom_attrs
         # this works because of the use of items.pop for all other attributes which removed them from the dict
         for key, value in item.items():
-            custom_attrs[key] = CustomAttribute(value)
+            custom_attrs[key] = value
 
         # Consider the runZero ID for force-merging if you know it ahead of time. In this case, if the asset's ID and
         # the runZero ID mapped, runZero will force the merge rather than using the built-in merge logic which matches
