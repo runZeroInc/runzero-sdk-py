@@ -36,7 +36,9 @@ from runzero.types._wrapped import (
     ScanOptions,
     ScanTemplate,
     ScanTemplateOptions,
+    Software,
     Tag,
+    Vulnerability,
 )
 
 __all__ = [
@@ -62,10 +64,12 @@ __all__ = [
     "ScanOptions",
     "ScanTemplate",
     "ScanTemplateOptions",
+    "Software",
     "Site",
     "SiteOptions",
     "Tag",
     "Task",
     "TaskOptions",
     "ValidationError",
+    "Vulnerability",
 ]
