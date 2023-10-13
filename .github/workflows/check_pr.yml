@@ -2,7 +2,7 @@ name: Check PR Pipeline
 
 concurrency:
   group: ${{ github.head_ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   pull_request:

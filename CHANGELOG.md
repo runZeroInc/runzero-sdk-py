@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2023-10-13
+
+- A number of type conversions have been added for user convenience.
+  - The `hostnames` field of `runzero.types.ImportAsset` now accepts valid strings in addition to the `runzero.types.Hostname` type in the list of inputs.
+  - The `tags` field of `runzero.types.ImportAsset` now accepts valid strings in addition to the `runzero.types.Tag` type in the list of inputs.
+  - The `ipv4_addresses` field of `runzero.types.NetworkInterface` now accepts valid strings in addition to the `IPv4Address` type in the list of inputs.
+  - The `ipv6_addresses` field of `runzero.types.NetworkInterface` now accepts valid strings in addition to the `IPv6Address` type in the list of inputs.
+  - The `service_address` field of `runzero.types.Software` now accepts valid strings in addition to the `IPv4Address`/`IPv6Address` types.
+  - The `service_address` field of `runzero.types.Vulnerability` now accepts valid strings in addition to the `IPv4Address`/`IPv6Address` types.
+
 ## [0.7.0] - 2023-10-12
 
 - `runzero.types.ImportAsset` now supports associating vulnerabilities with an asset by adding a `runzero.types.Vulnerability` type to be set on the `ImportAsset.vulnerabilities` field.

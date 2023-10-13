@@ -9,7 +9,8 @@ Each class should have a non-docstring comment in it describing why the REST typ
 was insufficient.
 """
 
-from typing import Any, Dict, Iterable, Optional, Union
+from ipaddress import IPv4Address, IPv6Address, ip_address
+from typing import Any, Dict, Iterable, List, Optional, Union
 from warnings import warn
 
 # Note: `validator` has been replaced with `field_validator` in v2+
@@ -20,6 +21,7 @@ from ._data_models_gen import AssetVulnerability as RESTVulnerability
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
 from ._data_models_gen import ImportAsset as RESTImportAsset
+from ._data_models_gen import NetworkInterface as RESTNetworkInterface
 from ._data_models_gen import ScanOptions as RESTScanOptions
 from ._data_models_gen import ScanTemplate as RESTScanTemplate
 from ._data_models_gen import ScanTemplateOptions as RESTScanTemplateOptions
@@ -78,6 +80,27 @@ class CustomAttribute(__CustomAttribute):
         super().__init__(__root__=attr)
 
 
+class Hostname(RESTHostname):
+    """
+    Hostname the dns name the asset is assigned or reachable at.
+
+    This can be a fully-qualified hostname with the domain name, or
+    a short hostname.
+    """
+
+    def __init__(self, hostname: str):
+        super().__init__(__root__=hostname)
+
+
+class Tag(RESTTag):
+    """
+    Tag is an arbitrary string classifier applied to the asset.
+    """
+
+    def __init__(self, tag: str):
+        super().__init__(__root__=tag)
+
+
 class ImportAsset(RESTImportAsset):
     """
     Represents a custom asset to be created or merged after import.
@@ -89,6 +112,38 @@ class ImportAsset(RESTImportAsset):
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+
+    @validator("hostnames", pre=True)
+    def _hostnames_str_conversion(cls, hosts: List[Union[str, Hostname]]) -> List[Hostname]:  # pylint: disable=E0213
+        """
+        Handles conversion of strings to Hostname class for user convenience.
+
+        Ultimately, we want to give users type safety but without burdening them with over-zealous runtime type checks.
+        """
+        result: List[Hostname] = []
+
+        for host in hosts:
+            if isinstance(host, str):
+                host = Hostname(host)
+            result.append(host)
+
+        return result
+
+    @validator("tags", pre=True)
+    def _tag_str_conversion(cls, tags: List[Union[str, Tag]]) -> List[Tag]:  # pylint: disable=E0213
+        """
+        Handles conversion of strings to Tags for user convenience.
+
+        Ultimately, we want to give users type safety without burdening them with over-zealous runtime type checks.
+        """
+        result: List[Tag] = []
+
+        for tag in tags:
+            if isinstance(tag, str):
+                tag = Tag(tag)
+            result.append(tag)
+
+        return result
 
     @validator("custom_attributes", pre=True)
     def _custom_attributes_length(  # pylint: disable=E0213
@@ -131,25 +186,51 @@ class ImportAsset(RESTImportAsset):
         return processed_attrs
 
 
-class Hostname(RESTHostname):
+class NetworkInterface(RESTNetworkInterface):
     """
-    Hostname the dns name the asset is assigned or reachable at.
-
-    This can be a fully-qualified hostname with the domain name, or
-    a short hostname.
+    Represents the Network Interface of an asset to be imported.
     """
 
-    def __init__(self, hostname: str):
-        super().__init__(__root__=hostname)
+    def __int__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
 
+    @validator("ipv4_addresses", pre=True)
+    def _ipv4_str_conversion(  # pylint: disable=E0213
+        cls, ipv4s: Optional[List[Union[str, IPv4Address]]]
+    ) -> Optional[List[IPv4Address]]:
+        """
+        Converts strings to IPv4Addresses which allows the user convenience of just passing in a string
+        """
+        if ipv4s is None:
+            return None
 
-class Tag(RESTTag):
-    """
-    Tag is an arbitrary string classifier applied to the asset.
-    """
+        result: List[IPv4Address] = []
 
-    def __init__(self, tag: str):
-        super().__init__(__root__=tag)
+        for ipv4 in ipv4s:
+            if isinstance(ipv4, str):
+                ipv4 = IPv4Address(ipv4)
+            result.append(ipv4)
+
+        return result
+
+    @validator("ipv6_addresses", pre=True)
+    def _ipv6_str_conversion(  # pylint: disable=E0213
+        cls, ipv6s: Optional[List[Union[str, IPv6Address]]]
+    ) -> Optional[List[IPv6Address]]:
+        """
+        Converts strings to IPv6Addresses which allows the user convenience of just passing in a string
+        """
+        if ipv6s is None:
+            return None
+
+        result: List[IPv6Address] = []
+
+        for ipv6 in ipv6s:
+            if isinstance(ipv6, str):
+                ipv6 = IPv6Address(ipv6)
+            result.append(ipv6)
+
+        return result
 
 
 class ScanOptions(RESTScanOptions):
@@ -210,6 +291,17 @@ class Software(RESTSoftware):
         regex.
         """
         return attr.lower()
+
+    @validator("service_address", pre=True)
+    def _service_address_str_conversion(  # pylint: disable=E0213
+        cls, addr: Union[str, IPv4Address, IPv6Address]
+    ) -> Union[IPv4Address, IPv6Address]:
+        """
+        This gives the user the convenience of passing in a valid ipv4/ipv6 as a string and doing type conversion
+        """
+        if isinstance(addr, str):
+            addr = ip_address(addr)
+        return addr
 
     @validator("custom_attributes", pre=True)
     def _custom_attributes_length(  # pylint: disable=E0213
@@ -291,6 +383,17 @@ class Vulnerability(RESTVulnerability):
         This simply upper-cases the string given by the user so that they don't get punished by overly pedantic regex.
         """
         return attr.upper()
+
+    @validator("service_address", pre=True)
+    def _service_address_str_conversion(  # pylint: disable=E0213
+        cls, addr: Union[str, IPv4Address, IPv6Address]
+    ) -> Union[IPv4Address, IPv6Address]:
+        """
+        This gives the user the convenience of passing in a valid ipv4/ipv6 as a string and doing type conversion
+        """
+        if isinstance(addr, str):
+            addr = ip_address(addr)
+        return addr
 
     @validator("custom_attributes", pre=True)
     def _custom_attributes_length(  # pylint: disable=E0213

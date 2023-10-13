@@ -4,6 +4,7 @@ from runzero.types import (
     CustomAttribute,
     Hostname,
     ImportAsset,
+    NetworkInterface,
     Software,
     Tag,
     ValidationError,
@@ -66,3 +67,13 @@ def test_wrapped_software():
     sw = Software(id="foo")
     asset = ImportAsset(id="bar", software=[sw])
     assert len(asset.software) == 1
+
+
+def test_import_asset_network_interface():
+    """
+    This test ensures the wrapped network interface is accepted
+    """
+
+    ni = NetworkInterface()
+    asset = ImportAsset(id="test", network_interfaces=[ni])
+    assert len(asset.network_interfaces) == 1
