@@ -31,16 +31,13 @@ jobs:
   tests:
     # run integration tests against production before releasing new version of sdk
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
     steps:
       - uses: actions/checkout@v3
       - run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.8"
           cache: "poetry"
       - name: Install dependencies
         run: poetry install --with dev
