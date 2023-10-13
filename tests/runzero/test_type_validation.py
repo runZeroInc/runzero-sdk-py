@@ -3,11 +3,13 @@ import pytest
 from runzero.types import (
     AddressValueError,
     CustomAttribute,
+    Hostname,
     ImportAsset,
     IPv4Address,
     IPv6Address,
     NetworkInterface,
     Software,
+    Tag,
     ValidationError,
     Vulnerability,
 )
@@ -229,6 +231,32 @@ def test_vuln_service_transport():
     assert vuln2.service_transport == lower
 
 
+def test_vuln_service_address():
+    """
+    This test ensures a user can pass in valid strings to service_address
+    """
+    valid_ipv4 = IPv4Address("127.0.0.1")
+    valid_ipv4_str = "1.1.1.1"
+    valid_ipv6 = IPv6Address("2002:db7::")
+    valid_ipv6_str = "2607:f8b0:4006:821::200e"
+    invalid = "not-an-address"
+
+    vuln = Vulnerability(id="ipv4", service_address=valid_ipv4)
+    assert isinstance(vuln.service_address, IPv4Address)
+
+    vuln = Vulnerability(id="ipv4_str", service_address=valid_ipv4_str)
+    assert isinstance(vuln.service_address, IPv4Address)
+
+    vuln = Vulnerability(id="ipv6", service_address=valid_ipv6)
+    assert isinstance(vuln.service_address, IPv6Address)
+
+    vuln = Vulnerability(id="ipv6_str", service_address=valid_ipv6_str)
+    assert isinstance(vuln.service_address, IPv6Address)
+
+    with pytest.raises(ValidationError):
+        Vulnerability(id="invalid", service_address=invalid)
+
+
 def test_software_custom_attrs_length_limit():
     """
     This test ensures that `custom_attributes` for software has a length limit of 1024
@@ -270,6 +298,32 @@ def test_software_attributes_value_length_limit():
 
     with pytest.raises(ValidationError):
         Software(id="invalid", custom_attributes=invalid_attributes)
+
+
+def test_software_service_address():
+    """
+    This test ensures a user can pass in valid strings to service_address
+    """
+    valid_ipv4 = IPv4Address("127.0.0.1")
+    valid_ipv4_str = "1.1.1.1"
+    valid_ipv6 = IPv6Address("2002:db7::")
+    valid_ipv6_str = "2607:f8b0:4006:821::200e"
+    invalid = "not-an-address"
+
+    sw = Software(id="ipv4", service_address=valid_ipv4)
+    assert isinstance(sw.service_address, IPv4Address)
+
+    sw = Software(id="ipv4_str", service_address=valid_ipv4_str)
+    assert isinstance(sw.service_address, IPv4Address)
+
+    sw = Software(id="ipv6", service_address=valid_ipv6)
+    assert isinstance(sw.service_address, IPv6Address)
+
+    sw = Software(id="ipv6_str", service_address=valid_ipv6_str)
+    assert isinstance(sw.service_address, IPv6Address)
+
+    with pytest.raises(ValidationError):
+        Software(id="invalid", service_address=invalid)
 
 
 def test_software_backwards_compat():
@@ -331,3 +385,87 @@ def test_software_service_transport():
 
     sw2 = Software(id="lower", service_transport=lower)
     assert sw2.service_transport == lower
+
+
+def test_import_asset_hostnames():
+    """
+    This test ensures users can provide a string in place of a Hostname class for the hostnames field
+    """
+    valid = Hostname("test.com")
+    valid_string = "test.io"
+    invalid_string = "t" * 260 + ".com"  # 264 characters exceeds 260 char limit
+
+    asset = ImportAsset(id="hostname", hostnames=[valid])
+    assert len(asset.hostnames) == 1
+
+    asset = ImportAsset(id="string", hostnames=[valid_string])
+    assert len(asset.hostnames) == 1
+
+    asset = ImportAsset(id="combined", hostnames=[valid, valid_string])
+    assert len(asset.hostnames) == 2
+
+    with pytest.raises(ValidationError):
+        ImportAsset(id="includes_invalid_string", hostnames=[valid, valid_string, invalid_string])
+
+
+def test_import_asset_tags():
+    """
+    This test ensures users can provide a string in place of a Tag class for the tags field
+    """
+    valid = Tag("test")
+    valid_str = "also=test"
+    invalid_str = "f" * 1025  # 1025 characters exceeds 1024 char limit
+
+    asset = ImportAsset(id="tag", tags=[valid])
+    assert len(asset.tags) == 1
+
+    asset = ImportAsset(id="string", tags=[valid_str])
+    assert len(asset.tags) == 1
+
+    asset = ImportAsset(id="combined", tags=[valid, valid_str])
+    assert len(asset.tags) == 2
+
+    with pytest.raises(ValidationError):
+        ImportAsset(id="includes_invalid_string", tags=[valid, valid_str, invalid_str])
+
+
+def test_network_interfaces_ipv4():
+    """
+    This test ensures that a user can pass in strings for ipv4 addresses
+    """
+    valid = IPv4Address("127.0.0.1")
+    valid_str = "1.1.1.1"
+    invalid_str = "2002:db7::"  # this is an ipv6
+
+    ni = NetworkInterface(ipv4_addresses=[valid])
+    assert len(ni.ipv4_addresses) == 1
+
+    ni = NetworkInterface(ipv4_addresses=[valid_str])
+    assert len(ni.ipv4_addresses) == 1
+
+    ni = NetworkInterface(ipv4_addresses=[valid, valid_str])
+    assert len(ni.ipv4_addresses) == 2
+
+    with pytest.raises(ValidationError):
+        NetworkInterface(ipv4_addresses=[valid, valid_str, invalid_str])
+
+
+def test_network_interfaces_ipv6():
+    """
+    This test ensures that a user can pass in strings for ipv6 addresses
+    """
+    valid = IPv6Address("2002:db7::")
+    valid_str = "2607:f8b0:4006:821::200e"
+    invalid_str = "1.1.1.1"  # this is an ipv6
+
+    ni = NetworkInterface(ipv6_addresses=[valid])
+    assert len(ni.ipv6_addresses) == 1
+
+    ni = NetworkInterface(ipv6_addresses=[valid_str])
+    assert len(ni.ipv6_addresses) == 1
+
+    ni = NetworkInterface(ipv6_addresses=[valid, valid_str])
+    assert len(ni.ipv6_addresses) == 2
+
+    with pytest.raises(ValidationError):
+        NetworkInterface(ipv6_addresses=[valid, valid_str, invalid_str])
