@@ -1,6 +1,7 @@
 """
 errors provides named exception types for working with or derived from runZero's data model types.
 """
+
 from runzero.types._data_models_gen import Problem
 
 

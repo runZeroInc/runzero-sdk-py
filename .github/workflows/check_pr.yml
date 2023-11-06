@@ -27,7 +27,7 @@ jobs:
         run: poetry install --with dev,docs
       - name: Build project documentation
         uses: ./.github/actions/docsbuild
-  tests:
+  test-unit:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -44,6 +44,20 @@ jobs:
         run: poetry install --with dev
       - name: Run tests - Unit
         uses: ./.github/actions/tests/unit
+      - name: Run tests - install check
+        uses: ./.github/actions/tests/install
+  test-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pipx install poetry
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install --with dev
       - name: Run tests - Integration
         if: github.actor != 'dependabot[bot]'
         uses: ./.github/actions/tests/integration
@@ -55,8 +69,6 @@ jobs:
           client_id: ${{ secrets.STAGING_PYTHON_SDK_CLIENT_ID }}
           client_secret: ${{ secrets.STAGING_PYTHON_SDK_SECRET }}
           validate_cert: "true"
-      - name: Run tests - install check
-        uses: ./.github/actions/tests/install
   lints:
     runs-on: ubuntu-latest
     steps:
