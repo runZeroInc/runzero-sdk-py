@@ -1,6 +1,7 @@
 """
 enables standard access to of runZero custom integrations, limited to read operations.
 """
+
 import base64
 import uuid
 from typing import Any, List, Optional

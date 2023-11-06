@@ -1,6 +1,7 @@
 """
 io contains classes which wrap network communication and handle errors in a consistent fashion.
 """
+
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from requests import JSONDecodeError, PreparedRequest

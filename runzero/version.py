@@ -1,4 +1,5 @@
 """holds the semver-compatible version tag"""
+
 from importlib import metadata
 
 try:

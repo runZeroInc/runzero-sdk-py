@@ -14,7 +14,6 @@ Sub-packages and modules may create their own error types in those packages, par
 if they are not useful outside of that package, but should inherit a base type here.
 """
 
-
 class Error(Exception):
     """Error is a named Exception class representing bottom-level runZero Error type.
 
