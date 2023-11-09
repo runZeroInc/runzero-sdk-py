@@ -16,8 +16,6 @@ from warnings import warn
 # Note: `validator` has been replaced with `field_validator` in v2+
 from pydantic import BaseModel, Field, ValidationError, validator
 
-from ._data_models_gen import AssetSoftware as RESTSoftware
-from ._data_models_gen import AssetVulnerability as RESTVulnerability
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
 from ._data_models_gen import ImportAsset as RESTImportAsset
@@ -25,7 +23,9 @@ from ._data_models_gen import NetworkInterface as RESTNetworkInterface
 from ._data_models_gen import ScanOptions as RESTScanOptions
 from ._data_models_gen import ScanTemplate as RESTScanTemplate
 from ._data_models_gen import ScanTemplateOptions as RESTScanTemplateOptions
+from ._data_models_gen import Software as RESTSoftware
 from ._data_models_gen import Tag as RESTTag
+from ._data_models_gen import Vulnerability as RESTVulnerability
 
 
 class CustomIntegration(RESTCustomIntegration):
