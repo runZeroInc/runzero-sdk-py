@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runzero-sdk"
-version = "0.7.3"
+version = "0.8.0"
 description = "The runZero platform sdk"
 license = "BSD-2-Clause"
 authors = ["runZero <support@runzero.com>"]
@@ -37,7 +37,7 @@ pydantic = ">=1.10.5,<2.0.0"
 requests = "^2.31.0"
 # no standard mechanism to pin transitive deps
 # https://github.com/python-poetry/poetry/issues/4991
-certifi = ">=2023.7.22"
+certifi = ">=2023.11.17"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
@@ -57,7 +57,7 @@ mypy-extensions = "^1.0.0"
 tox = "^4.4.7"
 
 [tool.poetry.group.codegen.dependencies]
-datamodel-code-generator = { version = ">=0.17.1,<0.24.0", extras = ["http"]}
+datamodel-code-generator = { version = ">=0.17.1,<0.25.0", extras = ["http"]}
 
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=6.1.3,<8.0.0"

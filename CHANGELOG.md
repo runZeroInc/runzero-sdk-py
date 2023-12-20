@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2023-12-20
+
+- `runzero.types.ImportAsset` now supports associating services with an asset by adding a `runzero.types.Service` type to be set on the `ImportAsset.services` field.
+- Updated `certifi` dependency to latest version.
+
 ## [0.7.3] - 2023-11-09
 
 - Fixed IDE autocompletion naming for the Software and Vulnerability classes by modifying the underlying class names which previously did not match the exported class name.
