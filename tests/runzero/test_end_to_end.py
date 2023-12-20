@@ -14,6 +14,8 @@ from runzero.types import (
     IPv6Address,
     NetworkInterface,
     OrgOptions,
+    Service,
+    ServiceProtocolData,
     SiteOptions,
     Software,
     Tag,
@@ -215,7 +217,9 @@ def build_software() -> List[Software]:
             installed_from="apt-ubuntu-20.14-LTS",
             installed_size=1564857439,
             vendor="test-vendor",
-            product="test-product",
+            # product ensures multibyte char support. contains 129 bytes and 74 chars.
+            # limit for field should be 128 chars and not 128 bytes.
+            product="Плагин пользователя систем электронного правительства (версия 3.1.1.0) x64",
             version="v1.2.3.004a",
             update="service pack 2",
             language="russian",
@@ -225,6 +229,46 @@ def build_software() -> List[Software]:
             other="test",
             custom_attributes={"foo": "bar"},
         )
+    ]
+
+
+def build_services() -> List[Service]:
+    return [
+        Service(
+            address=IPv4Address("192.0.2.1"),
+            port=443,
+            transport="tcp",
+            # intentionally excluding listing a vendor and version value
+            product="Django",
+            protocol_data=[
+                ServiceProtocolData(name="https", attributes={"service-name": "my-python-server", "use-tls": "false"}),
+                ServiceProtocolData(name="tls", attributes={"alive": "false"}),
+                ServiceProtocolData(name="dns", attributes={"cloudflare-approved": "false", "is_legitimate": "false"}),
+            ],
+            custom_attributes={"foo": "bar", "test": "test-test"},
+        ),
+        Service(
+            address=IPv4Address("192.0.7.1"),
+            port=50051,
+            transport="rpc",
+            vendor="NATS",
+            product="NATS Jetstream",
+            version="3.4.2",
+            protocol_data=[
+                ServiceProtocolData(
+                    name="grpc", attributes={"type": "unary", "supports_bidirectional_stream": "maybe"}
+                ),
+            ],
+            custom_attributes={"test-1": "TEST_two"},
+        ),
+        Service(
+            address=IPv4Address("192.0.7.2"),
+            port=21,
+            transport="tcp",
+            protocol_data=[
+                ServiceProtocolData(name="ftp", attributes={"secure": "no."}),
+            ],
+        ),
     ]
 
 
@@ -575,7 +619,7 @@ def test_asset_import_include_software(account_client, temp_org, temp_custom_int
     """
     This test utilizes a temp org/site/integration to ensure idempotency
 
-    1. uploads a single asset with 3 vulnerabilities
+    1. uploads a single asset with a piece of software associated with the asset
     2. asserts that 1 asset was created by checking the task stats after completion successfully completes
     """
     c = account_client
@@ -622,5 +666,173 @@ def test_asset_import_include_software(account_client, temp_org, temp_custom_int
     assert changed_assets is not None
     assert int(changed_assets) == 0
     total_assets = sw_task.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1
+
+
+def build_match_breakable_assets():
+    return [
+        ImportAsset(
+            id="foo1",
+            network_interfaces=[
+                NetworkInterface(
+                    mac_address="01:23:45:67:89:0A",
+                    ipv4_addresses=[IPv4Address("192.0.2.1")],
+                )
+            ],
+            hostnames=[Hostname("host.domain.com")],
+            domain="domain.com",
+            first_seen_ts=datetime(2023, 3, 6, 18, 14, 50, 520000, tzinfo=timezone.utc),
+            os="Ubuntu Linux 22.04",
+            os_version="22.04",
+            manufacturer="Apple Inc.",
+            model="Macbook Air",
+            tags=[Tag("foo"), Tag("key=value")],
+            device_type="Desktop",
+            custom_attributes={
+                "otherAttribute": "foo",
+                "anotherAttribute": "bar",
+                "yetAnotherAttr": "baz",
+            },
+        ),
+    ]
+
+
+@pytest.mark.integration_test
+def test_client_end_to_end_with_match_break(account_client, request, tsstring, temp_org, temp_custom_integration):
+    ######
+    # Setup
+    ######
+
+    c = account_client
+
+    site_name = tsstring(f"site for {request.node.name}")
+    site_opts = SiteOptions(name=str(site_name))
+    created_site = Sites(client=c).create(temp_org.id, site_opts)
+    assert created_site.name == site_name
+
+    ######
+    # First Batch
+    ######
+
+    assets = build_match_breakable_assets()
+
+    created_task = CustomAssets(client=c).upload_assets(
+        temp_org.id, created_site.id, temp_custom_integration.id, assets
+    )
+
+    status = created_task.status
+    iters = 0
+    # keep polling until the task is completed or failed, timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(temp_org.id, created_task.id)
+
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check the task stats to ensure correct processing
+    task_info = Tasks(client=c).get(temp_org.id, task_id=created_task.id)
+    assert task_info is not None
+    new_assets = task_info.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = task_info.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = task_info.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1
+
+    ######
+    # Second Batch
+    ######
+
+    # change the ID and primary IP and upload the asset again
+    assets[0].id = "foo2"
+    assets[0].network_interfaces[0].ipv4_addresses = [IPv4Address("192.0.2.2")]
+
+    created_task = CustomAssets(client=c).upload_assets(
+        temp_org.id, created_site.id, temp_custom_integration.id, assets
+    )
+
+    status = created_task.status
+    iters = 0
+    # keep polling until the task is completed or failed, timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(temp_org.id, created_task.id)
+
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check the task stats to ensure correct match break (no updated assets) on foreign ID
+    task_info = Tasks(client=c).get(temp_org.id, task_id=created_task.id)
+    assert task_info is not None
+    new_assets = task_info.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = task_info.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = task_info.stats.get("change.totalAssets")
+    assert total_assets is not None
+    assert int(total_assets) == 1
+
+
+@pytest.mark.integration_test
+def test_asset_import_include_services(account_client, temp_org, temp_custom_integration_with_icon):
+    """
+    This test utilizes a temp org/site/integration to ensure idempotency
+
+    1. uploads a single asset with 2 services
+    2. asserts that 1 asset was created by checking the task stats after completion successfully completes
+    """
+    c = account_client
+    # create the 3 assets we will use through this test
+    assets = build_test_data()
+    # add our vuln data
+    assets[0].services = build_services()
+
+    # create our temp site
+    site = Sites(client=c).create(temp_org.id, site_options=SiteOptions(name="temp-site-for-includes-services-test"))
+
+    # upload our first asset
+    svc_task = CustomAssets(client=c).upload_assets(
+        temp_org.id,
+        site.id,
+        temp_custom_integration_with_icon.id,
+        assets,
+        task_info=ImportTask(name="with-services", exclude_unknown=False),
+    )
+
+    # check that the task successfully completed
+    status = svc_task.status
+    iters = 0
+    # keep polling until the task is completed or failed
+    # timeout after 300 seconds
+    while status not in ("processed", "failed", "error") and iters < __TIMEOUT:
+        time.sleep(6)
+        iters += 1
+        status = Tasks(client=c).get_status(temp_org.id, svc_task.id)
+    assert iters != __TIMEOUT  # this is a timeout issue
+    assert status == "processed"
+
+    # check out the stats of the first task
+    # should be:
+    # - 1 new asset
+    # - 0 changed assets
+    # - 1 asset total
+    svc_task = Tasks(client=c).get(temp_org.id, task_id=svc_task.id)
+    assert svc_task is not None
+    new_assets = svc_task.stats.get("change.newAssets")
+    assert new_assets is not None
+    assert int(new_assets) == 1
+    changed_assets = svc_task.stats.get("change.changedAssets")
+    assert changed_assets is not None
+    assert int(changed_assets) == 0
+    total_assets = svc_task.stats.get("change.totalAssets")
     assert total_assets is not None
     assert int(total_assets) == 1
