@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runzero-sdk"
-version = "0.8.1"
+version = "0.8.2"
 description = "The runZero platform sdk"
 license = "BSD-2-Clause"
 authors = ["runZero <support@runzero.com>"]
@@ -49,7 +49,7 @@ types-requests = "^2.31.0.2"
 toml = "^0.10.2"
 pytest-lazy-fixture = "^0.6.3"
 pytest-cov = "^4.0.0"
-deptry = ">=0.8,<0.13"
+deptry = ">=0.8,<0.15"
 pytest-integration = "^0.2.3"
 mypy-extensions = "^1.0.0"
 
