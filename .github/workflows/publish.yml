@@ -1,13 +1,16 @@
 name: Publish SDK and Docs
 
+permissions:
+  contents: read
+
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "publish"
   cancel-in-progress: false
 
-
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -61,8 +64,8 @@ jobs:
       name: publish-package
     runs-on: ubuntu-latest
     permissions:
-      # for OpenID Connect trusted publisher to pypi
-      id-token: write
+      contents: read
+      id-token: write      # for OpenID Connect trusted publisher to pypi
     steps:
     - uses: actions/checkout@v4
     - run: pipx install poetry
@@ -78,7 +81,7 @@ jobs:
         rm -rf dist;
         poetry build --no-cache --no-interaction
     - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@a56da0b891b3dc519c7ee3284aff1fad93cc8598 #v1.8.6
+      uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450 #1.18.14
   publish-docs:
     needs:
       - publish-release
