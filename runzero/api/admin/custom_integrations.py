@@ -8,13 +8,250 @@ import base64
 import pathlib
 import uuid
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field
 
 from runzero.client import Client
 from runzero.errors import Error
-from runzero.types import BaseCustomIntegration, CustomIntegration, NewCustomIntegration
+from runzero.types import (
+    BaseCustomIntegration,
+    CustomIntegration,
+    ImportAsset,
+    NewCustomIntegration,
+)
 
 from ._sdk_source_icon import _PY_ICON_BYTES
+
+
+class CustomIntegrationAttributeSet(BaseModel):
+    """
+    A Pydantic-compliant class for marshaling custom attributes.
+    """
+
+    attributes: Dict[str, str] = Field(...)
+
+
+class CRUDAsset(BaseModel):
+    """
+    A Pydantic-compliant class for marshaling custom assets.
+    """
+
+    class Config:
+        "Inner config class."
+
+        allow_population_by_field_name = True
+
+    id: str = Field(..., max_length=1024)
+    macs: Optional[List[str]] = Field(None)
+    addresses: Optional[List[str]] = Field(None)
+    addresses_extra: Optional[List[str]] = Field(None)
+    hostnames: Optional[List[str]] = Field(None)
+    domains: Optional[List[str]] = Field(None)
+    first_seen: Optional[int] = Field(None)
+    os: Optional[str] = Field(None, max_length=1024)
+    os_vendor: Optional[str] = Field(None, max_length=1024)
+    os_version: Optional[str] = Field(None, max_length=1024)
+    hw: Optional[str] = Field(None, max_length=1024)
+    hw_vendor: Optional[str] = Field(None, max_length=1024)
+    tags: Optional[str] = Field(None, max_length=1024)
+    device_type: Optional[str] = Field(None, max_length=1024)
+    custom_attributes: Optional[Dict[str, str]] = Field(None)
+
+    def merge_import_asset(self, import_asset: ImportAsset) -> None:  # pylint: disable=too-many-statements
+        """
+        Merge an existing ImportAsset with this CRUD asset.
+        """
+        self.id = import_asset.id
+        self.macs = []
+        self.addresses = []
+        self.addresses_extra = []
+        self.hostnames = [hostname.__root__ for hostname in import_asset.hostnames] if import_asset.hostnames else []
+        self.domains = [import_asset.domain] if import_asset.domain else []
+        self.first_seen = 0
+        self.os = import_asset.os or ""
+        self.os_vendor = import_asset.manufacturer or ""
+        self.os_version = ""
+        self.hw = import_asset.model or ""
+        self.hw_vendor = ""
+        self.tags = ""
+        self.device_type = import_asset.device_type or ""
+        self.custom_attributes = {}
+
+        if import_asset.first_seen_ts is not None:
+            self.first_seen = int(import_asset.first_seen_ts.timestamp())
+
+        if import_asset.tags:
+            self.tags = "\t".join(tag.__root__ for tag in import_asset.tags)
+
+        if import_asset.custom_attributes is not None:
+            for key, value in import_asset.custom_attributes.items():
+                if key == "macAddresses":
+                    self.macs = value.split("\t")
+
+                elif key == "ipAddresses":
+                    self.addresses = value.split("\t")
+
+                elif key == "ipAddressesExtra":
+                    self.addresses_extra = value.split("\t")
+
+                elif key == "hostnames":
+                    self.hostnames = value.split("\t")
+
+                elif key == "domain":
+                    if self.domains is None:
+                        self.domains = []
+                    self.domains.append(value)
+
+                elif key == "os":
+                    self.os = value
+
+                elif key == "osVersion":
+                    self.os_version = value
+
+                elif key == "manufacturer":
+                    self.hw_vendor = value
+
+                elif key == "model":
+                    self.hw = value
+
+                elif key == "tags":
+                    if self.tags is None:
+                        self.tags = value
+                    else:
+                        self.tags = self.tags + " " + value
+
+                elif key == "deviceType":
+                    self.device_type = value
+
+                elif key in ("ownedBy", "runZeroID", "_services", "_software", "_vulnerabilities"):
+                    # Skip; we don't support these yet.
+                    continue
+
+                elif key in ("firstSeenTS", "lastSeenTS"):
+                    # Skip; these are set directly on the import asset.
+                    continue
+
+                else:
+                    self.custom_attributes[key] = value
+
+
+class CRUDImportAsset(BaseModel):
+    """
+    A wrapper class for importing assets via CRUD.
+    """
+
+    asset: CRUDAsset
+
+
+class CustomIntegrationAssetAdmin:
+    """Allows administration of custom integration-related features of assets.
+
+    This allows for assets to be created via a custom integration, without creating a runZero
+    import task, and for setting of attributes on assets using this custom integration.
+
+    :param client: A handle to the :class:`runzero.Client` which manages interactions
+        with the runZero server.
+    """
+
+    def __init__(self, client: Client, integration_id: uuid.UUID) -> None:
+        """Constructor methods."""
+        self._client = client
+        self._id = integration_id
+
+    def create_asset(self, org_id: uuid.UUID, site_id: uuid.UUID, asset: ImportAsset) -> uuid.UUID:
+        """Create a new asset in the specified organization and site, using this custom integration..
+
+        Note that not all fields of an :class:`ImportAsset` can be used when creating an asset directly.
+
+        :param org_id: organization id
+        :param site_id: site id
+        :param asset: a description of the asset to be created:
+
+        :returns: A UUID identifying the new asset in runZero.
+        :raises: AuthError, ClientError, ServerError
+        """
+
+        crud_asset = CRUDAsset(
+            id=asset.id,
+            macs=[],
+            addresses=[],
+            addresses_extra=[],
+            hostnames=[],
+            domains=[],
+            first_seen=0,
+            os="",
+            os_vendor="",
+            hw="",
+            tags="",
+            device_type="",
+            custom_attributes={},
+        )
+        crud_asset.merge_import_asset(asset)
+
+        res = self._client.execute(
+            "POST",
+            f"api/v1.0/org/custom-integrations/{self._id}/asset",
+            params={"_oid": str(org_id), "site": str(site_id)},
+            data=CRUDImportAsset(asset=crud_asset),
+        )
+        return res.json_obj["asset_id"]
+
+    def bulk_update_custom_attributes(
+        self,
+        org_id: uuid.UUID,
+        search: str,
+        attributes: Dict[str, str],
+        site: Optional[uuid.UUID] = None,
+        limit: int = 0,
+    ) -> int:
+        """
+        Adds, deletes, and updates custom integration attributes on assets matching the given search.
+
+        :param org_id: organization id
+        :param search: a search query to locate assets to update
+        :param attributes: a dictionary of key-value pairs to update; empty values delete attributes
+        :param site: limit the search to a given site
+        :param limit: limit the number of query results
+
+        :returns: An integer indicating the number of assets updated
+        :raises: AuthError, ClientError, ServerError
+        """
+
+        res = self._client.execute(
+            "PATCH",
+            f"api/v1.0/org/custom-integrations/{self._id}/attributes",
+            params={
+                "_oid": org_id,
+                "site": site or "",
+                "limit": limit or 0,
+                "search": search,
+            },
+            data=CustomIntegrationAttributeSet(attributes=attributes),
+        )
+
+        return res.json_obj.get("updated", 0)
+
+    def update_custom_attributes(self, org_id: uuid.UUID, asset_id: uuid.UUID, attributes: Dict[str, str]) -> int:
+        """
+        Adds, deletes, or updates custom integration attributes on a specific asset.
+
+        :param org_id: organization id
+        :param asset_id: the asset to update
+        :param attributes: a dictionary of key-value pairs to update; empty values delete attributes
+
+        :returns: An integer indicating the number of assets updated
+        :raises: AuthError, ClientError, ServerError
+        """
+
+        res = self._client.execute(
+            "PATCH",
+            f"api/v1.0/org/assets/{asset_id}/custom-integrations/{self._id}/attributes",
+            params={"_oid": org_id, "limit": 0},
+            data=CustomIntegrationAttributeSet(attributes=attributes),
+        )
+
+        return res.json_obj.get("updated", 0)
 
 
 class CustomIntegrationsAdmin:
@@ -74,6 +311,22 @@ class CustomIntegrationsAdmin:
         for src in self.get_all():
             if src.name == name:
                 return src
+        return None
+
+    def get_asset_admin_handle(self, custom_integration_id: uuid.UUID) -> Optional[CustomIntegrationAssetAdmin]:
+        """
+        Gets a CustomIntegrationAdmin object to manipulate assets related to the given integration.
+
+        :param custom_integration_id: The ID of the custom integration.
+
+        :raises: AuthError, ClientError, ServerError
+            ValueError if neither custom_integration_id nor name are provided.
+        :returns: The matching CustomIntegrationAssetAdmin or None
+        """
+
+        if self.get(custom_integration_id=custom_integration_id) is not None:
+            return CustomIntegrationAssetAdmin(self._client, custom_integration_id)
+
         return None
 
     def create(

@@ -2,7 +2,13 @@
 api provides all the classes which manage access to runZero http resources and endpoints
 """
 
-from .admin import CustomIntegrationsAdmin, OrgsAdmin, TasksAdmin, TemplatesAdmin
+from .admin import (
+    CustomIntegrationAssetAdmin,
+    CustomIntegrationsAdmin,
+    OrgsAdmin,
+    TasksAdmin,
+    TemplatesAdmin,
+)
 from .custom_integrations import CustomIntegrations
 from .explorers import Explorers
 from .hosted_zones import HostedZones
@@ -15,6 +21,7 @@ __all__ = [
     "CustomAssets",
     "CustomIntegrations",
     "CustomIntegrationsAdmin",
+    "CustomIntegrationAssetAdmin",
     "Explorers",
     "HostedZones",
     "OrgsAdmin",
