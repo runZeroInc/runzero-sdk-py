@@ -29,6 +29,7 @@
 * [PyCharm has an integration](https://www.jetbrains.com/help/pycharm/poetry.html) with `poetry` (and other IDE/editors presumably do too)
 
 ## Using the Makefile
+
 The makefile included in this repo provides a convenient shorthand for calling common poetry commands.
 
 * `make ci`: runs linters, type checking, build docs, unit tests, etc - basically everything needed for CI except integration tests as a quick feedback loop
@@ -51,20 +52,25 @@ The makefile included in this repo provides a convenient shorthand for calling c
 * `make hooks`: installs optional local git hooks to keep remote build surprises at bay
 
 ## Running tests
+
 This SDK uses pytest to manage running its unit and integration tests.
 
 ### Integration tests
+
 The integration tests require configurations to provide a URL and various client secrets. For local development, be sure to run `make init-test-config` and fill in the missing values for your local test instance.
 
 Integration tests can be run using `make test-int` for convenience or by calling pytest directly via `poetry run pytest -m integration ./tests` if you desire to utilize specific pytest cli flags.
 
 ## Using `poetry`
+
 Poetry is an incredibly powerful toolchain and I recommend you [read its docs](https://python-poetry.org/docs/), but the following will serve as a quick guide for onboarding.
 
 ### Adding a dependency
+
 1. Unlike `pip`, `poetry` has the ability to manage multiple dependency groups so that a published library only includes the dependencies that it needs to run
 2. To add a dependency, it's as simple as `poetry add {lib}`
    1. Poetry also offers a number of versioning restrictions like such:
+
    ```# Allow >=2.0.5, <3.0.0 versions
    poetry add {lib}@^2.0.5
 
@@ -77,18 +83,22 @@ Poetry is an incredibly powerful toolchain and I recommend you [read its docs](h
    # Allow only 2.0.5 version
    poetry add {lib}==2.0.5
    ```
+
 3. To install a dev-only dependency, you need to use the `-G` flag and declare a dependency group (like `dev`) ala `poetry add -G dev {lib}`
    * Dependency groups can be used for all sorts of things like `test`, `docs`, `lint`, `codegen`, etc
 
 ### Remove a dependency
+
 1. Removing dependencies (and any sub-deps) is very straight forward with `poetry`, you just need to run `poetry remove {lib}`
    * You can also remove dependencies from groups with the `-G` flag ala `poetry remove -G dev {lib}`
 
 ### Synchronizing your dependencies with the current lock file
+
 1. If you want to synchronize your dependencies with the current lock file (ie after switching branches), then it's as simple as running `poetry install --sync`
    * This will remove any deps not found in the lockfile as well as downgrade/upgrade where appropriate
 
 ### Running linters and code formatting
+
 1. `poetry` can manage running your formatters and linters for you as well by leveraging the settings in the `pyproject.toml` file
 2. It's as simple as running the `poetry run {cmd}`
    * To format with `black`:`poetry run black ./runzero ./tests`
@@ -98,6 +108,7 @@ Poetry is an incredibly powerful toolchain and I recommend you [read its docs](h
 3. Consider auto-linting with the local git hook. Install with `make hooks`
 
 ### Codegen the pydantic data models for our api
+
 1. First we need to install the codegen dependency
    * `poetry install --with codegen`
 2. Next, we can run the command to generate the pydantic models from the openapi spec
@@ -114,6 +125,5 @@ To prepare a release by:
 4. Creating the annotated release tag with a required committer signature
 5. Pushing to remote
 
-Use `./scripts/prepare_release.sh`. Use -h flag for help / details. It will not execute in a dirty repo, and will back out
+Use `./script/prepare_release.sh`. Use -h flag for help / details. It will not execute in a dirty repo, and will back out
 all changes on failure.
-

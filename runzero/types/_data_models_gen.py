@@ -372,7 +372,7 @@ class Vulnerability(BaseModel):
     """
     The Common Platform Enumeration v2.3 value describing the vulnerable service.
     """
-    cve: Optional[str] = Field(None, example="CVE-2021-31005", max_length=14, regex="^CVE-\\d{4}-\\d{5}$")
+    cve: Optional[str] = Field(None, example="CVE-2021-31005", max_length=14, regex="^CVE-[0-9]{4}-[0-9]{4,19}$")
     """
     CVE represents the common vulnerability ID as assigned by an authority such as NIST and should be in the format of 'CVE-YYYY-NNNNN' where YYYY represents the year of the entry and NNNNN is the vulns unique number.
 
