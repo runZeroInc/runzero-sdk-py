@@ -139,6 +139,3 @@ test_configs.toml
 
 # dev api files
 /api/*.yml
-
-# dependabot
-.github/dependabot.yml
