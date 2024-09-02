@@ -3,20 +3,20 @@
 ## Initial Setup
 
 1. Install the latest version of the minimum supported version
-   1. Presently our minimum supported version is 3.8
-   2. I recommend you install this with [pyenv](https://github.com/pyenv/pyenv) for convenience of following these setup instructions, but you may install however you wish
+   1. Presently our minimum supported version is 3.12
+   2. We recommend you install this with [pyenv](https://github.com/pyenv/pyenv) for convenience of following these setup instructions, but you may install however you wish
    3. Here are the dev env setup steps using `pyenv`
       1. `brew install pyenv`
-      2. `pyenv install 3.8`
-         * this installs the latest version of `3.8`
-      3. `pyenv global 3.8`
-         * this sets the system alias of `python` to version `3.8` for your system
+      2. `pyenv install 3.12`
+         * this installs the latest version of `3.12`
+      3. `pyenv global 3.12`
+         * this sets the system alias of `python` to version `3.12` for your system
          * this is not required, but it is convenient for installing poetry on your system
-      4. `pyenv local 3.8`
+      4. `pyenv local 3.12`
          * this creates a `.python-version` which poetry will depend upon for version and path resolution when creating your virtual environment
 2. Install [poetry](https://python-poetry.org/docs/) which will be our toolchain for managing all things python
    1. `poetry` will install to a global directory on your system. I recommend you set it using the `POETRY_HOME` env var - but that is not a requirement
-   2. `curl -sSL https://install.python-poetry.org | POETRY_HOME=~/.poetry python -`
+   2. `curl -sSL https://install.python-poetry.org | POETRY_HOME=~/.poetry python -` (use python3 vs python if needed)
    3. `echo 'export POETRY_HOME=~/.poetry' >> ~/.zshrc`
    4. `echo 'export PATH="$POETRY_HOME/bin:$PATH"'  >> ~/.zshrc`
    5. `source ~/.zshrc`
