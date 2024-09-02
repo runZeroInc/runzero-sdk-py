@@ -60,7 +60,7 @@ class Client:
     :type validate_certificate: bool
     """
 
-    __default_timeout__ = 30
+    __default_timeout__ = 180
     __default_server_url__ = "https://console.runzero.com"
 
     class _Paths(str, Enum):
