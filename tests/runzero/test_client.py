@@ -11,7 +11,7 @@ def test_client_init_and_defaults():
     """
     c = Client()
     assert c.server_url == "https://console.runzero.com"
-    assert c.timeout == 30
+    assert c.timeout == 180
 
     with pytest.raises(ValueError):
         Client(timeout_seconds=0)
