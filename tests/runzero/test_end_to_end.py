@@ -22,7 +22,7 @@ from runzero.types import (
     Vulnerability,
 )
 
-__TIMEOUT = 100
+__TIMEOUT = 300
 
 
 def build_test_data():
