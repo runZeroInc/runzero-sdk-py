@@ -722,7 +722,6 @@ class Organization(BaseModel):
     client_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
     download_token: Optional[str] = Field(None, example="DT11226D9EEEA2B035D42569585900")
     download_token_created_at: Optional[int] = Field(None, example=1576300370)
-    permanent: Optional[bool] = Field(None, example=True)
     name: str = Field(..., example="My Company")
     description: Optional[str] = Field(None, example="All subdivisions of my company")
     inactive: Optional[bool] = Field(None, example=False)
@@ -752,7 +751,6 @@ class Site(BaseModel):
     id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
     created_at: Optional[int] = Field(None, example=1576300370)
     updated_at: Optional[int] = Field(None, example=1576300370)
-    permanent: Optional[bool] = Field(None, example=True)
     name: str = Field(..., example="Primary")
     description: Optional[str] = Field(None, example="Headquarters")
     scope: Optional[str] = Field(None, example="192.168.0.0/24")
@@ -768,6 +766,7 @@ class SiteOptions(BaseModel):
     description: Optional[str] = Field(None, example="County Office")
     scope: Optional[str] = Field(None, example="192.168.10.0/24")
     excludes: Optional[str] = Field(None, example="192.168.10.1")
+    subnets: Optional[Dict[str, Any]] = None
 
 
 class OrgOptions(BaseModel):
