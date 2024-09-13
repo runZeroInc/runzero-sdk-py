@@ -253,6 +253,24 @@ class CustomIntegrationAssetAdmin:
 
         return res.json_obj.get("updated", 0)
 
+    def remove_custom_integration(self, org_id: uuid.UUID, asset_id: uuid.UUID) -> None:
+        """
+        Removes custom integration from a specific asset.
+
+        :param org_id: organization id
+        :param asset_id: the asset to update
+
+        :raises: AuthError, ClientError, ServerError
+        """
+
+        res = self._client.execute(
+            "DELETE",
+            f"api/v1.0/org/assets/{asset_id}/custom-integrations/{self._id}/remove",
+            params={"_oid": org_id},
+        )
+
+        return None
+
 
 class CustomIntegrationsAdmin:
     """Full Management of custom integrations.
