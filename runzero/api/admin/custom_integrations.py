@@ -29,7 +29,8 @@ class CustomIntegrationAssetSet(BaseModel):
     A Pydantic-compliant class for marshaling custom asset ids.
     """
 
-    asset_ids: list[uuid.UUID] = Field(...)
+    asset_ids: List[uuid.UUID] = Field(...)
+
 
 class CustomIntegrationAttributeSet(BaseModel):
     """
@@ -260,7 +261,7 @@ class CustomIntegrationAssetAdmin:
 
         return res.json_obj.get("updated", 0)
 
-    def remove_custom_integration(self, org_id: uuid.UUID, asset_id: uuid.UUID):
+    def remove_custom_integration(self, org_id: uuid.UUID, asset_id: uuid.UUID) -> None:
         """
         Removes a custom integration from a specific asset.
 
@@ -276,7 +277,7 @@ class CustomIntegrationAssetAdmin:
             params={"_oid": org_id},
         )
 
-    def bulk_remove_custom_integration(self, org_id: uuid.UUID, asset_ids: list[uuid.UUID]):
+    def bulk_remove_custom_integration(self, org_id: uuid.UUID, asset_ids: List[uuid.UUID]) -> None:
         """
         Removes a custom integration from a list of assets.
 
@@ -290,7 +291,7 @@ class CustomIntegrationAssetAdmin:
             "POST",
             f"api/v1.0/org/custom-integrations/{self._id}/bulk/remove",
             params={"_oid": org_id},
-            data=CustomIntegrationAssetSet(asset_ids=asset_ids)
+            data=CustomIntegrationAssetSet(asset_ids=asset_ids),
         )
 
 
