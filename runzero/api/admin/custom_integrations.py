@@ -24,6 +24,14 @@ from runzero.types import (
 from ._sdk_source_icon import _PY_ICON_BYTES
 
 
+class CustomIntegrationAssetSet(BaseModel):
+    """
+    A Pydantic-compliant class for marshaling custom asset ids.
+    """
+
+    asset_ids: List[uuid.UUID] = Field(...)
+
+
 class CustomIntegrationAttributeSet(BaseModel):
     """
     A Pydantic-compliant class for marshaling custom attributes.
@@ -252,6 +260,39 @@ class CustomIntegrationAssetAdmin:
         )
 
         return res.json_obj.get("updated", 0)
+
+    def remove_custom_integration(self, org_id: uuid.UUID, asset_id: uuid.UUID) -> None:
+        """
+        Removes a custom integration from a specific asset.
+
+        :param org_id: organization id
+        :param asset_id: the asset to update
+
+        :raises: AuthError, ClientError, ServerError
+        """
+
+        self._client.execute(
+            "DELETE",
+            f"api/v1.0/org/assets/{asset_id}/custom-integrations/{self._id}/remove",
+            params={"_oid": org_id},
+        )
+
+    def bulk_remove_custom_integration(self, org_id: uuid.UUID, asset_ids: List[uuid.UUID]) -> None:
+        """
+        Removes a custom integration from a list of assets.
+
+        :param org_id: organization id
+        :param asset_ids: the list of assets to update
+
+        :raises: AuthError, ClientError, ServerError
+        """
+
+        self._client.execute(
+            "POST",
+            f"api/v1.0/org/custom-integrations/{self._id}/bulk/remove",
+            params={"_oid": org_id},
+            data=CustomIntegrationAssetSet(asset_ids=asset_ids),
+        )
 
 
 class CustomIntegrationsAdmin:
