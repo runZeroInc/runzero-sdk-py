@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runzero-sdk"
-version = "0.8.5"
+version = "0.8.6"
 description = "The runZero platform sdk"
 license = "BSD-2-Clause"
 authors = ["runZero <support@runzero.com>"]
@@ -34,7 +34,7 @@ optional = true
 [tool.poetry.dependencies]
 python = "^3.8"
 pydantic = ">=1.10.5,<2.0.0"
-requests = "^2.31.0"
+requests = "^2.32.3"
 # no standard mechanism to pin transitive deps
 # https://github.com/python-poetry/poetry/issues/4991
 certifi = ">=2024.2.2"
