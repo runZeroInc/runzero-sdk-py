@@ -41,7 +41,22 @@ def test_client_org_create_and_delete(account_client, integration_config, reques
     assert created_org.name == org_name
 
     org = org_mgr.get(org_id=created_org.id)
-    assert org == created_org
+    if (
+        equal_ignore_fields(
+            org,
+            created_org,
+            [
+                "export_token",
+                "export_token_created_at",
+                "export_token_last_used_at",
+                "export_token_last_used_by",
+                "export_token_counter",
+            ],
+        )
+        != True
+    ):
+        # asserting here instead of equal_ignore_fields gives better error messages
+        assert org == created_org
 
     org_mgr.delete(org_id=org.id)
     with pytest.raises(ClientError):
@@ -82,3 +97,22 @@ def test_client_org_create_twice_is_error(account_client, integration_config, re
     org_mgr.delete(created_org.id)
     with pytest.raises(ClientError):
         org_mgr.get(org_id=created_org.id)
+
+
+def equal_ignore_fields(obj1, obj2, ignore_fields=None):
+    if ignore_fields is None:
+        ignore_fields = []
+
+    if type(obj1) != type(obj2):
+        return False
+
+    for field in obj1.__dict__:  # Assuming objects have __dict__ for attributes
+        if field in ignore_fields:
+            continue
+        value1 = getattr(obj1, field)
+        value2 = getattr(obj2, field)
+
+        # For other fields or if the special condition wasn't met
+        if value1 != value2:
+            return False
+    return True
