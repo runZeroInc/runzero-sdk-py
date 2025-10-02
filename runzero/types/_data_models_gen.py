@@ -1097,3 +1097,15 @@ class ImportAsset(BaseModel):
     """
     Flat map of arbitrary string key/value pairs representing custom attribute data not described in properties above. Note the maximum number of keys and length of values. Additionally, property names may only be 256 characters long.
     """
+    trust_os: Optional[bool] = Field(False, alias="trustOS", example=False)
+    """
+    If true, the provided OS value will be used even if it cannot be normalized using runZero's fingerprint engine.
+    """
+    trust_os_version: Optional[bool] = Field(False, alias="trustOSVersion", example=False)
+    """
+    If true, the provided OS version value will be used even if it cannot be normalized using runZero's fingerprint engine.
+    """
+    trust_device_type: Optional[bool] = Field(False, alias="trustDeviceType", example=False)
+    """
+    If true, the provided device type value will be used even if it cannot be normalized using runZero's fingerprint engine.
+    """
