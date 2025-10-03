@@ -74,7 +74,7 @@ jobs:
       with:
         python-version: "3.8"
     - name: Install dependencies
-      run: poetry install --no-interaction --no-root --no-dev
+      run: poetry install --no-interaction --no-root --without dev
     - name: Build package distributions
       shell: bash
       run: |
