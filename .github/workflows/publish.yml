@@ -81,7 +81,7 @@ jobs:
         rm -rf dist;
         poetry build --no-cache --no-interaction
     - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450 #1.18.14
+      uses: pypa/gh-action-pypi-publish@v1.13.0
   publish-docs:
     needs:
       - publish-release
