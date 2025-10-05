@@ -68,7 +68,7 @@ ensure it meets the outlined constraints.
 Any field which does not match the fields below will be placed under the `custom_attributes` field. Please see the
 `ImportAsset` schema definition for more details: #/components/schemas/ImportAsset
 
-* `id` - this `str` field is ***required*** to be set for all custom integration assets and is the unique identifier for the asset. If your asset does not have a unique id then we recommend you create one using `uuid.uuid4()`.
+* `id` - this `str` field is ***required*** to be set for all custom integration assets and is the unique identifier for the asset.  This ID should remain consistent across multiple imports of the same asset.  runZero will combine assets with the same ID into a single asset and prevent combining assets with different IDs.
 * `runZeroID` - a `uuid` field representing the unique identifier of an existing runZero asset to merge into.
 * `network_interfaces` - this field is an array of objects representing the network interfaces of the asset. Please see the API Schema for details. #/components/schemas/ImportAsset/properties/networkInterfaces.
 * `hostnames` - a `List[str]` field of all the hostnames associated with the asset. Each hostname has a maximum length of 260 characters and the `list` has a maximum of 100 hostnames.
