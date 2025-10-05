@@ -9,6 +9,9 @@ concurrency:
   group: "publish"
   cancel-in-progress: false
 
+on:
+  workflow_dispatch:
+
 jobs:
   # Docs must pass before SDK publish to PyPI. The publish docs task
   # depends on the PyPI publish task, so check docs build OK before
