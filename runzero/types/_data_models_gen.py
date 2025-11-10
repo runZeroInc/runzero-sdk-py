@@ -10,7 +10,7 @@ from ipaddress import IPv4Address, IPv6Address
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field, RootModel
 
 
 class BaseResponse(BaseModel):
@@ -18,81 +18,78 @@ class BaseResponse(BaseModel):
     Minimal identifying information with lifecycle metadata
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="f6cfb91a-52ea-4a86-bf9a-5a891a26f52b")
+    id: UUID = Field(..., examples=["f6cfb91a-52ea-4a86-bf9a-5a891a26f52b"])
     """
     The unique ID of the object
     """
-    client_id: UUID = Field(..., alias="clientId", example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    client_id: UUID = Field(..., alias="clientId", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The unique ID of the runZero client/customer account that owns the object
     """
-    created_by_id: UUID = Field(..., alias="createdById", example="f6cfb91a-52ea-4a86-bf9a-5a891a26f52b")
+    created_by_id: UUID = Field(..., alias="createdById", examples=["f6cfb91a-52ea-4a86-bf9a-5a891a26f52b"])
     """
     The unique ID of the entity that created the object
     """
-    created_at: datetime = Field(..., alias="createdAt", example="2023-03-06T18:14:50.52Z")
+    created_at: datetime = Field(..., alias="createdAt", examples=["2023-03-06T18:14:50.52Z"])
     """
     A timestamp indicating creation time of the object
     """
-    updated_at: datetime = Field(..., alias="updatedAt", example="2023-03-06T18:14:50.52Z")
+    updated_at: datetime = Field(..., alias="updatedAt", examples=["2023-03-06T18:14:50.52Z"])
     """
     A timestamp indicating last modified time of the object
     """
-    destroyed_at: Optional[datetime] = Field(None, alias="destroyedAt", example="2023-03-06T18:14:50.52Z")
+    destroyed_at: Optional[datetime] = Field(None, alias="destroyedAt", examples=["2023-03-06T18:14:50.52Z"])
     """
     A timestamp indicating deletion time of the object
     """
 
 
 class BaseCustomIntegration(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: Optional[str] = Field(None, example="my-custom-integration", regex="^\\S+$")
+    name: Optional[str] = Field(None, examples=["my-custom-integration"], pattern="^\\S+$")
     """
     The unique name of the custom integration, without spaces.
     """
     icon: Optional[str] = Field(
         None,
-        example="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",
+        examples=[
+            "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"
+        ],
     )
     """
     Base64 encoded png with maximum size 256x256 pixels
     """
-    description: Optional[str] = Field(None, example="My custom integration description.")
+    description: Optional[str] = Field(None, examples=["My custom integration description."])
     """
     A text description of the custom integration
     """
 
 
 class CustomIntegration(BaseCustomIntegration, BaseResponse):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: str = Field(..., example="my-custom-integration", regex="^\\S+$")
+    name: str = Field(..., examples=["my-custom-integration"], pattern="^\\S+$")
     """
     The unique name of the custom integration, without spaces.
     """
 
 
 class NewCustomIntegration(BaseCustomIntegration):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: str = Field(..., example="my-custom-integration", regex="^\\S+$")
+    name: str = Field(..., examples=["my-custom-integration"], pattern="^\\S+$")
     """
     The unique name of the custom integration, without spaces.
     """
 
 
-class Tag(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+class Tag(RootModel[str]):
+    model_config = ConfigDict(populate_by_name=True)
 
-    __root__: str = Field(..., max_length=1024)
+    root: str = Field(..., max_length=1024)
 
 
 class ImportTask(BaseModel):
@@ -100,16 +97,15 @@ class ImportTask(BaseModel):
     Information which describes the task created when asset data is imported.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: str = Field(..., example="my import task", max_length=100)
-    description: Optional[str] = Field(None, example="importing assets from custom integration A", max_length=1024)
-    exclude_unknown: Optional[bool] = Field(False, alias="excludeUnknown", example=True)
+    name: str = Field(..., examples=["my import task"], max_length=100)
+    description: Optional[str] = Field(None, examples=["importing assets from custom integration A"], max_length=1024)
+    exclude_unknown: Optional[bool] = Field(False, alias="excludeUnknown", examples=[True])
     """
     Instructs the data ingestion process whether to skip assets which do not merge into an existing asset in the asset inventory
     """
-    tags: Optional[List[Tag]] = Field(None, example=["tag1", "tag2"], max_items=100)
+    tags: Optional[List[Tag]] = Field(None, examples=[["tag1", "tag2"]], max_length=100)
     """
     Arbitrary string tag values which are applied to the asset data import task created.
     """
@@ -130,15 +126,14 @@ class NewAssetImport(BaseModel):
 
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    site_id: UUID = Field(..., alias="siteId", example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    site_id: UUID = Field(..., alias="siteId", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the site assets are to be imported into.
     """
     custom_integration_id: UUID = Field(
-        ..., alias="customIntegrationId", example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"
+        ..., alias="customIntegrationId", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"]
     )
     """
     The unique ID of the registered custom integration which produced the asset data. Uniqueness is not checked/enforced. See /account/custom-integrations api.
@@ -157,23 +152,22 @@ class NewAssetImport(BaseModel):
 
 
 class NetworkInterface(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    ipv4_addresses: Optional[List[IPv4Address]] = Field(None, alias="ipv4Addresses", max_items=256)
+    ipv4_addresses: Optional[List[IPv4Address]] = Field(None, alias="ipv4Addresses", max_length=256)
     """
     Represents IPV4 addresses. Addresses are ordered from most to least likely to uniquely identify the asset.
     """
-    ipv6_addresses: Optional[List[IPv6Address]] = Field(None, alias="ipv6Addresses", max_items=100)
+    ipv6_addresses: Optional[List[IPv6Address]] = Field(None, alias="ipv6Addresses", max_length=100)
     """
     Represents the IPV6 addresses. Addresses are ordered from most to least likely to uniquely identify the asset.
     """
     mac_address: Optional[str] = Field(
         None,
         alias="macAddress",
-        example="01:23:45:67:89:0A",
+        examples=["01:23:45:67:89:0A"],
         max_length=23,
-        regex=(
+        pattern=(
             "^([A-Fa-f0-9]{2}:){5}[A-Fa-f0-9]{2}$|^([A-Fa-f0-9]{2}:){7}[A-Fa-f0-9]{2}$|^([A-Fa-f0-9]{2}-){5}[A-Fa-f0-9]{2}$|^([A-Fa-f0-9]{2}-){7}[A-Fa-f0-9]{2}$|^([A-Fa-f0-9]{4}\\.){2}[A-Fa-f0-9]{4}$|^([A-Fa-f0-9]{4}\\.){3}[A-Fa-f0-9]{4}$|^([A-Fa-f0-9]{4}"
             " ){3}[A-Fa-f0-9]{4}$"
         ),
@@ -191,11 +185,10 @@ class NetworkInterface(BaseModel):
     """
 
 
-class Hostname(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+class Hostname(RootModel):
+    model_config = ConfigDict(populate_by_name=True)
 
-    __root__: str = Field(..., example="host.domain.com", max_length=260)
+    root: str = Field(..., examples=["host.domain.com"], max_length=260)
 
 
 class ServiceProtocolData(BaseModel):
@@ -203,10 +196,9 @@ class ServiceProtocolData(BaseModel):
     The protocol (and associated attributes) that are utilized by a service.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: str = Field(..., example="ssh", max_length=128)
+    name: str = Field(..., examples=["ssh"], max_length=128)
     """
     The well known protocol name.
     """
@@ -221,87 +213,90 @@ class Software(BaseModel):
     A piece of installed software on an asset.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(
         ...,
-        example="61837e2462224303baca6b5fcfdaa962_8edfd87bd511e7a9fa9d164a407a134cd5d9a29f8d3b0b2f0888d8db133624c2",
+        examples=["61837e2462224303baca6b5fcfdaa962_8edfd87bd511e7a9fa9d164a407a134cd5d9a29f8d3b0b2f0888d8db133624c2"],
         max_length=256,
     )
     """
     A value which can uniquely identify the software on an asset.
     """
     service_address: Optional[Union[IPv4Address, IPv6Address]] = Field(
-        None, alias="serviceAddress", example="127.0.0.1"
+        None, alias="serviceAddress", examples=["127.0.0.1"]
     )
     """
     Represents the IPAddress (v4 or v6) that the software is available at.
     """
-    service_transport: Optional[str] = Field(None, alias="serviceTransport", example="tcp", max_length=256)
+    service_transport: Optional[str] = Field(None, alias="serviceTransport", examples=["tcp"], max_length=256)
     """
     The transport type used to interact with the software.
     """
-    service_port: Optional[int] = Field(None, alias="servicePort", example=8080, ge=0, le=65535)
+    service_port: Optional[int] = Field(None, alias="servicePort", examples=[8080], ge=0, le=65535)
     """
     The port that the software is available on.
     """
     cpe23: Optional[str] = Field(
         None,
-        example="cpe:2.3:a:hp:insight_diagnostics:7.4.0.1570:-:*:*:online:win2003:x64:*",
+        examples=["cpe:2.3:a:hp:insight_diagnostics:7.4.0.1570:-:*:*:online:win2003:x64:*"],
         max_length=512,
-        regex="^cpe:/a:.*",
+        pattern="^cpe:/a:.*",
     )
     """
     The Common Platform Enumeration v2.3 value describing the software.
     """
-    installed_at: Optional[datetime] = Field(None, alias="installedAt", example="2023-03-06T18:14:50.52Z")
+    installed_at: Optional[datetime] = Field(None, alias="installedAt", examples=["2023-03-06T18:14:50.52Z"])
     """
     The timestamp at which the software was installed on the asset, using a date string as defined by RFC 3339, section 5.6.
     """
-    installed_size: Optional[int] = Field(None, alias="installedSize", example=1564857439, ge=0, le=9223372036854775807)
+    installed_size: Optional[int] = Field(
+        None, alias="installedSize", examples=[1564857439], ge=0, le=9223372036854775807
+    )
     """
     The size of the software in bytes once installed on the asset.
     """
-    installed_from: Optional[str] = Field(None, alias="installedFrom", example="apt-ubuntu-20.14-LTS", max_length=256)
+    installed_from: Optional[str] = Field(
+        None, alias="installedFrom", examples=["apt-ubuntu-20.14-LTS"], max_length=256
+    )
     """
     The source of the installation for the software.
     """
     vendor: Optional[str] = Field(
-        None, example="Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>", max_length=128
+        None, examples=["Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>"], max_length=128
     )
     """
     Describes or identifies the person or organization that manufactured or created the product.
     """
-    product: Optional[str] = Field(None, example="libwebp", max_length=128)
+    product: Optional[str] = Field(None, examples=["libwebp"], max_length=128)
     """
     Describes or identifies the most common and recognizable title or name of the product.
     """
-    version: Optional[str] = Field(None, example="v3.21.140", max_length=128)
+    version: Optional[str] = Field(None, examples=["v3.21.140"], max_length=128)
     """
     A vendor-specific alphanumeric strings characterizing the particular release version of the product.
     """
-    update: Optional[str] = Field(None, example="service pack 2", max_length=128)
+    update: Optional[str] = Field(None, examples=["service pack 2"], max_length=128)
     """
     The particular update, service pack, or point release of the product.
     """
-    language: Optional[str] = Field(None, example="en", max_length=128)
+    language: Optional[str] = Field(None, examples=["en"], max_length=128)
     """
     Valid language tags as defined by [RFC5646].
     """
-    software_edition: Optional[str] = Field(None, alias="softwareEdition", example="--TODO--", max_length=128)
+    software_edition: Optional[str] = Field(None, alias="softwareEdition", examples=["--TODO--"], max_length=128)
     """
     How the product is tailored to a particular market or class of end users.
     """
-    target_software: Optional[str] = Field(None, alias="targetSoftware", example="windows", max_length=128)
+    target_software: Optional[str] = Field(None, alias="targetSoftware", examples=["windows"], max_length=128)
     """
     A characterization of the software computing environment within which the product operates.
     """
-    target_hardware: Optional[str] = Field(None, alias="targetHardware", example="x86", max_length=128)
+    target_hardware: Optional[str] = Field(None, alias="targetHardware", examples=["x86"], max_length=128)
     """
     Characterizes the instruction set architecture (e.g., x86)
     """
-    other: Optional[str] = Field(None, example="kubernetes-v1beta1", max_length=128)
+    other: Optional[str] = Field(None, examples=["kubernetes-v1beta1"], max_length=128)
     """
     Any other general descriptive or identifying information which is vendor- or product-specific and which does not logically fit in any other attribute value of a CPE.
     """
@@ -317,111 +312,112 @@ class Vulnerability(BaseModel):
     A vulnerability associated with an asset.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: str = Field(..., example="apple-osx-webkit-cve-2021-31005", max_length=256)
+    id: str = Field(..., examples=["apple-osx-webkit-cve-2021-31005"], max_length=256)
     """
     A value which can uniquely identify the vulnerability on an asset.
     """
-    category: Optional[str] = Field(None, example="webkit", max_length=256)
+    category: Optional[str] = Field(None, examples=["webkit"], max_length=256)
     """
     A descriptive value which declares the type of vulnerability class.
     """
-    name: Optional[str] = Field(None, example="vapor-file-middleware-overflow", max_length=256)
+    name: Optional[str] = Field(None, examples=["vapor-file-middleware-overflow"], max_length=256)
     """
     A human-understandable name of a vulnerability.
     """
     description: Optional[str] = Field(
         None,
-        example=(
-            "Vapor is an HTTP web framework for Swift. Users of Vapor prior to version 4.60.3 with FileMiddleware"
-            " enabled are vulnerable to an integer overflow vulnerability that can crash the application. Version"
-            " 4.60.3 contains a patch for this issue. As a workaround, disable FileMiddleware and serve via a Content"
-            " Delivery Network.\n"
-        ),
+        examples=[
+            (
+                "Vapor is an HTTP web framework for Swift. Users of Vapor prior to version 4.60.3 with FileMiddleware"
+                " enabled are vulnerable to an integer overflow vulnerability that can crash the application. Version"
+                " 4.60.3 contains a patch for this issue. As a workaround, disable FileMiddleware and serve via a Content"
+                " Delivery Network.\n"
+            )
+        ],
         max_length=1024,
     )
     """
     A human-understandable summary of a vulnerability.
     """
-    solution: Optional[str] = Field(None, example="Patch application to Version 4.60.3 or newer.", max_length=1024)
+    solution: Optional[str] = Field(None, examples=["Patch application to Version 4.60.3 or newer."], max_length=1024)
     """
     A human-understandable summary of the steps to take to resolve a vulnerability.
     """
     service_address: Optional[Union[IPv4Address, IPv6Address]] = Field(
-        None, alias="serviceAddress", example="127.0.0.1"
+        None, alias="serviceAddress", examples=["127.0.0.1"]
     )
     """
     The IPAddress (v4 or v6) that the vulnerable service is available at.
     """
-    service_transport: Optional[str] = Field(None, alias="serviceTransport", example="tcp", max_length=256)
+    service_transport: Optional[str] = Field(None, alias="serviceTransport", examples=["tcp"], max_length=256)
     """
     The transport type used to interact with the vulnerable service.
     """
-    service_port: Optional[int] = Field(None, alias="servicePort", example=8080, ge=0, le=65535)
+    service_port: Optional[int] = Field(None, alias="servicePort", examples=[8080], ge=0, le=65535)
     """
     The port that the vulnerable service is available on.
     """
     cpe23: Optional[str] = Field(
         None,
-        example="cpe:2.3:a:hp:insight_diagnostics:7.4.0.1570:-:*:*:online:win2003:x64:*",
+        examples=["cpe:2.3:a:hp:insight_diagnostics:7.4.0.1570:-:*:*:online:win2003:x64:*"],
         max_length=512,
-        regex="^cpe:.*",
+        pattern="^cpe:.*",
     )
     """
     The Common Platform Enumeration v2.3 value describing the vulnerable service.
     """
-    cve: Optional[str] = Field(None, example="CVE-2021-31005", max_length=28, regex="^CVE-[0-9]{4}-[0-9]{4,19}$")
+    cve: Optional[str] = Field(None, examples=["CVE-2021-31005"], max_length=28, pattern="^CVE-[0-9]{4}-[0-9]{4,19}$")
     """
     CVE represents the common vulnerability ID as assigned by an authority such as NIST and should be in the format of 'CVE-YYYY-NNNNN' where YYYY represents the year of the entry and NNNNN is the vulns unique number.
 
     """
-    cvss2_base_score: Optional[float] = Field(None, alias="cvss2BaseScore", example=4.3, ge=0.0, le=10.0)
+    cvss2_base_score: Optional[float] = Field(None, alias="cvss2BaseScore", examples=[4.3], ge=0.0, le=10.0)
     """
     The exploit-ability score of the vulnerability as assigned by the CVSS2 system.
     """
-    cvss2_temporal_score: Optional[float] = Field(None, alias="cvss2TemporalScore", example=3.2, ge=0.0, le=10.0)
+    cvss2_temporal_score: Optional[float] = Field(None, alias="cvss2TemporalScore", examples=[3.2], ge=0.0, le=10.0)
     """
     The current exploit-ability score (modified by ease of patching/impact of vuln/etc) of the vuln as assigned by the CVSS2 system.
     """
-    cvss3_base_score: Optional[float] = Field(None, alias="cvss3BaseScore", example=5.6, ge=0.0, le=10.0)
+    cvss3_base_score: Optional[float] = Field(None, alias="cvss3BaseScore", examples=[5.6], ge=0.0, le=10.0)
     """
     The exploit-ability score of the vulnerability as assigned by the CVSS3 system.
     """
-    cvss3_temporal_score: Optional[float] = Field(None, alias="cvss3TemporalScore", example=4.1, ge=0.0, le=10.0)
+    cvss3_temporal_score: Optional[float] = Field(None, alias="cvss3TemporalScore", examples=[4.1], ge=0.0, le=10.0)
     """
     The current exploit-ability score (modified by ease of patching/impact of vuln/etc) of the vuln as assigned by the CVSS3 system.
     """
-    severity_rank: Optional[int] = Field(None, alias="severityRank", example=2, ge=0, le=4)
+    severity_rank: Optional[int] = Field(None, alias="severityRank", examples=[2], ge=0, le=4)
     """
     An integer representation of the vuln severity where 0=NONE, 1=LOW, 2=MEDIUM, 3=HIGH, and 4=CRITICAL
     """
-    severity_score: Optional[float] = Field(None, alias="severityScore", example=415.9, ge=0.0, le=10000.0)
+    severity_score: Optional[float] = Field(None, alias="severityScore", examples=[415.9], ge=0.0, le=10000.0)
     """
     The impact score which might occur if the vulnerability were to be exploited.
     """
-    risk_rank: Optional[int] = Field(None, alias="riskRank", example=2, ge=0, le=4)
+    risk_rank: Optional[int] = Field(None, alias="riskRank", examples=[2], ge=0, le=4)
     """
     An integer representation of the risk of vuln exploitation where 0=NONE, 1=LOW, 2=MEDIUM, 3=HIGH, and 4=CRITICAL.
     """
-    risk_score: Optional[float] = Field(None, alias="riskScore", example=305.1, ge=0.0, le=10000.0)
+    risk_score: Optional[float] = Field(None, alias="riskScore", examples=[305.1], ge=0.0, le=10000.0)
     """
     The probability score of the vulnerability being exploited.
     """
-    exploitable: Optional[bool] = Field(None, example=True)
+    exploitable: Optional[bool] = Field(None, examples=[True])
     """
     Declares whether the vulnerability can be exploited on the asset.
     """
-    published_ts: Optional[datetime] = Field(None, alias="publishedTS", example="2023-03-06T18:14:50.52Z")
+    published_ts: Optional[datetime] = Field(None, alias="publishedTS", examples=["2023-03-06T18:14:50.52Z"])
     """
     Represents the Timestamp at which the CVE was officially published, using a date string as defined by RFC 3339, section 5.6.
     """
-    first_detected_ts: Optional[datetime] = Field(None, alias="firstDetectedTS", example="2023-03-06T18:14:50.52Z")
+    first_detected_ts: Optional[datetime] = Field(None, alias="firstDetectedTS", examples=["2023-03-06T18:14:50.52Z"])
     """
     Represents the Timestamp at which the vulnerability was first detected on the asset, using a date string as defined by RFC 3339, section 5.6.
     """
-    last_detected_ts: Optional[datetime] = Field(None, alias="lastDetectedTS", example="2023-03-06T18:14:50.52Z")
+    last_detected_ts: Optional[datetime] = Field(None, alias="lastDetectedTS", examples=["2023-03-06T18:14:50.52Z"])
     """
     Represents the Timestamp at which the vulnerability was last detected on the asset, using a date string as defined by RFC 3339, section 5.6.
     """
@@ -450,72 +446,77 @@ class ScanOptions(BaseModel):
     Options which can be set to create or modify a scan.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    targets: str = Field(..., example="defaults")
+    targets: str = Field(..., examples=["defaults"])
     excludes: Optional[str] = None
-    scan_name: Optional[str] = Field(None, alias="scan-name", example="My Scan")
-    scan_description: Optional[str] = Field(None, alias="scan-description", example="Scan of Wireless")
+    scan_name: Optional[str] = Field(None, alias="scan-name", examples=["My Scan"])
+    scan_description: Optional[str] = Field(None, alias="scan-description", examples=["Scan of Wireless"])
     """
     A description of the scan.
     """
-    scan_template: Optional[UUID] = Field(None, alias="scan-template", example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    scan_frequency: Optional[ScanFrequency] = Field(None, alias="scan-frequency", example="hour")
+    scan_template: Optional[UUID] = Field(
+        None, alias="scan-template", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"]
+    )
+    scan_frequency: Optional[ScanFrequency] = Field(None, alias="scan-frequency", examples=["hour"])
     """
     A string time duration value representing execution frequency, if scheduled to repeat.
     """
-    scan_start: Optional[str] = Field(None, alias="scan-start", example="0")
+    scan_start: Optional[str] = Field(None, alias="scan-start", examples=["0"])
     """
     Unix timestamp value indicating when the template was created.
     """
-    scan_tags: Optional[str] = Field(None, alias="scan-tags", example="owner=IT location=Texas")
-    scan_grace_period: Optional[str] = Field(None, alias="scan-grace-period", example="4")
-    agent: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    explorer: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    hosted_zone_id: Optional[str] = Field(None, alias="hosted-zone-id", example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    scan_tags: Optional[str] = Field(None, alias="scan-tags", examples=["owner=IT location=Texas"])
+    scan_grace_period: Optional[str] = Field(None, alias="scan-grace-period", examples=["4"])
+    agent: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    explorer: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    hosted_zone_id: Optional[str] = Field(
+        None, alias="hosted-zone-id", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"]
+    )
     """
     The string 'auto' will use any available hosted zone. Otherwise, provide the string name (hostedzone1) or UUID (e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8) of a hosted zone.
     """
-    hosted_zone_name: Optional[str] = Field(None, alias="hosted-zone-name", example="auto")
+    hosted_zone_name: Optional[str] = Field(None, alias="hosted-zone-name", examples=["auto"])
     """
     The string 'auto' will use any available hosted zone. Otherwise, provide the string name (hostedzone1) of the hosted zone.
     """
-    rate: Optional[str] = Field(None, example="10000")
-    max_host_rate: Optional[str] = Field(None, alias="max-host-rate", example="100")
-    passes: Optional[str] = Field(None, example="3")
-    max_attempts: Optional[str] = Field(None, alias="max-attempts", example="3")
-    max_sockets: Optional[str] = Field(None, alias="max-sockets", example="500")
-    max_group_size: Optional[str] = Field(None, alias="max-group-size", example="4096")
-    max_ttl: Optional[str] = Field(None, alias="max-ttl", example="255")
-    tos: Optional[str] = Field(None, example="255")
-    tcp_ports: Optional[str] = Field(None, alias="tcp-ports", example="1-1000,5000-6000")
-    tcp_excludes: Optional[str] = Field(None, alias="tcp-excludes", example="9500")
-    screenshots: Optional[str] = Field(None, example="true")
-    nameservers: Optional[str] = Field(None, example="8.8.8.8")
-    subnet_ping: Optional[str] = Field(None, alias="subnet-ping", example="true")
-    subnet_ping_net_size: Optional[str] = Field(None, alias="subnet-ping-net-size", example="256")
+    rate: Optional[str] = Field(None, examples=["10000"])
+    max_host_rate: Optional[str] = Field(None, alias="max-host-rate", examples=["100"])
+    passes: Optional[str] = Field(None, examples=["3"])
+    max_attempts: Optional[str] = Field(None, alias="max-attempts", examples=["3"])
+    max_sockets: Optional[str] = Field(None, alias="max-sockets", examples=["500"])
+    max_group_size: Optional[str] = Field(None, alias="max-group-size", examples=["4096"])
+    max_ttl: Optional[str] = Field(None, alias="max-ttl", examples=["255"])
+    tos: Optional[str] = Field(None, examples=["255"])
+    tcp_ports: Optional[str] = Field(None, alias="tcp-ports", examples=["1-1000,5000-6000"])
+    tcp_excludes: Optional[str] = Field(None, alias="tcp-excludes", examples=["9500"])
+    screenshots: Optional[str] = Field(None, examples=["true"])
+    nameservers: Optional[str] = Field(None, examples=["8.8.8.8"])
+    subnet_ping: Optional[str] = Field(None, alias="subnet-ping", examples=["true"])
+    subnet_ping_net_size: Optional[str] = Field(None, alias="subnet-ping-net-size", examples=["256"])
     subnet_ping_probes: Optional[str] = Field(
         None,
         alias="subnet-ping-probes",
-        example="arp, echo, syn, connect, netbios, snmp, ntp, sunrpc, ike, openvpn, mdns",
+        examples=["arp, echo, syn, connect, netbios, snmp, ntp, sunrpc, ike, openvpn, mdns"],
     )
     """
     Optional subnet ping probe list as comma separated strings. The example shows possibilities.
     """
-    subnet_ping_sample_rate: Optional[str] = Field(None, alias="subnet-ping-sample-rate", example="3")
-    host_ping: Optional[str] = Field(None, alias="host-ping", example="false")
+    subnet_ping_sample_rate: Optional[str] = Field(None, alias="subnet-ping-sample-rate", examples=["3"])
+    host_ping: Optional[str] = Field(None, alias="host-ping", examples=["false"])
     host_ping_probes: Optional[str] = Field(
         None,
         alias="host-ping-probes",
-        example="arp, echo, syn, connect, netbios, snmp, ntp, sunrpc, ike, openvpn, mdns",
+        examples=["arp, echo, syn, connect, netbios, snmp, ntp, sunrpc, ike, openvpn, mdns"],
     )
     """
     Optional host ping probe list as comma separated strings. The example shows possibilities.
     """
     probes: Optional[str] = Field(
         None,
-        example="arp,bacnet,connect,dns,echo,ike,ipmi,mdns,memcache,mssql,natpmp,netbios,pca,rdns,rpcbind,sip,snmp,ssdp,syn,ubnt,wlan-list,wsd",
+        examples=[
+            "arp,bacnet,connect,dns,echo,ike,ipmi,mdns,memcache,mssql,natpmp,netbios,pca,rdns,rpcbind,sip,snmp,ssdp,syn,ubnt,wlan-list,wsd"
+        ],
     )
     """
     Optional probe list, otherwise all probes are used
@@ -527,18 +528,17 @@ class ScanTemplateOptions(BaseModel):
     Options which can be set to create a scan template.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: str = Field(..., example="My Scan Template")
+    name: str = Field(..., examples=["My Scan Template"])
     """
     Name of the template.
     """
-    description: Optional[str] = Field(None, example="My Scan Template")
+    description: Optional[str] = Field(None, examples=["My Scan Template"])
     """
     Description of the template.
     """
-    organization_id: UUID = Field(..., example="f6cfb91a-52ea-4a86-bf9a-5a891a26f52b")
+    organization_id: UUID = Field(..., examples=["f6cfb91a-52ea-4a86-bf9a-5a891a26f52b"])
     """
     The ID of the organization the template will be created in
     """
@@ -546,11 +546,11 @@ class ScanTemplateOptions(BaseModel):
     """
     A number of scan parameter values. Currently there is no authoritative list of acceptable values. See existing templates for examples.
     """
-    global_: bool = Field(..., alias="global", example=False)
+    global_: bool = Field(..., alias="global", examples=[False])
     """
     Whether the template is globally available to all organizations.
     """
-    acl: Dict[str, Any] = Field(..., example={"e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8": "user"})
+    acl: Dict[str, Any] = Field(..., examples=[{"e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8": "user"}])
     """
     A map of IDs to strings which describe how the template may be accessed. Currently there is no authoritative list of acceptable values. See existing templates for examples.
     """
@@ -561,66 +561,65 @@ class ScanTemplate(BaseModel):
     A scan task template
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     ID of the template.
     """
-    name: Optional[str] = Field(None, example="My Scan Template")
+    name: Optional[str] = Field(None, examples=["My Scan Template"])
     """
     The name of the template.
     """
-    description: Optional[str] = Field(None, example="My Scan Template")
+    description: Optional[str] = Field(None, examples=["My Scan Template"])
     """
     The description of the template.
     """
-    client_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    client_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     ID of the account which owns the template.
     """
-    organization_id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    organization_id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     ID of the organization the template is available in.
     """
-    agent_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    agent_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     ID of the explorer which may execute the template.
     """
-    site_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    site_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     ID of the site the template is being used in.
     """
-    cruncher_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    cruncher_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     ID of the runZero cruncher the task is executing on.
     """
-    created_at: Optional[int] = Field(None, example=1576300370)
+    created_at: Optional[int] = Field(None, examples=[1576300370])
     """
     Unix timestamp value indicating when the template was created.
     """
-    created_by: Optional[str] = Field(None, example="user@example.com")
+    created_by: Optional[str] = Field(None, examples=["user@example.com"])
     """
     The username of the account which created the template.
     """
-    created_by_user_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    created_by_user_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the account which created the template.
     """
-    updated_at: Optional[int] = Field(None, example=1576300370)
+    updated_at: Optional[int] = Field(None, examples=[1576300370])
     """
     Unix timestamp value indicating when the template was last modified.
     """
-    type: Optional[str] = Field(None, example="scan")
+    type: Optional[str] = Field(None, examples=["scan"])
     """
     The type of task the template creates.
     """
-    status: Optional[str] = Field(None, example="processed")
+    status: Optional[str] = Field(None, examples=["processed"])
     """
     The status of the last task using the template.
     """
-    error: Optional[str] = Field(None, example="agent unavailable")
+    error: Optional[str] = Field(None, examples=["agent unavailable"])
     """
     The error message, if any, of the last task using the template.
     """
@@ -632,154 +631,150 @@ class ScanTemplate(BaseModel):
     """
     A map of statistics about the last task executed with the template. Currently there is no authoritative list of in-use values. See existing templates for examples.
     """
-    hidden: Optional[bool] = Field(None, example=False)
+    hidden: Optional[bool] = Field(None, examples=[False])
     """
     A flag indicating whether the item is hidden from common view.
     """
-    parent_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    parent_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the parent entity of the task scheduled.
     """
-    recur: Optional[bool] = Field(None, example=False)
+    recur: Optional[bool] = Field(None, examples=[False])
     """
     A flag representing whether derived tasks are scheduled to repeat.
     """
-    recur_frequency: Optional[str] = Field(None, example="hourly")
+    recur_frequency: Optional[str] = Field(None, examples=["hourly"])
     """
     A string time duration value representing execution frequency, if scheduled to repeat. You may use
     values including as once, hourly, daily, weekly, monthly, continuous
 
     """
-    start_time: Optional[int] = Field(None, example=1576300370)
+    start_time: Optional[int] = Field(None, examples=[1576300370])
     """
     Unix timestamp representing the next execution time.
     """
-    recur_last: Optional[int] = Field(None, example=1576300370)
+    recur_last: Optional[int] = Field(None, examples=[1576300370])
     """
     Unix timestamp representing the last execution if scheduled to repeat.
     """
-    recur_next: Optional[int] = Field(None, example=1576300370)
+    recur_next: Optional[int] = Field(None, examples=[1576300370])
     """
     Unix timestamp representing the next execution if scheduled to repeat.
     """
-    recur_last_task_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    recur_last_task_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the task that last executed if scheduled to repeat.
     """
-    grace_period: Optional[str] = Field(None, example="4")
+    grace_period: Optional[str] = Field(None, examples=["4"])
     """
     Additional time beyond hard expiration deadline by which the task may still be allowed to execute.
     """
-    custom_integration_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    custom_integration_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the custom integration source, if the last task executed with this template was an import of Asset Data.
     """
-    source_id: Optional[str] = Field(None, example="1")
+    source_id: Optional[str] = Field(None, examples=["1"])
     """
     The numeric ID of the data source, if the task executed with this template is a runZero scan or third party data connection import.
     """
-    template_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    template_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the template.
     """
-    size_site: Optional[int] = Field(None, example=0)
+    size_site: Optional[int] = Field(None, examples=[0])
     """
     The size in assets of the site the last task the template was executed against.
     """
-    size_data: Optional[int] = Field(None, example=0)
+    size_data: Optional[int] = Field(None, examples=[0])
     """
     The total size of result data of the last task the template was used with.
     """
-    size_results: Optional[int] = Field(None, example=0)
+    size_results: Optional[int] = Field(None, examples=[0])
     """
     The number of results in the last task the template was used with.
     """
-    hosted_zone_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    hosted_zone_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the hosted zone that ran the last task the template was used with.
     """
-    linked_task_count: Optional[int] = Field(None, example=1)
+    linked_task_count: Optional[int] = Field(None, examples=[1])
     """
     The number of tasks derived from the template.
     """
-    global_: bool = Field(..., alias="global", example=False)
+    global_: bool = Field(..., alias="global", examples=[False])
     """
     Whether the template is globally available to all organizations.
     """
-    acl: Dict[str, Any] = Field(..., example={"e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8": "user"})
+    acl: Dict[str, Any] = Field(..., examples=[{"e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8": "user"}])
     """
     A map of IDs to strings which describe how the template may be accessed. Currently there is no authoritative list of in-use values. See existing templates for examples.
     """
 
 
 class Organization(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    created_at: Optional[int] = Field(None, example=1576300370)
-    updated_at: Optional[int] = Field(None, example=1576300370)
-    client_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    download_token: Optional[str] = Field(None, example="DT11226D9EEEA2B035D42569585900")
-    download_token_created_at: Optional[int] = Field(None, example=1576300370)
-    name: str = Field(..., example="My Company")
-    description: Optional[str] = Field(None, example="All subdivisions of my company")
-    inactive: Optional[bool] = Field(None, example=False)
-    deactivated_at: Optional[int] = Field(None, example=0)
-    service_count: Optional[int] = Field(None, example=10)
-    service_count_tcp: Optional[int] = Field(None, example=7)
-    service_count_udp: Optional[int] = Field(None, example=1)
-    service_count_arp: Optional[int] = Field(None, example=1)
-    service_count_icmp: Optional[int] = Field(None, example=1)
-    asset_count: Optional[int] = Field(None, example=100)
-    export_token: Optional[str] = Field(None, example="ET11226D9EEEA2B035D42569585900")
-    export_token_created_at: Optional[int] = Field(None, example=1576300370)
-    export_token_last_used_at: Optional[int] = Field(None, example=0)
-    export_token_last_used_by: Optional[str] = Field(None, example="127.0.0.1")
-    export_token_counter: Optional[int] = Field(None, example=0)
-    project: Optional[bool] = Field(None, example=False)
-    parent_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    expiration_assets_stale: Optional[int] = Field(None, example=365)
-    expiration_assets_offline: Optional[int] = Field(None, example=365)
-    expiration_scans: Optional[int] = Field(None, example=365)
+    id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    created_at: Optional[int] = Field(None, examples=[1576300370])
+    updated_at: Optional[int] = Field(None, examples=[1576300370])
+    client_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    download_token: Optional[str] = Field(None, examples=["DT11226D9EEEA2B035D42569585900"])
+    download_token_created_at: Optional[int] = Field(None, examples=[1576300370])
+    name: str = Field(..., examples=["My Company"])
+    description: Optional[str] = Field(None, examples=["All subdivisions of my company"])
+    inactive: Optional[bool] = Field(None, examples=[False])
+    deactivated_at: Optional[int] = Field(None, examples=[0])
+    service_count: Optional[int] = Field(None, examples=[10])
+    service_count_tcp: Optional[int] = Field(None, examples=[7])
+    service_count_udp: Optional[int] = Field(None, examples=[1])
+    service_count_arp: Optional[int] = Field(None, examples=[1])
+    service_count_icmp: Optional[int] = Field(None, examples=[1])
+    asset_count: Optional[int] = Field(None, examples=[100])
+    export_token: Optional[str] = Field(None, examples=["ET11226D9EEEA2B035D42569585900"])
+    export_token_created_at: Optional[int] = Field(None, examples=[1576300370])
+    export_token_last_used_at: Optional[int] = Field(None, examples=[0])
+    export_token_last_used_by: Optional[str] = Field(None, examples=["127.0.0.1"])
+    export_token_counter: Optional[int] = Field(None, examples=[0])
+    project: Optional[bool] = Field(None, examples=[False])
+    parent_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    expiration_assets_stale: Optional[int] = Field(None, examples=[365])
+    expiration_assets_offline: Optional[int] = Field(None, examples=[365])
+    expiration_scans: Optional[int] = Field(None, examples=[365])
 
 
 class Site(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    created_at: Optional[int] = Field(None, example=1576300370)
-    updated_at: Optional[int] = Field(None, example=1576300370)
-    name: str = Field(..., example="Primary")
-    description: Optional[str] = Field(None, example="Headquarters")
-    scope: Optional[str] = Field(None, example="192.168.0.0/24")
-    excludes: Optional[str] = Field(None, example="192.168.0.5")
+    id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    created_at: Optional[int] = Field(None, examples=[1576300370])
+    updated_at: Optional[int] = Field(None, examples=[1576300370])
+    name: str = Field(..., examples=["Primary"])
+    description: Optional[str] = Field(None, examples=["Headquarters"])
+    scope: Optional[str] = Field(None, examples=["192.168.0.0/24"])
+    excludes: Optional[str] = Field(None, examples=["192.168.0.5"])
     subnets: Optional[Dict[str, Any]] = None
 
 
 class SiteOptions(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: str = Field(..., example="New Site")
-    description: Optional[str] = Field(None, example="County Office")
-    scope: Optional[str] = Field(None, example="192.168.10.0/24")
-    excludes: Optional[str] = Field(None, example="192.168.10.1")
+    name: str = Field(..., examples=["New Site"])
+    description: Optional[str] = Field(None, examples=["County Office"])
+    scope: Optional[str] = Field(None, examples=["192.168.10.0/24"])
+    excludes: Optional[str] = Field(None, examples=["192.168.10.1"])
     subnets: Optional[Dict[str, Any]] = None
 
 
 class OrgOptions(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    name: Optional[str] = Field(None, example="My Organization")
-    description: Optional[str] = Field(None, example="Wobbly Widgets, Inc.")
-    export_token: Optional[str] = Field(None, example="ETXXXXXXXXXXXXXXXX")
-    parent_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    expiration_assets_stale: Optional[str] = Field(None, example="365", regex="^\\d+$")
-    expiration_assets_offline: Optional[str] = Field(None, example="365", regex="^\\d+$")
-    expiration_scans: Optional[str] = Field(None, example="365", regex="^\\d+$")
+    name: Optional[str] = Field(None, examples=["My Organization"])
+    description: Optional[str] = Field(None, examples=["Wobbly Widgets, Inc."])
+    export_token: Optional[str] = Field(None, examples=["ETXXXXXXXXXXXXXXXX"])
+    parent_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    expiration_assets_stale: Optional[str] = Field(None, examples=["365"], pattern="^\\d+$")
+    expiration_assets_offline: Optional[str] = Field(None, examples=["365"], pattern="^\\d+$")
+    expiration_scans: Optional[str] = Field(None, examples=["365"], pattern="^\\d+$")
 
 
 class Agent(BaseModel):
@@ -789,51 +784,47 @@ class Agent(BaseModel):
 
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    client_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    organization_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    created_at: Optional[int] = Field(None, example=1576300370)
-    updated_at: Optional[int] = Field(None, example=1576300370)
-    host_id: Optional[str] = Field(None, example="6f9e6fe52271da70962e007183c5c9c9")
-    hub_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    name: Optional[str] = Field(None, example="RUNZERO-AGENT")
-    site_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    last_checkin: Optional[int] = Field(None, example=1576300370)
-    os: Optional[str] = Field(None, example="Windows")
-    arch: Optional[str] = Field(None, example="amd64")
+    id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    client_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    organization_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    created_at: Optional[int] = Field(None, examples=[1576300370])
+    updated_at: Optional[int] = Field(None, examples=[1576300370])
+    host_id: Optional[str] = Field(None, examples=["6f9e6fe52271da70962e007183c5c9c9"])
+    hub_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    name: Optional[str] = Field(None, examples=["RUNZERO-AGENT"])
+    site_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    last_checkin: Optional[int] = Field(None, examples=[1576300370])
+    os: Optional[str] = Field(None, examples=["Windows"])
+    arch: Optional[str] = Field(None, examples=["amd64"])
     version: Optional[str] = Field(
-        None, example="1.2.3 (build 20191219224016) [fc50c5eefdc3ff5c60533c3c345d14d336396272]"
+        None, examples=["1.2.3 (build 20191219224016) [fc50c5eefdc3ff5c60533c3c345d14d336396272]"]
     )
-    external_ip: Optional[str] = Field(None, example="1.1.1.1")
-    internal_ip: Optional[str] = Field(None, example="192.168.0.1")
+    external_ip: Optional[str] = Field(None, examples=["1.1.1.1"])
+    internal_ip: Optional[str] = Field(None, examples=["192.168.0.1"])
     system_info: Optional[Dict[str, Any]] = None
-    connected: Optional[bool] = Field(None, example=True)
-    inactive: Optional[bool] = Field(None, example=False)
-    deactivated_at: Optional[int] = Field(None, example=0)
+    connected: Optional[bool] = Field(None, examples=[True])
+    inactive: Optional[bool] = Field(None, examples=[False])
+    deactivated_at: Optional[int] = Field(None, examples=[0])
 
 
 class AgentSiteID(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    site_id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-
-
-class Explorer(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
-
-    __root__: Agent
+    site_id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
 
 
-class ExplorerSiteID(BaseModel):
-    class Config:
-        allow_population_by_field_name = True
+class Explorer(RootModel[Agent]):
+    model_config = ConfigDict(populate_by_name=True)
 
-    __root__: AgentSiteID
+    root: Agent
+
+
+class ExplorerSiteID(RootModel[AgentSiteID]):
+    model_config = ConfigDict(populate_by_name=True)
+
+    root: AgentSiteID
 
 
 class TaskBase(BaseModel):
@@ -841,48 +832,47 @@ class TaskBase(BaseModel):
     All fields of a Task with none required
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    name: Optional[str] = Field(None, example="Hourly Scan")
-    description: Optional[str] = Field(None, example="Scan the headquarters hourly")
-    template_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    client_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    organization_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    agent_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    hosted_zone_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    name: Optional[str] = Field(None, examples=["Hourly Scan"])
+    description: Optional[str] = Field(None, examples=["Scan the headquarters hourly"])
+    template_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    client_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    organization_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    agent_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    hosted_zone_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the Hosted Zone which executes the task. If the
 
     """
-    site_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    cruncher_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    created_at: Optional[int] = Field(None, example=1576300370)
-    created_by: Optional[str] = Field(None, example="user@example.com")
-    created_by_user_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    custom_integration_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    site_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    cruncher_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    created_at: Optional[int] = Field(None, examples=[1576300370])
+    created_by: Optional[str] = Field(None, examples=["user@example.com"])
+    created_by_user_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    custom_integration_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the custom integration source, if the last task executed with this template was an import of Asset Data.
     """
-    source_id: Optional[int] = Field(None, example=1)
+    source_id: Optional[int] = Field(None, examples=[1])
     """
     The numeric ID of the data source, if the task executed with this template is a runZero scan or third party data connection import.
     """
-    updated_at: Optional[int] = Field(None, example=1576300370)
-    type: Optional[str] = Field(None, example="scan")
-    status: Optional[str] = Field(None, example="processed")
-    error: Optional[str] = Field(None, example="agent unavailable")
+    updated_at: Optional[int] = Field(None, examples=[1576300370])
+    type: Optional[str] = Field(None, examples=["scan"])
+    status: Optional[str] = Field(None, examples=["processed"])
+    error: Optional[str] = Field(None, examples=["agent unavailable"])
     params: Optional[Dict[str, str]] = None
     stats: Optional[Dict[str, Any]] = None
-    hidden: Optional[bool] = Field(None, example=False)
-    parent_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
-    recur: Optional[bool] = Field(None, example=False)
-    recur_frequency: Optional[str] = Field(None, example="hourly")
-    start_time: Optional[int] = Field(None, example=1576300370)
-    recur_last: Optional[int] = Field(None, example=1576300370)
-    recur_next: Optional[int] = Field(None, example=1576300370)
-    recur_last_task_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    hidden: Optional[bool] = Field(None, examples=[False])
+    parent_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    recur: Optional[bool] = Field(None, examples=[False])
+    recur_frequency: Optional[str] = Field(None, examples=["hourly"])
+    start_time: Optional[int] = Field(None, examples=[1576300370])
+    recur_last: Optional[int] = Field(None, examples=[1576300370])
+    recur_next: Optional[int] = Field(None, examples=[1576300370])
+    recur_last_task_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
 
 
 class Task(TaskBase):
@@ -890,10 +880,9 @@ class Task(TaskBase):
     A task object
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
 
 
 class TaskOptions(TaskBase):
@@ -901,10 +890,9 @@ class TaskOptions(TaskBase):
     Options which can be set to create or modify a task.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    hosted_zone_name: Optional[str] = Field(None, example="auto")
+    hosted_zone_name: Optional[str] = Field(None, examples=["auto"])
     """
     The string 'auto' will use any available hosted zone. Otherwise, provide the string name (hostedzone1) of the hosted zone.
     """
@@ -917,43 +905,42 @@ class HostedZone(BaseModel):
 
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    id: UUID = Field(..., example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the hosted zone
     """
-    name: Optional[str] = Field(None, example="zone1")
-    enabled: Optional[bool] = Field(None, example=True)
+    name: Optional[str] = Field(None, examples=["zone1"])
+    enabled: Optional[bool] = Field(None, examples=[True])
     """
     Whether the hosted zone is enabled
     """
-    updated_at: Optional[datetime] = Field(None, example="2023-03-06T18:14:50.52Z")
+    updated_at: Optional[datetime] = Field(None, examples=["2023-03-06T18:14:50.52Z"])
     """
     The last modification time of the hosted zone
     """
-    processor_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    processor_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The processor ID assigned to the hosted zone
     """
-    explorers_concurrency: Optional[int] = Field(None, example=0)
+    explorers_concurrency: Optional[int] = Field(None, examples=[0])
     """
     The number of concurrent explorer tasks that can be executed
     """
-    explorers_total: Optional[int] = Field(None, example=0)
+    explorers_total: Optional[int] = Field(None, examples=[0])
     """
     The number of explorers available in the zone
     """
-    tasks_active: Optional[int] = Field(None, example=0)
+    tasks_active: Optional[int] = Field(None, examples=[0])
     """
     The number of tasks executing in the zone
     """
-    tasks_waiting: Optional[int] = Field(None, example=0)
+    tasks_waiting: Optional[int] = Field(None, examples=[0])
     """
     The number of tasks waiting to execute in the zone
     """
-    organization_id: Optional[UUID] = Field(None, example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    organization_id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The ID of the organization the hosted zone is assigned to
     """
@@ -965,10 +952,9 @@ class Problem(BaseModel):
 
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    title: Optional[str] = Field(None, example="A short summary of the problem type.")
+    title: Optional[str] = Field(None, examples=["A short summary of the problem type."])
     """
     A short summary of the problem type. Written in English and readable for engineers, usually not suited for non technical stakeholders and not localized.
 
@@ -979,7 +965,7 @@ class Problem(BaseModel):
 
     """
     detail: Optional[str] = Field(
-        None, example="A human readable explanation specific to this occurrence of the problem."
+        None, examples=["A human readable explanation specific to this occurrence of the problem."]
     )
     """
     A human readable explanation specific to this occurrence of the problem that is helpful to locate the problem and give advice on how to proceed. Written in English and readable for engineers, usually not suited for non technical stakeholders and not localized.
@@ -992,34 +978,33 @@ class Service(BaseModel):
     A service running on an asset.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
-    address: Union[IPv4Address, IPv6Address] = Field(..., example="127.0.0.1")
+    address: Union[IPv4Address, IPv6Address] = Field(..., examples=["127.0.0.1"])
     """
     Represents the IPAddress (v4 or v6) that the service is available at.
     """
-    port: int = Field(..., example=8080, ge=0, le=65535)
+    port: int = Field(..., examples=[8080], ge=0, le=65535)
     """
     The port that the service is listening on.
     """
-    transport: str = Field(..., example="TCP", max_length=128)
+    transport: str = Field(..., examples=["TCP"], max_length=128)
     """
     The communication protocol utilized by the service for its data protocols.
     """
-    vendor: Optional[str] = Field(None, example="NATS", max_length=256)
+    vendor: Optional[str] = Field(None, examples=["NATS"], max_length=256)
     """
     The name of the entity which created the service.
     """
-    product: Optional[str] = Field(None, example="NATS Jetstream", max_length=256)
+    product: Optional[str] = Field(None, examples=["NATS Jetstream"], max_length=256)
     """
     The  name of the software product associated with the service.
     """
-    version: Optional[str] = Field(None, example="1.2.3", max_length=256)
+    version: Optional[str] = Field(None, examples=["1.2.3"], max_length=256)
     """
     The version of the service present on the asset.
     """
-    protocol_data: List[ServiceProtocolData] = Field(..., alias="protocolData", max_items=128)
+    protocol_data: List[ServiceProtocolData] = Field(..., alias="protocolData", max_length=128)
     custom_attributes: Optional[Dict[str, str]] = Field(None, alias="customAttributes")
     """
     Flat map of arbitrary string key/value pairs representing service level attributes not associated with a protocol. Note the maximum number of keys and length of values. Additionally, property names may only be 256 characters long.
@@ -1031,65 +1016,64 @@ class ImportAsset(BaseModel):
     Represents a custom asset to be created or merged after import.
     """
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., max_length=1024)
     """
     Any value which can uniquely identify the asset within the custom integration.
     """
-    run_zero_id: Optional[UUID] = Field(None, alias="runZeroID", example="e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8")
+    run_zero_id: Optional[UUID] = Field(None, alias="runZeroID", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     """
     The unique identifier of the runZero asset to merge into.
     """
     network_interfaces: Optional[List[NetworkInterface]] = Field(
-        None, alias="networkInterfaces", max_items=256, title="NetworkInterfaces"
+        None, alias="networkInterfaces", max_length=256, title="NetworkInterfaces"
     )
     """
     The asset's networking configuration.
     """
-    hostnames: Optional[List[Hostname]] = Field(None, max_items=100)
+    hostnames: Optional[List[Hostname]] = Field(None, max_length=100)
     """
     Represents hostnames the asset is assigned or reachable at. These can be fully-qualified hostnames with the domain name, or a short hostname.
     """
-    domain: Optional[str] = Field(None, example="domain.com", max_length=260)
+    domain: Optional[str] = Field(None, examples=["domain.com"], max_length=260)
     """
     Represents a single domain name which could be applied to all non-fqdns in the hostnames field.
     """
-    first_seen_ts: Optional[datetime] = Field(None, alias="firstSeenTS", example="2023-03-06T18:14:50.52Z")
+    first_seen_ts: Optional[datetime] = Field(None, alias="firstSeenTS", examples=["2023-03-06T18:14:50.52Z"])
     """
     Represents the earliest time the asset was seen by the custom integration reporting it, using a date string as defined by RFC 3339, section 5.6.
     """
-    os: Optional[str] = Field(None, example="Ubuntu Linux 22.04", max_length=1024)
+    os: Optional[str] = Field(None, examples=["Ubuntu Linux 22.04"], max_length=1024)
     """
     The name of the asset's operating system. It is advisable to keep the data clean by normalizing to existing values when possible.
     """
-    os_version: Optional[str] = Field(None, alias="osVersion", example="22.04", max_length=1024)
+    os_version: Optional[str] = Field(None, alias="osVersion", examples=["22.04"], max_length=1024)
     """
     The version of the asset's operating system. It is advisable to keep the data clean by normalizing to existing values when possible.
     """
-    manufacturer: Optional[str] = Field(None, example="Apple Inc.", max_length=1024)
+    manufacturer: Optional[str] = Field(None, examples=["Apple Inc."], max_length=1024)
     """
     The manufacturer of the operating system of the asset. It is advisable to keep the data clean by normalizing to existing values when possible.
     """
-    model: Optional[str] = Field(None, example="Macbook Air", max_length=1024)
+    model: Optional[str] = Field(None, examples=["Macbook Air"], max_length=1024)
     """
     The hardware model of the asset. It is advisable to keep the data clean by normalizing to existing values when possible.
     """
-    tags: Optional[List[Tag]] = Field(None, example=["foo", "key=value"], max_items=100)
+    tags: Optional[List[Tag]] = Field(None, examples=[["foo", "key=value"]], max_length=100)
     """
     Arbitrary string tags applied to the asset.
     """
-    device_type: Optional[str] = Field(None, alias="deviceType", example="Desktop", max_length=1024)
-    services: Optional[List[Service]] = Field(None, max_items=1000)
+    device_type: Optional[str] = Field(None, alias="deviceType", examples=["Desktop"], max_length=1024)
+    services: Optional[List[Service]] = Field(None, max_length=1000)
     """
     The services running on an asset.
     """
-    software: Optional[List[Software]] = Field(None, max_items=1000)
+    software: Optional[List[Software]] = Field(None, max_length=1000)
     """
     The installed software on an asset.
     """
-    vulnerabilities: Optional[List[Vulnerability]] = Field(None, max_items=1000)
+    vulnerabilities: Optional[List[Vulnerability]] = Field(None, max_length=1000)
     """
     The vulnerabilities associated with an asset.
     """
@@ -1097,15 +1081,15 @@ class ImportAsset(BaseModel):
     """
     Flat map of arbitrary string key/value pairs representing custom attribute data not described in properties above. Note the maximum number of keys and length of values. Additionally, property names may only be 256 characters long.
     """
-    trust_os: Optional[bool] = Field(False, alias="trustOS", example=False)
+    trust_os: Optional[bool] = Field(False, alias="trustOS", examples=[False])
     """
     If true, the provided OS value will be used even if it cannot be normalized using runZero's fingerprint engine.
     """
-    trust_os_version: Optional[bool] = Field(False, alias="trustOSVersion", example=False)
+    trust_os_version: Optional[bool] = Field(False, alias="trustOSVersion", examples=[False])
     """
     If true, the provided OS version value will be used even if it cannot be normalized using runZero's fingerprint engine.
     """
-    trust_device_type: Optional[bool] = Field(False, alias="trustDeviceType", example=False)
+    trust_device_type: Optional[bool] = Field(False, alias="trustDeviceType", examples=[False])
     """
     If true, the provided device type value will be used even if it cannot be normalized using runZero's fingerprint engine.
     """

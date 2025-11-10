@@ -10,7 +10,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 
 from runzero.client import Client
 from runzero.errors import Error
@@ -45,10 +45,7 @@ class CRUDAsset(BaseModel):
     A Pydantic-compliant class for marshaling custom assets.
     """
 
-    class Config:
-        "Inner config class."
-
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., max_length=1024)
     macs: Optional[List[str]] = Field(None)
@@ -74,7 +71,7 @@ class CRUDAsset(BaseModel):
         self.macs = []
         self.addresses = []
         self.addresses_extra = []
-        self.hostnames = [hostname.__root__ for hostname in import_asset.hostnames] if import_asset.hostnames else []
+        self.hostnames = [hostname.root for hostname in import_asset.hostnames] if import_asset.hostnames else []
         self.domains = [import_asset.domain] if import_asset.domain else []
         self.first_seen = 0
         self.os = import_asset.os or ""
@@ -90,7 +87,7 @@ class CRUDAsset(BaseModel):
             self.first_seen = int(import_asset.first_seen_ts.timestamp())
 
         if import_asset.tags:
-            self.tags = "\t".join(tag.__root__ for tag in import_asset.tags)
+            self.tags = "\t".join(tag.root for tag in import_asset.tags)
 
         if import_asset.custom_attributes is not None:
             for key, value in import_asset.custom_attributes.items():
