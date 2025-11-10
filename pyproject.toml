@@ -1,6 +1,6 @@
 [project]
-name = "runzero-sdk"
-version = "0.8.7"
+name = "runzero"
+version = "0.9.0"
 homepage = "https://runzero.com/"
 documentation = "https://runzeroinc.github.io/runzero-sdk-py"
 repository = "https://github.com/runZeroInc/runzero-sdk-py"
