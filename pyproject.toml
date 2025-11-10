@@ -1,15 +1,17 @@
-[tool.poetry]
+[project]
 name = "runzero-sdk"
 version = "0.8.7"
-description = "The runZero platform sdk"
-license = "BSD-2-Clause"
-authors = ["runZero <support@runzero.com>"]
-readme = "README.md"
 homepage = "https://runzero.com/"
 documentation = "https://runzeroinc.github.io/runzero-sdk-py"
 repository = "https://github.com/runZeroInc/runzero-sdk-py"
-keywords = ["runzero", "api", "sdk"]
 packages = [{include = "runzero"}]
+license = "BSD-2-Clause"
+authors = [
+  { name = "runZero", email = "support@runzero.com" },
+]
+keywords = ["runzero", "api", "sdk"]
+description = "The runZero platform sdk"
+readme = "README.md"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Framework :: Pydantic",
@@ -20,11 +22,14 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Security",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: System :: Systems Administration",
   "Typing :: Typed",
 ]
+requires-python = "^3.8"
 
 [tool.poetry.group.codegen]
 
@@ -38,7 +43,6 @@ requests = "^2.32.3"
 # no standard mechanism to pin transitive deps
 # https://github.com/python-poetry/poetry/issues/4991
 certifi = ">=2024.2.2"
-
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7,<25.0"
 mypy = "^1.5.1"
