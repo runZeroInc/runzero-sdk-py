@@ -70,7 +70,7 @@ class CRUDAsset(BaseModel):
         self.macs = []
         self.addresses = []
         self.addresses_extra = []
-        self.hostnames = [hostname.__root__ for hostname in import_asset.hostnames] if import_asset.hostnames else []
+        self.hostnames = [hostname.root for hostname in import_asset.hostnames] if import_asset.hostnames else []
         self.domains = [import_asset.domain] if import_asset.domain else []
         self.first_seen = 0
         self.os = import_asset.os or ""
@@ -86,7 +86,7 @@ class CRUDAsset(BaseModel):
             self.first_seen = int(import_asset.first_seen_ts.timestamp())
 
         if import_asset.tags:
-            self.tags = "\t".join(tag.__root__ for tag in import_asset.tags)
+            self.tags = "\t".join(tag.root for tag in import_asset.tags)
 
         if import_asset.custom_attributes is not None:
             for key, value in import_asset.custom_attributes.items():

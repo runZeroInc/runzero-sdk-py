@@ -88,7 +88,7 @@ class CustomAssets:
 
         tags_as_str = ""
         if asset_import_req.import_task.tags is not None:
-            tags_as_str = ",".join([tag.__root__ for tag in asset_import_req.import_task.tags])
+            tags_as_str = ",".join([tag.root for tag in asset_import_req.import_task.tags])
         multipart_form_data = (
             ("assetData", ("asset_data.jsonl.gz", asset_import_req.asset_data)),
             ("siteId", (None, str(asset_import_req.site_id))),

@@ -14,7 +14,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from warnings import warn
 
 # Note: `validator` has been replaced with `field_validator` in v2+
-from pydantic import field_validator, ConfigDict, BaseModel, Field, ValidationError
+from pydantic import field_validator, ConfigDict, BaseModel, Field, ValidationError, RootModel
 
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
@@ -48,14 +48,14 @@ class CustomIntegration(RESTCustomIntegration):
     """
 
 
-class __CustomAttribute(BaseModel):  # pylint: disable=C0103
+class __CustomAttribute(RootModel[str]):  # pylint: disable=C0103
     """
     __RESTCustomAttribute is vestigial from an earlier version of the SDK and is being kept here for backwards
     compatability purposes. This will be removed as part of the SDK 1.0 release.
     """
     model_config = ConfigDict(populate_by_name=True)
 
-    __root__: str = Field(..., max_length=1024)
+    root: str = Field(..., max_length=1024)
 
 
 class CustomAttribute(__CustomAttribute):
@@ -75,7 +75,7 @@ class CustomAttribute(__CustomAttribute):
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(__root__=attr)
+        super().__init__(root=attr)
 
 
 class Hostname(RESTHostname):
@@ -87,7 +87,7 @@ class Hostname(RESTHostname):
     """
 
     def __init__(self, hostname: str):
-        super().__init__(__root__=hostname)
+        super().__init__(root=hostname)
 
 
 class Tag(RESTTag):
@@ -96,7 +96,7 @@ class Tag(RESTTag):
     """
 
     def __init__(self, tag: str):
-        super().__init__(__root__=tag)
+        super().__init__(root=tag)
 
 
 class ImportAsset(RESTImportAsset):
@@ -171,10 +171,10 @@ class ImportAsset(RESTImportAsset):
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
-            # Now we use strings - but still support CustomAttribute for backwards compatability
+            # Now we use strings - but still support CustomAttribute for backwards compatibility
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
                 raise ValidationError(
@@ -329,7 +329,7 @@ class Service(RESTService):
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
                 raise ValidationError(
@@ -395,7 +395,7 @@ class ServiceProtocolData(RESTServiceProtocolData):
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
                 raise ValidationError(
@@ -483,7 +483,7 @@ class Software(RESTSoftware):
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
                 raise ValidationError(
@@ -580,7 +580,7 @@ class Vulnerability(RESTVulnerability):
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
                 raise ValidationError(

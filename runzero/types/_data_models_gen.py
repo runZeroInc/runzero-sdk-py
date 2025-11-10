@@ -10,7 +10,7 @@ from ipaddress import IPv4Address, IPv6Address
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import ConfigDict, BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field, RootModel
 
 
 class BaseResponse(BaseModel):
@@ -83,10 +83,10 @@ class NewCustomIntegration(BaseCustomIntegration):
     """
 
 
-class Tag(BaseModel):
+class Tag(RootModel[str]):
     model_config = ConfigDict(populate_by_name=True)
 
-    __root__: str = Field(..., max_length=1024)
+    root: str = Field(..., max_length=1024)
 
 
 class ImportTask(BaseModel):
@@ -180,10 +180,10 @@ class NetworkInterface(BaseModel):
     """
 
 
-class Hostname(BaseModel):
+class Hostname(RootModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    __root__: str = Field(..., examples=["host.domain.com"], max_length=260)
+    root: str = Field(..., examples=["host.domain.com"], max_length=260)
 
 
 class ServiceProtocolData(BaseModel):
@@ -791,16 +791,16 @@ class AgentSiteID(BaseModel):
     site_id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
 
 
-class Explorer(BaseModel):
+class Explorer(RootModel[Agent]):
     model_config = ConfigDict(populate_by_name=True)
 
-    __root__: Agent
+    root: Agent
 
 
-class ExplorerSiteID(BaseModel):
+class ExplorerSiteID(RootModel[AgentSiteID]):
     model_config = ConfigDict(populate_by_name=True)
 
-    __root__: AgentSiteID
+    root: AgentSiteID
 
 
 class TaskBase(BaseModel):
