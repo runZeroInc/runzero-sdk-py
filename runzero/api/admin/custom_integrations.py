@@ -10,7 +10,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 
 from runzero.client import Client
 from runzero.errors import Error
@@ -44,11 +44,7 @@ class CRUDAsset(BaseModel):
     """
     A Pydantic-compliant class for marshaling custom assets.
     """
-
-    class Config:
-        "Inner config class."
-
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., max_length=1024)
     macs: Optional[List[str]] = Field(None)

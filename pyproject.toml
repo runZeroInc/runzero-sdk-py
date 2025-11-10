@@ -33,7 +33,7 @@ optional = true
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pydantic = ">=1.10.5,<2.0.0"
+pydantic = ">=2.0.0"
 requests = "^2.32.3"
 # no standard mechanism to pin transitive deps
 # https://github.com/python-poetry/poetry/issues/4991
