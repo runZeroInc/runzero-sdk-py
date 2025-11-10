@@ -17,6 +17,7 @@ class BaseResponse(BaseModel):
     """
     Minimal identifying information with lifecycle metadata
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: UUID = Field(..., examples=["f6cfb91a-52ea-4a86-bf9a-5a891a26f52b"])
@@ -54,7 +55,9 @@ class BaseCustomIntegration(BaseModel):
     """
     icon: Optional[str] = Field(
         None,
-        examples=["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"],
+        examples=[
+            "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"
+        ],
     )
     """
     Base64 encoded png with maximum size 256x256 pixels
@@ -93,6 +96,7 @@ class ImportTask(BaseModel):
     """
     Information which describes the task created when asset data is imported.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     name: str = Field(..., examples=["my import task"], max_length=100)
@@ -121,6 +125,7 @@ class NewAssetImport(BaseModel):
     pre-existing ones.
 
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     site_id: UUID = Field(..., alias="siteId", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
@@ -190,6 +195,7 @@ class ServiceProtocolData(BaseModel):
     """
     The protocol (and associated attributes) that are utilized by a service.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     name: str = Field(..., examples=["ssh"], max_length=128)
@@ -206,6 +212,7 @@ class Software(BaseModel):
     """
     A piece of installed software on an asset.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(
@@ -243,11 +250,15 @@ class Software(BaseModel):
     """
     The timestamp at which the software was installed on the asset, using a date string as defined by RFC 3339, section 5.6.
     """
-    installed_size: Optional[int] = Field(None, alias="installedSize", examples=[1564857439], ge=0, le=9223372036854775807)
+    installed_size: Optional[int] = Field(
+        None, alias="installedSize", examples=[1564857439], ge=0, le=9223372036854775807
+    )
     """
     The size of the software in bytes once installed on the asset.
     """
-    installed_from: Optional[str] = Field(None, alias="installedFrom", examples=["apt-ubuntu-20.14-LTS"], max_length=256)
+    installed_from: Optional[str] = Field(
+        None, alias="installedFrom", examples=["apt-ubuntu-20.14-LTS"], max_length=256
+    )
     """
     The source of the installation for the software.
     """
@@ -300,6 +311,7 @@ class Vulnerability(BaseModel):
     """
     A vulnerability associated with an asset.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., examples=["apple-osx-webkit-cve-2021-31005"], max_length=256)
@@ -316,12 +328,14 @@ class Vulnerability(BaseModel):
     """
     description: Optional[str] = Field(
         None,
-        examples=[(
-            "Vapor is an HTTP web framework for Swift. Users of Vapor prior to version 4.60.3 with FileMiddleware"
-            " enabled are vulnerable to an integer overflow vulnerability that can crash the application. Version"
-            " 4.60.3 contains a patch for this issue. As a workaround, disable FileMiddleware and serve via a Content"
-            " Delivery Network.\n"
-        )],
+        examples=[
+            (
+                "Vapor is an HTTP web framework for Swift. Users of Vapor prior to version 4.60.3 with FileMiddleware"
+                " enabled are vulnerable to an integer overflow vulnerability that can crash the application. Version"
+                " 4.60.3 contains a patch for this issue. As a workaround, disable FileMiddleware and serve via a Content"
+                " Delivery Network.\n"
+            )
+        ],
         max_length=1024,
     )
     """
@@ -431,6 +445,7 @@ class ScanOptions(BaseModel):
     """
     Options which can be set to create or modify a scan.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     targets: str = Field(..., examples=["defaults"])
@@ -440,7 +455,9 @@ class ScanOptions(BaseModel):
     """
     A description of the scan.
     """
-    scan_template: Optional[UUID] = Field(None, alias="scan-template", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    scan_template: Optional[UUID] = Field(
+        None, alias="scan-template", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"]
+    )
     scan_frequency: Optional[ScanFrequency] = Field(None, alias="scan-frequency", examples=["hour"])
     """
     A string time duration value representing execution frequency, if scheduled to repeat.
@@ -453,7 +470,9 @@ class ScanOptions(BaseModel):
     scan_grace_period: Optional[str] = Field(None, alias="scan-grace-period", examples=["4"])
     agent: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
     explorer: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
-    hosted_zone_id: Optional[str] = Field(None, alias="hosted-zone-id", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
+    hosted_zone_id: Optional[str] = Field(
+        None, alias="hosted-zone-id", examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"]
+    )
     """
     The string 'auto' will use any available hosted zone. Otherwise, provide the string name (hostedzone1) or UUID (e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8) of a hosted zone.
     """
@@ -495,7 +514,9 @@ class ScanOptions(BaseModel):
     """
     probes: Optional[str] = Field(
         None,
-        examples=["arp,bacnet,connect,dns,echo,ike,ipmi,mdns,memcache,mssql,natpmp,netbios,pca,rdns,rpcbind,sip,snmp,ssdp,syn,ubnt,wlan-list,wsd"],
+        examples=[
+            "arp,bacnet,connect,dns,echo,ike,ipmi,mdns,memcache,mssql,natpmp,netbios,pca,rdns,rpcbind,sip,snmp,ssdp,syn,ubnt,wlan-list,wsd"
+        ],
     )
     """
     Optional probe list, otherwise all probes are used
@@ -506,6 +527,7 @@ class ScanTemplateOptions(BaseModel):
     """
     Options which can be set to create a scan template.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     name: str = Field(..., examples=["My Scan Template"])
@@ -538,6 +560,7 @@ class ScanTemplate(BaseModel):
     """
     A scan task template
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
@@ -760,6 +783,7 @@ class Agent(BaseModel):
     Explorers may be referred to by their legacy name, Agents.
 
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
@@ -807,6 +831,7 @@ class TaskBase(BaseModel):
     """
     All fields of a Task with none required
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: Optional[UUID] = Field(None, examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
@@ -854,6 +879,7 @@ class Task(TaskBase):
     """
     A task object
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
@@ -863,6 +889,7 @@ class TaskOptions(TaskBase):
     """
     Options which can be set to create or modify a task.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     hosted_zone_name: Optional[str] = Field(None, examples=["auto"])
@@ -877,6 +904,7 @@ class HostedZone(BaseModel):
     Enterprise customers.
 
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: UUID = Field(..., examples=["e77602e0-3fb8-4734-aef9-fbc6fdcb0fa8"])
@@ -923,6 +951,7 @@ class Problem(BaseModel):
     RFC7807 Problem JSON object from https://opensource.zalando.com/restful-api-guidelines/models/problem-1.0.1.yaml without the standard 'type' and 'instance' fields.
 
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     title: Optional[str] = Field(None, examples=["A short summary of the problem type."])
@@ -948,6 +977,7 @@ class Service(BaseModel):
     """
     A service running on an asset.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     address: Union[IPv4Address, IPv6Address] = Field(..., examples=["127.0.0.1"])
@@ -985,6 +1015,7 @@ class ImportAsset(BaseModel):
     """
     Represents a custom asset to be created or merged after import.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., max_length=1024)

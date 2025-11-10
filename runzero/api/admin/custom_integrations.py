@@ -44,6 +44,7 @@ class CRUDAsset(BaseModel):
     """
     A Pydantic-compliant class for marshaling custom assets.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., max_length=1024)

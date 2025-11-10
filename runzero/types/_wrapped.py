@@ -53,6 +53,7 @@ class __CustomAttribute(RootModel[str]):  # pylint: disable=C0103
     __RESTCustomAttribute is vestigial from an earlier version of the SDK and is being kept here for backwards
     compatability purposes. This will be removed as part of the SDK 1.0 release.
     """
+
     model_config = ConfigDict(populate_by_name=True)
 
     root: str = Field(..., max_length=1024)
