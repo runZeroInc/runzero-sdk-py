@@ -10,11 +10,11 @@ was insufficient.
 """
 
 from ipaddress import IPv4Address, IPv6Address, ip_address
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, ClassVar, Dict, Iterable, List, Optional, Union
 from warnings import warn
 
 # Note: `validator` has been replaced with `field_validator` in v2+
-from pydantic import field_validator, ConfigDict, BaseModel, Field, ValidationError, RootModel
+from pydantic import ConfigDict, Field, RootModel, field_validator
 
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
@@ -105,9 +105,9 @@ class ImportAsset(RESTImportAsset):
     Represents a custom asset to be created or merged after import.
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -156,19 +156,16 @@ class ImportAsset(RESTImportAsset):
         that each key in that dict does not itself exceed a length of 256 characters.
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
@@ -178,10 +175,9 @@ class ImportAsset(RESTImportAsset):
                 val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -270,9 +266,9 @@ class ScanTemplateOptions(RESTScanTemplateOptions):
 class Service(RESTService):
     """A service running on an asset."""
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -311,19 +307,16 @@ class Service(RESTService):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
@@ -333,10 +326,9 @@ class Service(RESTService):
                 val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -348,9 +340,9 @@ class ServiceProtocolData(RESTServiceProtocolData):
     ServiceProtocolData represents the attributes associated with a given service protocol
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -377,19 +369,16 @@ class ServiceProtocolData(RESTServiceProtocolData):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
@@ -399,10 +388,9 @@ class ServiceProtocolData(RESTServiceProtocolData):
                 val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -414,9 +402,9 @@ class Software(RESTSoftware):
     Represents a piece of installed software on a particular asset.
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -465,19 +453,16 @@ class Software(RESTSoftware):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
@@ -487,10 +472,9 @@ class Software(RESTSoftware):
                 val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -502,9 +486,9 @@ class Vulnerability(RESTVulnerability):
     Represents a vulnerability present on a particular asset.
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -562,19 +546,16 @@ class Vulnerability(RESTVulnerability):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
@@ -584,10 +565,9 @@ class Vulnerability(RESTVulnerability):
                 val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
