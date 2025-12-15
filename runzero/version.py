@@ -3,6 +3,7 @@
 from importlib import metadata
 
 try:
-    __version__ = metadata.version("runzero-sdk")  # from pyproject.toml, ultimately
+    # package name matches pyproject [project].name
+    __version__ = metadata.version("runzero")
 except metadata.PackageNotFoundError:
     __version__ = "unknown"

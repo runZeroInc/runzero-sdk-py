@@ -252,6 +252,16 @@ class ScanTemplate(RESTScanTemplate):
         kwargs.setdefault("by_alias", True)
         return super().json(*args, **kwargs)
 
+    @field_validator("grace_period", "source_id", mode="before")
+    @classmethod
+    def _stringify_int_fields(cls, value: Optional[Union[str, int]]) -> Optional[str]:  # pylint: disable=E0213
+        """
+        The API may return numeric grace/source identifiers; accept ints and cast to the expected string shape.
+        """
+        if value is None:
+            return None
+        return str(value)
+
 
 class ScanTemplateOptions(RESTScanTemplateOptions):
     """Options which can be set to create or modify a scan template."""
