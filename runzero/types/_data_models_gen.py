@@ -10,7 +10,7 @@ from ipaddress import IPv4Address, IPv6Address
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import ConfigDict, BaseModel, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
 class BaseResponse(BaseModel):
