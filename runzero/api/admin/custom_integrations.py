@@ -202,7 +202,7 @@ class CustomIntegrationAssetAdmin:
         )
         return res.json_obj["asset_id"]
 
-    def bulk_update_custom_attributes(
+    def bulk_update_custom_attributes(  # pylint: disable=too-many-positional-arguments
         self,
         org_id: uuid.UUID,
         search: str,

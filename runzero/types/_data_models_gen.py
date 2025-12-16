@@ -185,7 +185,7 @@ class NetworkInterface(BaseModel):
     """
 
 
-class Hostname(RootModel):
+class Hostname(RootModel[str]):
     model_config = ConfigDict(populate_by_name=True)
 
     root: str = Field(..., examples=["host.domain.com"], max_length=260)
@@ -329,12 +329,10 @@ class Vulnerability(BaseModel):
     description: Optional[str] = Field(
         None,
         examples=[
-            (
-                "Vapor is an HTTP web framework for Swift. Users of Vapor prior to version 4.60.3 with FileMiddleware"
-                " enabled are vulnerable to an integer overflow vulnerability that can crash the application. Version"
-                " 4.60.3 contains a patch for this issue. As a workaround, disable FileMiddleware and serve via a Content"
-                " Delivery Network.\n"
-            )
+            "Vapor is an HTTP web framework for Swift. Users of Vapor prior to version 4.60.3 with FileMiddleware"
+            " enabled are vulnerable to an integer overflow vulnerability that can crash the application. Version"
+            " 4.60.3 contains a patch for this issue. As a workaround, disable FileMiddleware and serve via a Content"
+            " Delivery Network.\n"
         ],
         max_length=1024,
     )

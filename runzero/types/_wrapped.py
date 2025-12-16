@@ -71,8 +71,10 @@ class CustomAttribute(__CustomAttribute):
 
     def __init__(self, attr: str):
         warn(
-            f"{self.__class__.__name__} is deprecated and will be removed in the 1.0 release of the SDK. You can now"
-            " directly use a string instead.",
+            (
+                f"{self.__class__.__name__} is deprecated and will be removed in the 1.0 release of the SDK. You can"
+                " now directly use a string instead."
+            ),
             DeprecationWarning,
             stacklevel=2,
         )
@@ -280,9 +282,6 @@ class Service(RESTService):
     __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
     __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-
     @field_validator("address", mode="before")
     @classmethod
     def _address_str_conversion(  # pylint: disable=E0213
@@ -354,9 +353,6 @@ class ServiceProtocolData(RESTServiceProtocolData):
     __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
     __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-
     @field_validator("name", mode="before")
     @classmethod
     def _lower_case_name(cls, attr: str) -> str:  # pylint: disable=E0213
@@ -415,9 +411,6 @@ class Software(RESTSoftware):
     __MAX_ATTRS: ClassVar[int] = 1024
     __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
     __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
 
     @field_validator("service_transport", mode="before")
     @classmethod
