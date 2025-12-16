@@ -112,7 +112,7 @@ Poetry is an incredibly powerful toolchain and I recommend you [read its docs](h
 1. First we need to install the codegen dependency
    * `poetry install --with codegen`
 2. Next, we can run the command to generate the pydantic models from the openapi spec
-   * `poetry run datamodel-codegen --input ./api/runzero-api.yml --field-constraints --output ./models/asset.py --target-python-version 3.8`
+   * `poetry run datamodel-codegen --input ./api/runzero-api.yml --field-constraints --output ./models/asset.py --target-python-version 3.14`
 
 ### Preparing a release
 

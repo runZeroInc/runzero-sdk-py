@@ -74,7 +74,7 @@ class Client:
         ACCOUNT = 1
         ORG = 2
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         account_key: Optional[str] = None,
         org_key: Optional[str] = None,
@@ -257,7 +257,7 @@ class Client:
         """
         return self._validate_cert
 
-    def execute(
+    def execute(  # pylint: disable=too-many-positional-arguments
         self,
         method: str,
         endpoint: str,

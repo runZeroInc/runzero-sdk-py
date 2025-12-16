@@ -10,11 +10,11 @@ was insufficient.
 """
 
 from ipaddress import IPv4Address, IPv6Address, ip_address
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, ClassVar, Dict, Iterable, List, Optional, Union
 from warnings import warn
 
 # Note: `validator` has been replaced with `field_validator` in v2+
-from pydantic import BaseModel, Field, ValidationError, validator
+from pydantic import ConfigDict, Field, RootModel, field_validator
 
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
@@ -48,18 +48,15 @@ class CustomIntegration(RESTCustomIntegration):
     """
 
 
-class __CustomAttribute(BaseModel):  # pylint: disable=C0103
+class __CustomAttribute(RootModel[str]):  # pylint: disable=C0103
     """
     __RESTCustomAttribute is vestigial from an earlier version of the SDK and is being kept here for backwards
     compatability purposes. This will be removed as part of the SDK 1.0 release.
     """
 
-    class Config:
-        """Config for pydantic model"""
+    model_config = ConfigDict(populate_by_name=True)
 
-        allow_population_by_field_name = True
-
-    __root__: str = Field(..., max_length=1024)
+    root: str = Field(..., max_length=1024)
 
 
 class CustomAttribute(__CustomAttribute):
@@ -74,12 +71,14 @@ class CustomAttribute(__CustomAttribute):
 
     def __init__(self, attr: str):
         warn(
-            f"{self.__class__.__name__} is deprecated and will be removed in the 1.0 release of the SDK. You can now"
-            " directly use a string instead.",
+            (
+                f"{self.__class__.__name__} is deprecated and will be removed in the 1.0 release of the SDK. You can"
+                " now directly use a string instead."
+            ),
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(__root__=attr)
+        super().__init__(root=attr)
 
 
 class Hostname(RESTHostname):
@@ -91,7 +90,7 @@ class Hostname(RESTHostname):
     """
 
     def __init__(self, hostname: str):
-        super().__init__(__root__=hostname)
+        super().__init__(root=hostname)
 
 
 class Tag(RESTTag):
@@ -100,7 +99,7 @@ class Tag(RESTTag):
     """
 
     def __init__(self, tag: str):
-        super().__init__(__root__=tag)
+        super().__init__(root=tag)
 
 
 class ImportAsset(RESTImportAsset):
@@ -108,14 +107,15 @@ class ImportAsset(RESTImportAsset):
     Represents a custom asset to be created or merged after import.
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    @validator("hostnames", pre=True)
+    @field_validator("hostnames", mode="before")
+    @classmethod
     def _hostnames_str_conversion(cls, hosts: List[Union[str, Hostname]]) -> List[Hostname]:  # pylint: disable=E0213
         """
         Handles conversion of strings to Hostname class for user convenience.
@@ -131,7 +131,8 @@ class ImportAsset(RESTImportAsset):
 
         return result
 
-    @validator("tags", pre=True)
+    @field_validator("tags", mode="before")
+    @classmethod
     def _tag_str_conversion(cls, tags: List[Union[str, Tag]]) -> List[Tag]:  # pylint: disable=E0213
         """
         Handles conversion of strings to Tags for user convenience.
@@ -147,7 +148,8 @@ class ImportAsset(RESTImportAsset):
 
         return result
 
-    @validator("custom_attributes", pre=True)
+    @field_validator("custom_attributes", mode="before")
+    @classmethod
     def _custom_attributes_length(  # pylint: disable=E0213
         cls, attrs: Dict[str, Union[CustomAttribute, str]]
     ) -> Dict[str, str]:
@@ -156,32 +158,28 @@ class ImportAsset(RESTImportAsset):
         that each key in that dict does not itself exceed a length of 256 characters.
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
-            # Now we use strings - but still support CustomAttribute for backwards compatability
+            # Now we use strings - but still support CustomAttribute for backwards compatibility
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -196,7 +194,8 @@ class NetworkInterface(RESTNetworkInterface):
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    @validator("ipv4_addresses", pre=True)
+    @field_validator("ipv4_addresses", mode="before")
+    @classmethod
     def _ipv4_str_conversion(  # pylint: disable=E0213
         cls, ipv4s: Optional[List[Union[str, IPv4Address]]]
     ) -> Optional[List[IPv4Address]]:
@@ -215,7 +214,8 @@ class NetworkInterface(RESTNetworkInterface):
 
         return result
 
-    @validator("ipv6_addresses", pre=True)
+    @field_validator("ipv6_addresses", mode="before")
+    @classmethod
     def _ipv6_str_conversion(  # pylint: disable=E0213
         cls, ipv6s: Optional[List[Union[str, IPv6Address]]]
     ) -> Optional[List[IPv6Address]]:
@@ -254,6 +254,16 @@ class ScanTemplate(RESTScanTemplate):
         kwargs.setdefault("by_alias", True)
         return super().json(*args, **kwargs)
 
+    @field_validator("grace_period", "source_id", mode="before")
+    @classmethod
+    def _stringify_int_fields(cls, value: Optional[Union[str, int]]) -> Optional[str]:  # pylint: disable=E0213
+        """
+        The API may return numeric grace/source identifiers; accept ints and cast to the expected string shape.
+        """
+        if value is None:
+            return None
+        return str(value)
+
 
 class ScanTemplateOptions(RESTScanTemplateOptions):
     """Options which can be set to create or modify a scan template."""
@@ -268,14 +278,12 @@ class ScanTemplateOptions(RESTScanTemplateOptions):
 class Service(RESTService):
     """A service running on an asset."""
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-
-    @validator("address", pre=True)
+    @field_validator("address", mode="before")
+    @classmethod
     def _address_str_conversion(  # pylint: disable=E0213
         cls, addr: Union[str, IPv4Address, IPv6Address]
     ) -> Union[IPv4Address, IPv6Address]:
@@ -286,7 +294,8 @@ class Service(RESTService):
             addr = ip_address(addr)
         return addr
 
-    @validator("transport", pre=True)
+    @field_validator("transport", mode="before")
+    @classmethod
     def _lower_case_transport(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -294,7 +303,8 @@ class Service(RESTService):
         """
         return attr.lower()
 
-    @validator("custom_attributes", pre=True)
+    @field_validator("custom_attributes", mode="before")
+    @classmethod
     def _custom_attributes_length(  # pylint: disable=E0213
         cls, attrs: Dict[str, Union[CustomAttribute, str]]
     ) -> Dict[str, str]:
@@ -306,32 +316,28 @@ class Service(RESTService):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -343,14 +349,12 @@ class ServiceProtocolData(RESTServiceProtocolData):
     ServiceProtocolData represents the attributes associated with a given service protocol
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-
-    @validator("name", pre=True)
+    @field_validator("name", mode="before")
+    @classmethod
     def _lower_case_name(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -358,7 +362,8 @@ class ServiceProtocolData(RESTServiceProtocolData):
         """
         return attr.lower()
 
-    @validator("attributes", pre=True)
+    @field_validator("attributes", mode="before")
+    @classmethod
     def _attributes_length(  # pylint: disable=E0213
         cls, attrs: Dict[str, Union[CustomAttribute, str]]
     ) -> Dict[str, str]:
@@ -370,32 +375,28 @@ class ServiceProtocolData(RESTServiceProtocolData):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -407,14 +408,12 @@ class Software(RESTSoftware):
     Represents a piece of installed software on a particular asset.
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-
-    @validator("service_transport", pre=True)
+    @field_validator("service_transport", mode="before")
+    @classmethod
     def _lower_case_service_transport(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -422,7 +421,8 @@ class Software(RESTSoftware):
         """
         return attr.lower()
 
-    @validator("cpe23", pre=True)
+    @field_validator("cpe23", mode="before")
+    @classmethod
     def _lower_case_cpe(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -431,7 +431,8 @@ class Software(RESTSoftware):
         """
         return attr.lower()
 
-    @validator("service_address", pre=True)
+    @field_validator("service_address", mode="before")
+    @classmethod
     def _service_address_str_conversion(  # pylint: disable=E0213
         cls, addr: Union[str, IPv4Address, IPv6Address]
     ) -> Union[IPv4Address, IPv6Address]:
@@ -442,7 +443,8 @@ class Software(RESTSoftware):
             addr = ip_address(addr)
         return addr
 
-    @validator("custom_attributes", pre=True)
+    @field_validator("custom_attributes", mode="before")
+    @classmethod
     def _custom_attributes_length(  # pylint: disable=E0213
         cls, attrs: Dict[str, Union[CustomAttribute, str]]
     ) -> Dict[str, str]:
@@ -454,32 +456,28 @@ class Software(RESTSoftware):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 
@@ -491,14 +489,15 @@ class Vulnerability(RESTVulnerability):
     Represents a vulnerability present on a particular asset.
     """
 
-    __MAX_ATTRS = 1024
-    __MAX_ATTR_KEY_LEN = 256
-    __MAX_ATTR_VAL_LEN = 1024
+    __MAX_ATTRS: ClassVar[int] = 1024
+    __MAX_ATTR_KEY_LEN: ClassVar[int] = 256
+    __MAX_ATTR_VAL_LEN: ClassVar[int] = 1024
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    @validator("service_transport", pre=True)
+    @field_validator("service_transport", mode="before")
+    @classmethod
     def _lower_case_service_transport(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -506,7 +505,8 @@ class Vulnerability(RESTVulnerability):
         """
         return attr.lower()
 
-    @validator("cpe23", pre=True)
+    @field_validator("cpe23", mode="before")
+    @classmethod
     def _lower_case_cpe(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -515,7 +515,8 @@ class Vulnerability(RESTVulnerability):
         """
         return attr.lower()
 
-    @validator("cve", pre=True)
+    @field_validator("cve", mode="before")
+    @classmethod
     def _upper_case_cve(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
         """
@@ -523,7 +524,8 @@ class Vulnerability(RESTVulnerability):
         """
         return attr.upper()
 
-    @validator("service_address", pre=True)
+    @field_validator("service_address", mode="before")
+    @classmethod
     def _service_address_str_conversion(  # pylint: disable=E0213
         cls, addr: Union[str, IPv4Address, IPv6Address]
     ) -> Union[IPv4Address, IPv6Address]:
@@ -534,7 +536,8 @@ class Vulnerability(RESTVulnerability):
             addr = ip_address(addr)
         return addr
 
-    @validator("custom_attributes", pre=True)
+    @field_validator("custom_attributes", mode="before")
+    @classmethod
     def _custom_attributes_length(  # pylint: disable=E0213
         cls, attrs: Dict[str, Union[CustomAttribute, str]]
     ) -> Dict[str, str]:
@@ -546,32 +549,28 @@ class Vulnerability(RESTVulnerability):
         - that the length of each value does not exceed a length of 1024 characters
         """
         if len(attrs) > cls.__MAX_ATTRS:
-            raise ValidationError(
-                f"custom attributes exceeds length of 256 with length of {len(attrs)}",
-                ImportAsset,
-            )
+            raise ValueError(f"custom attributes exceeds length of {cls.__MAX_ATTRS} with length of {len(attrs)}")
 
         # store for return value after type casting to handle CustomAttribute instances
         processed_attrs: Dict[str, str] = {}
 
         for k, val in attrs.items():
             if len(k) > cls.__MAX_ATTR_KEY_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes exceeds maximum length of 256 with length of {len(k)}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_KEY_LEN} with length of {len(k)}"
                 )
 
             # CustomAttribute used to be the required type for the custom attributes value field
             # Now we use strings - but still support CustomAttribute for backwards compatability
             # Thus we need to cast any CustomAttribute() to a string because the wrapped type uses strings
             if isinstance(val, CustomAttribute):
-                val = val.__root__
+                val = val.root
                 attrs[k] = val
             if len(val) > cls.__MAX_ATTR_VAL_LEN:
-                raise ValidationError(
-                    f"key {k[:25]}... in custom_attributes has a value which the exceeds maximum length of 1024 with"
-                    f" length of {len(str(val))}",
-                    ImportAsset,
+                raise ValueError(
+                    f"key {k[:25]}... in custom_attributes has a value which exceeds maximum length of "
+                    f"{cls.__MAX_ATTR_VAL_LEN} with length of {len(str(val))}"
                 )
             processed_attrs[k] = val
 

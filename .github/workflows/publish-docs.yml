@@ -21,10 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pipx install poetry
-      - name: Set up Python 3.8
+      - name: Set up Python 3.14
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.14
       - name: Install dependencies
         run: poetry install --with dev,docs
       - name: Build project documentation
@@ -47,7 +47,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.14"
       - name: Build project documentation
         uses: ./.github/actions/docsbuild
       - name: Setup Pages

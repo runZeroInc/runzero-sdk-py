@@ -37,7 +37,7 @@ class CustomAssets:
         """Constructor method"""
         self._client = client
 
-    def upload_assets(
+    def upload_assets(  # pylint: disable=too-many-positional-arguments
         self,
         org_id: uuid.UUID,
         site_id: uuid.UUID,
@@ -87,16 +87,21 @@ class CustomAssets:
         )
 
         tags_as_str = ""
-        if asset_import_req.import_task.tags is not None:
-            tags_as_str = ",".join([tag.__root__ for tag in asset_import_req.import_task.tags])
+        import_task = asset_import_req.import_task
+        # Pydantic attaches fields at runtime; pylint cannot see them statically.
+        tags = getattr(import_task, "tags", None) or []  # pylint: disable=no-member
+        if tags:
+            tags_as_str = ",".join(tag.root for tag in tags)  # pylint: disable=no-member
         multipart_form_data = (
             ("assetData", ("asset_data.jsonl.gz", asset_import_req.asset_data)),
             ("siteId", (None, str(asset_import_req.site_id))),
             ("customIntegrationId", (None, str(asset_import_req.custom_integration_id))),
-            ("importTask.name", (None, asset_import_req.import_task.name)),
-            ("importTask.description", (None, asset_import_req.import_task.description)),
-            # this requires casting to a lower-cased string to function properly
-            ("importTask.excludeUnknown", (None, str(asset_import_req.import_task.exclude_unknown).lower())),
+            ("importTask.name", (None, getattr(import_task, "name", ""))),  # pylint: disable=no-member
+            ("importTask.description", (None, getattr(import_task, "description", ""))),  # pylint: disable=no-member
+            (
+                "importTask.excludeUnknown",
+                (None, str(getattr(import_task, "exclude_unknown", False)).lower()),
+            ),  # pylint: disable=no-member
             ("importTask.tags", (None, tags_as_str)),
         )
         res = self._client.execute("POST", self._ENDPOINT.format(oid=org_id), files=multipart_form_data, multipart=True)

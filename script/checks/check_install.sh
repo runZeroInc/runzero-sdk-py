@@ -15,7 +15,7 @@ PY="$(which python)"
 >&2 echo "creating virtualenv"
 # shellcheck disable=SC1091
 "$PY" -m venv .testinst && . .testinst/bin/activate
-pip install dist/runzero_sdk-*.tar.gz
+pip install dist/runzero-*.tar.gz
 # get out of project root to ensure we're importing from installed copy
 [ -d "$PROJ_ROOT/build" ] || mkdir "$PROJ_ROOT/build" 2>&1
 pushd "$PROJ_ROOT/build" || { >&2 echo "cannot enter build dir" && exit 1; }
