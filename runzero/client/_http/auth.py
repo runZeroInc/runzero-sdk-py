@@ -27,8 +27,8 @@ class OAuthToken(BaseModel):
 
         :returns: Returns a bool of whether the token is expired or about to
         """
-        delta = self.created_at - datetime.now()
-        return not delta.total_seconds() <= (self.expires_in + 60)
+        delta = datetime.now() - self.created_at
+        return delta.total_seconds() >= (self.expires_in - 60)
 
 
 class BearerToken(AuthBase):
