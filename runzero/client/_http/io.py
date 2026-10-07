@@ -2,6 +2,8 @@
 io contains classes which wrap network communication and handle errors in a consistent fashion.
 """
 
+import random
+import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from requests import JSONDecodeError, PreparedRequest
@@ -54,6 +56,29 @@ class Response:
             self.json_obj = None
 
 
+# Sleep indirection so tests can observe backoff without waiting.
+_sleep = time.sleep
+
+# Defaults for retrying a request the server refused with 429 Too Many Requests.
+DEFAULT_RATE_LIMIT_RETRIES = 3
+DEFAULT_RATE_LIMIT_BACKOFF_SECONDS = 1.0
+MAX_RATE_LIMIT_WAIT_SECONDS = 120.0
+
+
+def rate_limit_wait_seconds(attempt: int, retry_after: Optional[int], backoff_seconds: float) -> float:
+    """Returns how long to wait before retrying a rate-limited request.
+
+    The server's Retry-After value wins when present. Otherwise the wait doubles per attempt from
+    backoff_seconds with a little jitter. Either way the wait is capped at MAX_RATE_LIMIT_WAIT_SECONDS.
+    """
+    if retry_after is not None and retry_after >= 0:
+        wait = float(retry_after)
+    else:
+        wait = backoff_seconds * (2**attempt)
+        wait += random.uniform(0, wait / 4) if wait > 0 else 0  # nosec B311 - jitter, not security
+    return min(wait, MAX_RATE_LIMIT_WAIT_SECONDS)
+
+
 class Request:
     """A wrapper around API http requests to keep all callers in-bounds.
 
@@ -65,6 +90,10 @@ class Request:
     :param data: The data to send in form body (POST, PATCH, PUT)
     :param files: For multipart form data or file uploads. Format varies.
     :param multipart: True if using a multipart form data (combination file[s] and form data)
+    :param rate_limit_retries: How many times to retry after a 429 Too Many Requests response before
+        raising RateLimitError. Default is DEFAULT_RATE_LIMIT_RETRIES; 0 disables retries.
+    :param rate_limit_backoff_seconds: Base wait between retries when the server sends no
+        Retry-After header. Doubles per attempt.
 
     """
 
@@ -80,6 +109,8 @@ class Request:
         data: Optional[Any] = None,
         files: Optional[Any] = None,
         multipart: Optional[bool] = None,
+        rate_limit_retries: Optional[int] = None,
+        rate_limit_backoff_seconds: Optional[float] = None,
     ):
         """Class constructor"""
         self.url = url
@@ -89,6 +120,10 @@ class Request:
         else:
             self.handlers = handlers
         self.token = token
+        self.rate_limit_retries = DEFAULT_RATE_LIMIT_RETRIES if rate_limit_retries is None else rate_limit_retries
+        self.rate_limit_backoff_seconds = (
+            DEFAULT_RATE_LIMIT_BACKOFF_SECONDS if rate_limit_backoff_seconds is None else rate_limit_backoff_seconds
+        )
         self.params = params
         self.timeout: Optional[int] = timeout
         if validate_certificate is None:
@@ -114,7 +149,6 @@ class Request:
             # with boundaries is discouraged. 'requests' handles automatically.
             headers = DEFAULT_CONTENT_HEADERS
 
-        self.handlers.append(_error_handler)
         req = RequestsRequest(
             method=self.method,
             url=self.url,
@@ -123,18 +157,30 @@ class Request:
             data=self.data,
             files=self.files,
         )
-        for handler in self.handlers:
+        # The error handler runs last and is added per prepared request so a retry does not stack it.
+        for handler in [*self.handlers, _error_handler]:
             req.register_hook("response", handler)
         return BearerToken(self.token)(req.prepare())
 
     def execute(self) -> Response:
-        """Sends prepared request.
+        """Sends prepared request, retrying with backoff when the server answers 429 Too Many Requests.
 
         Returns
             (Response)
                 The HTTP Response from an API Request
                 to the server.
         """
+        attempt = 0
+        while True:
+            try:
+                return self._send_once()
+            except RateLimitError as exc:
+                if attempt >= self.rate_limit_retries:
+                    raise
+                _sleep(rate_limit_wait_seconds(attempt, exc.retry_after, self.rate_limit_backoff_seconds))
+                attempt += 1
+
+    def _send_once(self) -> Response:
         prepared_request = self._prepare()
         session = Session()
         try:
@@ -203,10 +249,11 @@ def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsRespons
 
     if 400 <= response.status_code <= 499:
         if response.status_code == 429:
-            rate_limit = RateLimitInformation.from_headers(response.headers)
-            remaining = rate_limit.usage_remaining
-            if isinstance(remaining, int) and remaining < 1:
-                raise RateLimitError(rate_limit_information=rate_limit)
+            raise RateLimitError(
+                rate_limit_information=RateLimitInformation.from_headers(response.headers),
+                unparsed_response=response.text,
+                retry_after=_retry_after_seconds(response),
+            )
         raise ClientError(
             unparsed_response=response.json(),
             message=f"The request was rejected by the server: {error_message}",
@@ -221,3 +268,14 @@ def _error_handler(response: RequestsResponse, **kwargs: Any) -> RequestsRespons
         )
 
     return response
+
+
+def _retry_after_seconds(response: RequestsResponse) -> Optional[int]:
+    """Returns the Retry-After header as whole seconds, or None when absent or not a delay."""
+    value = response.headers.get("Retry-After")
+    if value is None:
+        return None
+    try:
+        return max(0, int(float(value)))
+    except (TypeError, ValueError):
+        return None

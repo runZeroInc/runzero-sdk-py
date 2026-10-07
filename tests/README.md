@@ -35,6 +35,14 @@ make test-integration
 
 from the repository root.
 
+The integration config accepts an optional `communications` flag (`communications = true` in
+`test_configs.toml`, or `communications=true` in the environment). Tests that upload asset
+communications skip unless it is set, so a console that does not accept them yet still passes.
+
+Live tests share one account rate limit. The client retries a `429 Too Many Requests` response
+with backoff before raising `RateLimitError`, so a burst of parallel test runs slows down rather
+than fails.
+
 
 To validate changes via unit test against a fully built package that is installed into each supported Python version,
 run:

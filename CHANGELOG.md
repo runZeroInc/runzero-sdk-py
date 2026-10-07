@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- **Breaking:** the minimum supported Python version is now 3.11. Python 3.11 through 3.14 are supported and tested. Python 3.8 reached end of life in October 2024 and current tooling no longer builds environments for it.
+- The minimum supported Python version is now 3.11. Python 3.11 through 3.14 are supported and tested. Python 3.8 reached end of life in October 2024 and current tooling no longer builds environments for it. The package API is unchanged, so this is a direct upgrade on a supported interpreter.
 - `pydantic` now requires 1.10.25 or newer, the first 1.x release that runs on Python 3.14.
+- `runzero.Client` retries a request the server refuses with `429 Too Many Requests`, honoring the `Retry-After` header or backing off exponentially, before raising `RateLimitError`. `rate_limit_retries` and `rate_limit_backoff_seconds` on the constructor tune this; `rate_limit_retries=0` restores the previous raise-immediately behavior.
+- `RateLimitError` is raised for every 429 response and now subclasses `ClientError`, so existing `except ClientError` handlers keep catching rate limits. It carries the server's `retry_after` seconds when sent.
 - `runzero.types.ImportAsset` now supports associating aggregated traffic summaries with an asset by adding `runzero.types.Communication` values to the `ImportAsset.communications` field.
 - Naive `datetime` values on `ImportAsset`, `Software`, `Vulnerability` and `Communication` are now treated as local time and serialized with an offset. The API requires RFC 3339 timestamps with an offset and previously rejected these records at import.
 
