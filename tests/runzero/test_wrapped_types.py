@@ -1,6 +1,9 @@
+from datetime import datetime, timezone
+
 import pytest
 
 from runzero.types import (
+    Communication,
     CustomAttribute,
     Hostname,
     ImportAsset,
@@ -61,6 +64,17 @@ def test_wrapped_vuln():
     vuln = Vulnerability(id="foo")
     asset = ImportAsset(id="foo", vulnerabilities=[vuln])
     assert len(asset.vulnerabilities) == 1
+
+
+def test_wrapped_communication():
+    comm = Communication(
+        role="client",
+        protocol="https",
+        start_ts=datetime(2026, 10, 1, tzinfo=timezone.utc),
+        end_ts=datetime(2026, 10, 2, tzinfo=timezone.utc),
+    )
+    asset = ImportAsset(id="foo", communications=[comm])
+    assert len(asset.communications) == 1
 
 
 def test_wrapped_software():

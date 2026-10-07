@@ -15,11 +15,10 @@ classifiers = [
   "Framework :: Pydantic",
   "Intended Audience :: Developers",
   "Intended Audience :: System Administrators",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Security",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: System :: Systems Administration",
@@ -32,8 +31,9 @@ classifiers = [
 optional = true
 
 [tool.poetry.dependencies]
-python = "^3.8"
-pydantic = ">=1.10.5,<2.0.0"
+python = "^3.11"
+# 1.10.25 is the first 1.x release that runs on Python 3.14
+pydantic = ">=1.10.25,<2.0.0"
 requests = "^2.32.3"
 # no standard mechanism to pin transitive deps
 # https://github.com/python-poetry/poetry/issues/4991
@@ -111,14 +111,14 @@ preview = true
 field-constraints = true
 snake-case-field = true
 strip-default-none = false
-target-python-version = "3.8"
+target-python-version = "3.11"
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
 
 [tool.mypy]
-python_version = 3.8
+python_version = "3.11"
 exclude = "tests"
 plugins = [
   "pydantic.mypy"
@@ -160,10 +160,10 @@ legacy_tox_ini = """
     [tox]
     isolated_build = true
     env_list =
-        py38
-        py39
-        py310
         py311
+        py312
+        py313
+        py314
 
     [testenv]
     # This runs tests using all in-scope envs on your local source tree files.

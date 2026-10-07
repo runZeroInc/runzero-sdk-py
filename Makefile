@@ -116,4 +116,5 @@ init-test-configs:
 	'org_id = "" # UUID of organization associated with the above token \n' \
 	'client_id = "" # OAuth client ID for the test account \n' \
 	'client_secret = '' # OAuth client secret for the test account - enclose in single quotes \n' \
-	'validate_cert = false # bool for whether to require a valid tsl cert (should be false for dev instance) \n' >> ./test_configs.toml
+	'validate_cert = false # bool for whether to require a valid tsl cert (should be false for dev instance) \n' \
+	'communications = false # bool for whether the console accepts asset communications on import \n' >> ./test_configs.toml

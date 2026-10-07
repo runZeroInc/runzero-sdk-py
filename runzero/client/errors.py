@@ -121,14 +121,12 @@ class AuthError(APIError):
     pass
 
 
-class RateLimitError(APIError):
+class RateLimitError(ClientError):
     """
-    RateLimitError is a named Exception class errors resulting from API rate limiting.
+    RateLimitError is a named Exception class for every 429 Too Many Requests response. It is raised
+    after the client's own retries are exhausted.
 
     See https://www.runzero.com/docs/leveraging-the-api/#api-client-credentials for details.
-
-    Consider an exponential backoff retry, or a more calculated approach by examining the returned
-    numbers.
 
     :param message: A top-level error description. The default value None provides a reasonable
         message.
@@ -139,6 +137,10 @@ class RateLimitError(APIError):
     :param rate_limit_information: a RateLimitInformation object which holds the rate limit data
     :type rate_limit_information: RateLimitInformation
 
+    :param retry_after: seconds the server asked the caller to wait, from the Retry-After header,
+        when present.
+    :type retry_after: int, optional
+
     """
 
     def __init__(
@@ -146,6 +148,7 @@ class RateLimitError(APIError):
         rate_limit_information: RateLimitInformation,
         message: Optional[str] = None,
         unparsed_response: Optional[str] = None,
+        retry_after: Optional[int] = None,
     ):
         """Constructor method"""
         if not message:
@@ -153,10 +156,10 @@ class RateLimitError(APIError):
                 "Too many API requests for licensed rate limit. See runZero documentation for details on API "
                 "rate limiting."
             )
-        super().__init__(message)
+        super().__init__(unparsed_response=unparsed_response, message=message)
         self.message = message
-        self.unparsed_response: Optional[str] = unparsed_response
         self.rate_limit_information: RateLimitInformation = rate_limit_information
+        self.retry_after: Optional[int] = retry_after
 
     def __str__(self) -> str:
         return f"{self.message} Rate limit information: {self.rate_limit_information}"

@@ -19,7 +19,12 @@ from requests.exceptions import HTTPError as RequestsHTTPError
 from runzero.types import RateLimitInformation
 
 from ._http.auth import OAuthToken, RegisteredAPIClient
-from ._http.io import Request, Response
+from ._http.io import (
+    DEFAULT_RATE_LIMIT_BACKOFF_SECONDS,
+    DEFAULT_RATE_LIMIT_RETRIES,
+    Request,
+    Response,
+)
 from .errors import AuthError
 
 
@@ -58,6 +63,16 @@ class Client:
         Ignoring certificate validation errors can result in credential theft or other
         bad outcomes.
     :type validate_certificate: bool
+
+    :param rate_limit_retries: Optional number of times a request is retried after the
+        server answers 429 Too Many Requests, waiting for the server's Retry-After value or an
+        exponential backoff between attempts. Default is 3. Set to 0 to raise
+        :class:`.RateLimitError` on the first 429 instead.
+    :type rate_limit_retries: int
+
+    :param rate_limit_backoff_seconds: Optional base wait, in seconds, between retries when
+        the server sends no Retry-After header. The wait doubles per attempt. Default is 1.
+    :type rate_limit_backoff_seconds: float
     """
 
     __default_timeout__ = 180
@@ -81,6 +96,8 @@ class Client:
         server_url: Optional[str] = None,
         timeout_seconds: Optional[int] = None,
         validate_certificate: Optional[bool] = None,
+        rate_limit_retries: Optional[int] = None,
+        rate_limit_backoff_seconds: Optional[float] = None,
     ):
         """Constructor method"""
         self.__account_key: Optional[str] = account_key
@@ -104,6 +121,14 @@ class Client:
         else:
             self._validate_cert = validate_certificate
         self._rate_limit_information: Optional[RateLimitInformation] = None
+        if rate_limit_retries is not None and rate_limit_retries < 0:
+            raise ValueError("Rate limit retries must not be negative")
+        if rate_limit_backoff_seconds is not None and rate_limit_backoff_seconds < 0:
+            raise ValueError("Rate limit backoff must not be negative")
+        self.rate_limit_retries: int = DEFAULT_RATE_LIMIT_RETRIES if rate_limit_retries is None else rate_limit_retries
+        self.rate_limit_backoff_seconds: float = (
+            DEFAULT_RATE_LIMIT_BACKOFF_SECONDS if rate_limit_backoff_seconds is None else rate_limit_backoff_seconds
+        )
 
     @property
     def oauth_token_is_expired(self) -> bool:
@@ -300,6 +325,8 @@ class Client:
             data=form_data,
             files=files,
             multipart=multipart,
+            rate_limit_retries=self.rate_limit_retries,
+            rate_limit_backoff_seconds=self.rate_limit_backoff_seconds,
         ).execute()
         self._rate_limit_information = resp.rate_limit_information
         return resp

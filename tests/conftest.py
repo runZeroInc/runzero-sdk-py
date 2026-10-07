@@ -257,6 +257,7 @@ class IntegrationConfigs:
             self.client_id: str = t.get("client_id")
             self.client_secret: str = t.get("client_secret")
             self.validate_cert: bool = t.get("validate_cert")
+            self.communications: bool = bool(t.get("communications", False))
         else:
             self.url: str = os.environ.get("url")
             self.account_token: str = os.environ.get("account_token")
@@ -267,7 +268,15 @@ class IntegrationConfigs:
             self.client_id: str = os.environ.get("client_id")
             self.client_secret: str = os.environ.get("client_secret")
             self.validate_cert: bool = os.environ.get("validate_cert", "true").lower() == "true"
+            self.communications: bool = os.environ.get("communications", "false").lower() == "true"
         self._validate_config()
+
+    def skip_unless_communications(self) -> None:
+        """Skips the calling test until the integration test console accepts asset communications."""
+        if not self.communications:
+            pytest.skip(
+                "asset communications are not enabled on the integration test console (set communications=true)"
+            )
 
     def _validate_config(self):
         try:

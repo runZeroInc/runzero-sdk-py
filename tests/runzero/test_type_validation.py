@@ -1,7 +1,11 @@
+import json
+from datetime import datetime, timedelta, timezone
+
 import pytest
 
 from runzero.types import (
     AddressValueError,
+    Communication,
     CustomAttribute,
     Hostname,
     ImportAsset,
@@ -469,3 +473,133 @@ def test_network_interfaces_ipv6():
 
     with pytest.raises(ValidationError):
         NetworkInterface(ipv6_addresses=[valid, valid_str, invalid_str])
+
+
+_WINDOW_START = datetime(2026, 10, 1, tzinfo=timezone.utc)
+_WINDOW_END = _WINDOW_START + timedelta(days=1)
+
+
+def _communication(**overrides):
+    values = {"role": "client", "protocol": "https", "start_ts": _WINDOW_START, "end_ts": _WINDOW_END}
+    values.update(overrides)
+    return Communication(**values)
+
+
+def test_communication_normalizes_role_and_protocol():
+    """
+    This test ensures the role is lower-cased and the protocol upper-cased to match the console.
+    """
+    comm = _communication(role=" Server ", protocol=" modbus ")
+    assert comm.role == "server"
+    assert comm.protocol == "MODBUS"
+
+
+def test_communication_rejects_unknown_role():
+    with pytest.raises(ValidationError):
+        _communication(role="peer")
+
+
+def test_communication_requires_window():
+    with pytest.raises(ValidationError):
+        Communication(role="client", protocol="https")
+
+
+def test_communication_rejects_inverted_window():
+    with pytest.raises(ValidationError):
+        _communication(start_ts=_WINDOW_END, end_ts=_WINDOW_START)
+
+
+def test_communication_port_range():
+    comm = _communication(ports=[1, 443, 65535])
+    assert comm.ports == [1, 443, 65535]
+
+    with pytest.raises(ValidationError):
+        _communication(ports=[0])
+    with pytest.raises(ValidationError):
+        _communication(ports=[65536])
+    with pytest.raises(ValidationError):
+        _communication(ports=list(range(1, 258)))
+
+
+def test_communication_rejects_negative_bytes():
+    with pytest.raises(ValidationError):
+        _communication(bytes_tx=-1)
+    with pytest.raises(ValidationError):
+        _communication(bytes_rx=-1)
+
+
+def test_communication_serializes_with_api_aliases():
+    """
+    This test ensures the upload payload uses the field names the console expects.
+    """
+    comm = _communication(ports=[443], bytes_tx=10, bytes_rx=20)
+    payload = json.loads(ImportAsset(id="foo", communications=[comm]).json(by_alias=True, exclude_none=True))
+    assert payload["communications"] == [
+        {
+            "role": "client",
+            "protocol": "HTTPS",
+            "ports": [443],
+            "startTS": "2026-10-01T00:00:00+00:00",
+            "endTS": "2026-10-02T00:00:00+00:00",
+            "bytesTx": 10,
+            "bytesRx": 20,
+        }
+    ]
+
+
+def test_communication_accepts_api_aliases():
+    comm = Communication(role="client", protocol="https", startTS=_WINDOW_START, endTS=_WINDOW_END, bytesTx=5)
+    assert comm.bytes_tx == 5
+
+
+def test_import_asset_communications_length_limit():
+    """
+    This test ensures that only 1000 communications can be associated with a given asset
+    """
+    valid = [_communication() for _ in range(1000)]
+    invalid = [_communication() for _ in range(1001)]
+
+    asset = ImportAsset(id="valid", communications=valid)
+    assert len(asset.communications) == 1000
+
+    with pytest.raises(ValidationError):
+        ImportAsset(id="invalid", communications=invalid)
+
+
+def test_naive_datetimes_gain_local_offset():
+    """
+    This test ensures naive datetimes serialize with an offset, which the API requires.
+    Python treats a naive datetime as local time, so the local offset is attached.
+    """
+    naive = datetime(2026, 10, 1, 12, 0, 0)
+    expected = naive.astimezone()
+
+    asset = ImportAsset(id="foo", first_seen_ts=naive)
+    assert asset.first_seen_ts == expected
+    assert asset.first_seen_ts.tzinfo is not None
+    assert json.loads(asset.json(by_alias=True))["firstSeenTS"] == expected.isoformat()
+
+    sw = Software(id="sw", installed_at=naive)
+    assert sw.installed_at == expected
+
+    vuln = Vulnerability(id="v", published_ts=naive, first_detected_ts=naive, last_detected_ts=naive)
+    assert vuln.published_ts == expected
+    assert vuln.first_detected_ts == expected
+    assert vuln.last_detected_ts == expected
+
+    comm = Communication(role="client", protocol="https", start_ts=naive, end_ts=naive + timedelta(hours=1))
+    assert comm.start_ts == expected
+    assert comm.end_ts == expected + timedelta(hours=1)
+
+
+def test_aware_datetimes_are_unchanged():
+    aware = datetime(2026, 10, 1, 12, 0, 0, tzinfo=timezone(timedelta(hours=9)))
+    asset = ImportAsset(id="foo", first_seen_ts=aware)
+    assert asset.first_seen_ts is aware
+    assert json.loads(asset.json(by_alias=True))["firstSeenTS"] == "2026-10-01T12:00:00+09:00"
+
+
+def test_communication_window_order_with_naive_values():
+    naive = datetime(2026, 10, 1, 12, 0, 0)
+    with pytest.raises(ValidationError):
+        Communication(role="client", protocol="https", start_ts=naive + timedelta(hours=1), end_ts=naive)

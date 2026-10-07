@@ -4,7 +4,7 @@ import uuid
 
 import runzero
 from runzero.api import CustomIntegrationsAdmin
-from runzero.types import ImportAsset, Tag
+from runzero.types import Communication, ImportAsset, Tag
 
 # API keys are required for using the runZero sdk. See https://www.runzero.com/docs/leveraging-the-api/
 MY_CLIENT_ID = ""  # OAuth client id. See https://console.runzero.com/account/api/clients
@@ -52,6 +52,19 @@ def main():
                 "ipAddresses": "192.168.86.1\t10.10.10.1",
                 "ipAddressesExtra": "10.10.10.4",
             },
+            # Aggregated traffic summaries, one per role and protocol over a window.
+            # Naive datetimes are treated as local time and gain an offset on upload.
+            communications=[
+                Communication(
+                    role="client",
+                    protocol="HTTPS",
+                    ports=[443],
+                    start_ts=datetime.datetime.now() - datetime.timedelta(days=1),
+                    end_ts=datetime.datetime.now(),
+                    bytes_tx=1500,
+                    bytes_rx=300,
+                ),
+            ],
         ),
     )
     print(f"created asset {asset_id}")
