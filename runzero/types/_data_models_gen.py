@@ -1026,6 +1026,44 @@ class Service(BaseModel):
     """
 
 
+class Communication(BaseModel):
+    """
+    An aggregated summary of traffic an asset took part in, for one role and protocol over a time window.
+    """
+
+    class Config:
+        allow_population_by_field_name = True
+
+    role: str = Field(..., example="client", regex="^(client|server)$")
+    """
+    The asset's side of the traffic: "client" (outbound) or "server" (inbound).
+    """
+    protocol: str = Field(..., example="HTTPS", max_length=64)
+    """
+    The application or transport protocol name. Stored upper-cased.
+    """
+    ports: Optional[List[int]] = Field(None, example=[443], max_items=256)
+    """
+    The ports observed during the window.
+    """
+    start_ts: datetime = Field(..., alias="startTS", example="2023-03-06T18:14:50.52Z")
+    """
+    The start of the collection window, using a date string as defined by RFC 3339, section 5.6.
+    """
+    end_ts: datetime = Field(..., alias="endTS", example="2023-03-07T18:14:50.52Z")
+    """
+    The end of the collection window, using a date string as defined by RFC 3339, section 5.6.
+    """
+    bytes_tx: Optional[int] = Field(None, alias="bytesTx", example=1500, ge=0)
+    """
+    The number of bytes the asset transmitted during the window.
+    """
+    bytes_rx: Optional[int] = Field(None, alias="bytesRx", example=300, ge=0)
+    """
+    The number of bytes the asset received during the window.
+    """
+
+
 class ImportAsset(BaseModel):
     """
     Represents a custom asset to be created or merged after import.
@@ -1092,6 +1130,10 @@ class ImportAsset(BaseModel):
     vulnerabilities: Optional[List[Vulnerability]] = Field(None, max_items=1000)
     """
     The vulnerabilities associated with an asset.
+    """
+    communications: Optional[List[Communication]] = Field(None, max_items=1000)
+    """
+    Aggregated traffic summaries for an asset. Records sharing a role and protocol are summed. An asset without communications keeps whatever was stored before.
     """
     custom_attributes: Optional[Dict[str, str]] = Field(None, alias="customAttributes")
     """

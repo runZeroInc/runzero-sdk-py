@@ -29,6 +29,7 @@ from runzero.types._data_models_gen import (
 )
 from runzero.types._rate_limit_information import RateLimitInformation
 from runzero.types._wrapped import (
+    Communication,
     CustomAttribute,
     CustomIntegration,
     Hostname,
@@ -47,6 +48,7 @@ from runzero.types._wrapped import (
 __all__ = [
     "AddressValueError",
     "BaseCustomIntegration",
+    "Communication",
     "CustomAttribute",
     "CustomIntegration",
     "Explorer",

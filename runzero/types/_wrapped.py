@@ -9,6 +9,7 @@ Each class should have a non-docstring comment in it describing why the REST typ
 was insufficient.
 """
 
+from datetime import datetime
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Any, Dict, Iterable, List, Optional, Union
 from warnings import warn
@@ -16,6 +17,7 @@ from warnings import warn
 # Note: `validator` has been replaced with `field_validator` in v2+
 from pydantic import BaseModel, Field, ValidationError, validator
 
+from ._data_models_gen import Communication as RESTCommunication
 from ._data_models_gen import CustomIntegration as RESTCustomIntegration
 from ._data_models_gen import Hostname as RESTHostname
 from ._data_models_gen import ImportAsset as RESTImportAsset
@@ -28,6 +30,61 @@ from ._data_models_gen import ServiceProtocolData as RESTServiceProtocolData
 from ._data_models_gen import Software as RESTSoftware
 from ._data_models_gen import Tag as RESTTag
 from ._data_models_gen import Vulnerability as RESTVulnerability
+
+
+class Communication(RESTCommunication):
+    """
+    Represents aggregated traffic an asset took part in, for one role and protocol over a time window.
+    """
+
+    # The REST type accepts any protocol casing and any port value; the server
+    # normalizes the role and protocol and rejects ports outside 1..65535 and
+    # an inverted window, so the checks run here to fail before upload.
+
+    __MIN_PORT = 1
+    __MAX_PORT = 65535
+
+    def __int__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
+    @validator("role", pre=True)
+    def _lower_case_role(cls, attr: str) -> str:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Lower-cases the role so "Client" and "SERVER" are accepted.
+        """
+        return str(attr).strip().lower()
+
+    @validator("protocol", pre=True)
+    def _upper_case_protocol(cls, attr: str) -> str:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Upper-cases the protocol to match how the console stores it.
+        """
+        return str(attr).strip().upper()
+
+    @validator("ports")
+    def _port_range(cls, ports: Optional[List[int]]) -> Optional[List[int]]:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Rejects ports outside 1..65535. Validates the whole list because
+        each_item validators do not run on an Optional list in pydantic v1.
+        """
+        for port in ports or []:
+            if port < cls.__MIN_PORT or port > cls.__MAX_PORT:
+                raise ValueError(f"port {port} must be between {cls.__MIN_PORT} and {cls.__MAX_PORT}")
+        return ports
+
+    @validator("end_ts")
+    def _window_order(cls, end_ts: datetime, values: Dict[str, Any]) -> datetime:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Rejects a window that ends before it starts.
+        """
+        start_ts = values.get("start_ts")
+        if start_ts is not None and start_ts > end_ts:
+            raise ValueError("start_ts must not be after end_ts")
+        return end_ts
 
 
 class CustomIntegration(RESTCustomIntegration):

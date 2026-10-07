@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- `runzero.types.ImportAsset` now supports associating aggregated traffic summaries with an asset by adding `runzero.types.Communication` values to the `ImportAsset.communications` field.
+
 ## [0.8.3] - 2024-05-22
 
 - Support for longer-form CVE identifies.
