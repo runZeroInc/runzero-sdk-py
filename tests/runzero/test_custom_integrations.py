@@ -130,7 +130,9 @@ def test_custom_integrations_admin_icon_creation(account_client, integration_con
         integrations.create(name=str(integration_name), icon=b"not a 256x256 png")
 
     assert str(exc.value).startswith("The request was rejected by the server")
-    assert "pixels" in exc.value.error_info.detail
+    # The console rejects the bytes as not being a PNG before it checks dimensions
+    detail = exc.value.error_info.detail.lower()
+    assert "png" in detail or "pixels" in detail
 
 
 @pytest.mark.integration_test
