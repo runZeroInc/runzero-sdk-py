@@ -564,3 +564,42 @@ def test_import_asset_communications_length_limit():
 
     with pytest.raises(ValidationError):
         ImportAsset(id="invalid", communications=invalid)
+
+
+def test_naive_datetimes_gain_local_offset():
+    """
+    This test ensures naive datetimes serialize with an offset, which the API requires.
+    Python treats a naive datetime as local time, so the local offset is attached.
+    """
+    naive = datetime(2026, 10, 1, 12, 0, 0)
+    expected = naive.astimezone()
+
+    asset = ImportAsset(id="foo", first_seen_ts=naive)
+    assert asset.first_seen_ts == expected
+    assert asset.first_seen_ts.tzinfo is not None
+    assert json.loads(asset.json(by_alias=True))["firstSeenTS"] == expected.isoformat()
+
+    sw = Software(id="sw", installed_at=naive)
+    assert sw.installed_at == expected
+
+    vuln = Vulnerability(id="v", published_ts=naive, first_detected_ts=naive, last_detected_ts=naive)
+    assert vuln.published_ts == expected
+    assert vuln.first_detected_ts == expected
+    assert vuln.last_detected_ts == expected
+
+    comm = Communication(role="client", protocol="https", start_ts=naive, end_ts=naive + timedelta(hours=1))
+    assert comm.start_ts == expected
+    assert comm.end_ts == expected + timedelta(hours=1)
+
+
+def test_aware_datetimes_are_unchanged():
+    aware = datetime(2026, 10, 1, 12, 0, 0, tzinfo=timezone(timedelta(hours=9)))
+    asset = ImportAsset(id="foo", first_seen_ts=aware)
+    assert asset.first_seen_ts is aware
+    assert json.loads(asset.json(by_alias=True))["firstSeenTS"] == "2026-10-01T12:00:00+09:00"
+
+
+def test_communication_window_order_with_naive_values():
+    naive = datetime(2026, 10, 1, 12, 0, 0)
+    with pytest.raises(ValidationError):
+        Communication(role="client", protocol="https", start_ts=naive + timedelta(hours=1), end_ts=naive)

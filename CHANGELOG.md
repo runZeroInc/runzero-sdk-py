@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - `runzero.types.ImportAsset` now supports associating aggregated traffic summaries with an asset by adding `runzero.types.Communication` values to the `ImportAsset.communications` field.
+- Naive `datetime` values on `ImportAsset`, `Software`, `Vulnerability` and `Communication` are now treated as local time and serialized with an offset. The API requires RFC 3339 timestamps with an offset and previously rejected these records at import.
 
 ## [0.8.3] - 2024-05-22
 

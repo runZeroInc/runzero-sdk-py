@@ -32,6 +32,17 @@ from ._data_models_gen import Tag as RESTTag
 from ._data_models_gen import Vulnerability as RESTVulnerability
 
 
+def _ensure_timezone(value: Optional[datetime]) -> Optional[datetime]:
+    """
+    Attaches the local offset to a naive datetime. The runZero API requires
+    RFC 3339 timestamps with an offset, and Python treats a naive datetime
+    as local time, so this follows the stdlib rule instead of guessing UTC.
+    """
+    if value is None or value.tzinfo is not None:
+        return value
+    return value.astimezone()
+
+
 class Communication(RESTCommunication):
     """
     Represents aggregated traffic an asset took part in, for one role and protocol over a time window.
@@ -46,6 +57,14 @@ class Communication(RESTCommunication):
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+
+    @validator("start_ts", "end_ts")
+    def _timezone_aware(cls, value: Optional[datetime]) -> Optional[datetime]:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Attaches the local offset to a naive datetime so the API accepts it.
+        """
+        return _ensure_timezone(value)
 
     @validator("role", pre=True)
     def _lower_case_role(cls, attr: str) -> str:  # pylint: disable=E0213
@@ -82,7 +101,11 @@ class Communication(RESTCommunication):
         Rejects a window that ends before it starts.
         """
         start_ts = values.get("start_ts")
-        if start_ts is not None and start_ts > end_ts:
+        if start_ts is None:
+            return end_ts
+        aware_start = _ensure_timezone(start_ts)
+        aware_end = _ensure_timezone(end_ts)
+        if aware_start is not None and aware_end is not None and aware_start > aware_end:
             raise ValueError("start_ts must not be after end_ts")
         return end_ts
 
@@ -171,6 +194,14 @@ class ImportAsset(RESTImportAsset):
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+
+    @validator("first_seen_ts")
+    def _timezone_aware(cls, value: Optional[datetime]) -> Optional[datetime]:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Attaches the local offset to a naive datetime so the API accepts it.
+        """
+        return _ensure_timezone(value)
 
     @validator("hostnames", pre=True)
     def _hostnames_str_conversion(cls, hosts: List[Union[str, Hostname]]) -> List[Hostname]:  # pylint: disable=E0213
@@ -471,6 +502,14 @@ class Software(RESTSoftware):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
+    @validator("installed_at")
+    def _timezone_aware(cls, value: Optional[datetime]) -> Optional[datetime]:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Attaches the local offset to a naive datetime so the API accepts it.
+        """
+        return _ensure_timezone(value)
+
     @validator("service_transport", pre=True)
     def _lower_case_service_transport(cls, attr: str) -> str:  # pylint: disable=E0213
         # disabled pylint because @validator turns the method into a classmethod
@@ -554,6 +593,14 @@ class Vulnerability(RESTVulnerability):
 
     def __int__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+
+    @validator("published_ts", "first_detected_ts", "last_detected_ts")
+    def _timezone_aware(cls, value: Optional[datetime]) -> Optional[datetime]:  # pylint: disable=E0213
+        # disabled pylint because @validator turns the method into a classmethod
+        """
+        Attaches the local offset to a naive datetime so the API accepts it.
+        """
+        return _ensure_timezone(value)
 
     @validator("service_transport", pre=True)
     def _lower_case_service_transport(cls, attr: str) -> str:  # pylint: disable=E0213

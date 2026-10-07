@@ -53,13 +53,14 @@ def main():
                 "ipAddressesExtra": "10.10.10.4",
             },
             # Aggregated traffic summaries, one per role and protocol over a window.
+            # Naive datetimes are treated as local time and gain an offset on upload.
             communications=[
                 Communication(
                     role="client",
                     protocol="HTTPS",
                     ports=[443],
-                    start_ts=datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1),
-                    end_ts=datetime.datetime.now(datetime.timezone.utc),
+                    start_ts=datetime.datetime.now() - datetime.timedelta(days=1),
+                    end_ts=datetime.datetime.now(),
                     bytes_tx=1500,
                     bytes_rx=300,
                 ),
